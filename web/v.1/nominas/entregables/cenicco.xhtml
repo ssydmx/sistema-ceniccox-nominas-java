@@ -1,0 +1,900 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Entregables - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="center">
+                            <p:tabView id="tabGeneral">
+                                <p:tab title="Cifras Nómina" id="tabCifrasNomina">
+                                    <h:panelGrid columns="10">
+                                        <p:selectOneMenu id="idestatusempleadocn" style="width: 150px" 
+                                                         filter="true" filterMatchMode="contains" value="#{cifrasnominaBean.selectedestatus}">  
+                                            <f:selectItem itemValue="" itemLabel="- Estatus Empleado -"/>
+                                            <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectCheckboxMenu id="idGruposPago" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                              style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                              value="#{cifrasnominaBean.selectedGruposPago}" label="Grupo(s) Pago" requiredMessage="#{appBean.mensajeErrorGrupoPago}">
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                        </p:selectCheckboxMenu>
+
+                                        <p:selectOneMenu value="#{cifrasnominaBean.selectedTipoproceso}" 
+                                                         style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                            <f:selectItem itemValue="" itemLabel="NM - NOMINA NORMAL"/>
+                                            <f:selectItems value="#{tipoprocesoBean.procesosEspeciales}" var="tp" 
+                                                           itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                                        </p:selectOneMenu>
+
+                                        <p:inputText value="#{cifrasnominaBean.periodo}" size="5" placeholder="Periodo" style="text-align: center"/>
+
+                                        <p:inputText value="#{cifrasnominaBean.anio}" size="5" placeholder="Año" style="text-align: center"/>
+
+                                        <p:commandButton icon="ui-icon-refresh" title="Traer Empleados"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{cifrasnominaBean.updateEmpleados(event)}"
+                                                         update="idEmpleados" onclick="statusDialog.show();"/>
+
+                                        <p:selectCheckboxMenu id="idEmpleados" panelStyle="width:300px" filter="true" filterMatchMode="contains"
+                                                              style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                              value="#{cifrasnominaBean.selectedRelaciones}" label="Empleado(s)">
+                                            <f:selectItems value="#{cifrasnominaBean.relaciones}"/> 
+                                        </p:selectCheckboxMenu>
+                                        <p:message for="idEmpleados" display="tooltip"/>
+
+                                        <p:commandButton value="Consultar" actionListener="#{cifrasnominaBean.consultar(event)}"
+                                                         update=":msgs, :form" styleClass="style_botones" icon="icon-search" onclick="statusDialog.show();"/>
+
+                                    </h:panelGrid>
+                                    <p:panelGrid>
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <p:outputLabel value="#{cifrasnominaBean.informacion}"/> 
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:commandButton value="Limpiar" icon="ui-icon-trash" styleClass="style_botones"
+                                                                         actionListener="#{cifrasnominaBean.limpiar(event)}"
+                                                                         update=":msgs, :form" onclick="statusDialog.show();"/> 
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableCifras" var="cifra" value="#{cifrasnominaBean.cifrasnomina}"
+                                                             resizableColumns="true" style="font-size: .8em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                             filteredValue="#{cifrasnominaBean.filteredCifrasnomina}"
+                                                             scrollable="true" scrollHeight="300"
+                                                             widgetVar="registrosTableCifras">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTableCifras.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{cifrasnominaBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="csv" actionListener="#{cifrasnominaBean.descargarReporteCsv()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" 
+                                                              sortBy="#{cifra.numeroconcepto}" filterBy="#{cifra.numeroconcepto}" style="background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="No. Concepto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.numeroconcepto}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" style="background-color: #C6C6C6;"
+                                                              sortBy="#{cifra.nombreconcepto}" filterBy="#{cifra.nombreconcepto}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Concepto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.nombreconcepto}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}"/>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{cifra.contador}" style="text-align: right; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="No. Trabajadores"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.contador}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}"/>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{cifra.tiempo}" style="text-align: right; background-color: #C6C6C6;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Tiempo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.tiempo}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}"/>
+                                                        <f:facet name="footer" >
+                                                            <p:outputLabel value="Totales:" style="color: black"/>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{cifra.percepciones}" style="text-align: right; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Percepción"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.percepciones}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{cifrasnominaBean.totalPercepciones}" style="color: black">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{cifra.deducciones}" style="text-align: right; background-color: #C6C6C6;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Deducción"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.deducciones}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}"> 
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{cifrasnominaBean.totalDeducciones}" style="color: black">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{cifra.provisiones}" style="text-align: right; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Provisión"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.provisiones}" style="#{cifra.suma==1?'color: #1A1A1A':'color: #D33C1C'}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{cifrasnominaBean.totalProvisiones}" style="color: black;">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column sortBy="#{cifra.suma}" style="text-align: center; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Totaliza" title="Totaliza"/>
+                                                        </f:facet>
+                                                        <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{cifra.suma == 1}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{cifra.suma == 0}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{empty cifra.suma}"/>
+                                                    </p:column>
+
+                                                    <p:column sortBy="#{cifra.atributoconcepto}" style="text-align: center; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Atributo" title="Atributo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{cifra.atributoconcepto}" rendered="#{not empty cifra.atributoconcepto}" style="color: #1A1A1A;"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{empty cifra.atributoconcepto}"/>
+                                                    </p:column>
+
+                                                    <p:column sortBy="#{cifra.recibonominaconcepto}" style="text-align: center; background-color: #B8B8B8;">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Recibo" title="Recibo"/>
+                                                        </f:facet>
+                                                        <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{cifra.recibonominaconcepto == 1}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{cifra.recibonominaconcepto == 0}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{empty cifra.recibonominaconcepto}"/>
+                                                    </p:column>
+
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:tab>
+                                <p:tab title="Listado Netos" id="tabListadosNetos">
+                                    <h:panelGrid columns="9">
+                                        <p:selectOneMenu id="idestatusempleadoln" style="width: 150px" 
+                                                         filter="true" filterMatchMode="contains" value="#{listadonetosBean.selectedestatus}">  
+                                            <f:selectItem itemValue="" itemLabel="- Estatus Empleado -"/>
+                                            <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu value="#{listadonetosBean.selectedGrupoPago}" style="width: 150px"
+                                                         filter="true" filterMatchMode="contains">
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}" var="gp" 
+                                                           itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu value="#{listadonetosBean.selectedTipoproceso}" 
+                                                         style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                            <f:selectItem itemValue="" itemLabel="NM - NOMINA NORMAL"/>
+                                            <f:selectItems value="#{tipoprocesoBean.procesosEspeciales}" var="tp" 
+                                                           itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                                        </p:selectOneMenu>
+
+                                        <p:inputText id="idPeriodoNetos" value="#{listadonetosBean.periodo}" size="5" style="text-align: center" placeholder="Periodo"/>
+
+                                        <p:inputText id="idAnioNetos" value="#{listadonetosBean.anio}" size="5" style="text-align: center" placeholder="Año"/>
+
+                                        <p:commandButton icon="ui-icon-refresh" title="Traer Empleados"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{listadonetosBean.updateEmpleados(event)}"
+                                                         update="idEmpleadosnetos" onclick="statusDialog.show();"/>
+
+                                        <p:selectCheckboxMenu id="idEmpleadosnetos" panelStyle="width:300px" filter="true" filterMatchMode="contains"
+                                                              style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                              value="#{listadonetosBean.selectedRelaciones}" label="Empleado(s)">
+                                            <f:selectItems value="#{listadonetosBean.relaciones}"/> 
+                                        </p:selectCheckboxMenu>
+                                        <p:message for="idEmpleados" display="tooltip"/>
+
+                                        <p:commandButton value="Consultar" actionListener="#{listadonetosBean.consultar(event)}"
+                                                         update=":msgs, :form" styleClass="style_botones" icon="icon-search" onclick="statusDialog.show();"/>
+                                    </h:panelGrid>
+                                    <p:panelGrid>
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <p:outputLabel value="#{listadonetosBean.informacion}"/> 
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:commandButton value="Limpiar" icon="ui-icon-trash" styleClass="style_botones"
+                                                                         actionListener="#{listadonetosBean.limpiar(event)}"
+                                                                         update=":msgs, :form" onclick="statusDialog.show();"/> 
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableNetos" var="neto" value="#{listadonetosBean.listadoNetos}"
+                                                             resizableColumns="true" style="font-size: .8em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                             filteredValue="#{listadonetosBean.filteredListadoNetos}"
+                                                             scrollable="true" scrollHeight="300"
+                                                             widgetVar="registrosTableNetos">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTableNetos.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{listadonetosBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="csv" actionListener="#{listadonetosBean.descargarReporteCsv()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{neto.numeroempleado}" filterBy="#{neto.numeroempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.numeroempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{neto.nombreempleado}" filterBy="#{neto.nombreempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Nombre" title="Nombre"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.nombreempleado}"/>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="Total:" style="color: black"/>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{neto.neto}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Importe Neto" title="Importe Neto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.neto}"/>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{listadonetosBean.totalNeto}" style="color: black;">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{neto.cuentabancaria}" style="text-align: right"
+                                                              filterMatchMode="contains" filterBy="#{neto.cuentabancaria}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Cuenta"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.cuentabancaria}"/>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{neto.clabebancaria}" style="text-align: right"
+                                                              filterMatchMode="contains" filterBy="#{neto.clabebancaria}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Clabe"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.clabebancaria}"/>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{neto.bancoempleado}" style="text-align: right"
+                                                              filterMatchMode="contains" filterBy="#{neto.bancoempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Banco Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{neto.bancoempleado}"/>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:tab>
+                                <p:tab title="Listado de Nóminas" id="tabListadoNominas" >
+                                    <h:panelGrid columns="11">
+                                        <p:selectOneMenu id="idestatusempleadolno" style="width: 150px" 
+                                                         filter="true" filterMatchMode="contains" value="#{listadonominasBean.selectedestatus}">  
+                                            <f:selectItem itemValue="" itemLabel="- Estatus Empleado -"/>
+                                            <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu value="#{listadonominasBean.selectedGrupoPago}" style="width: 150px"
+                                                         filter="true" filterMatchMode="contains">
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}" var="gp" 
+                                                           itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu value="#{listadonominasBean.selectedTipoproceso}" 
+                                                         style="width: 200px;text-align: left" filter="true" filterMatchMode="contains">
+                                            <f:selectItem itemValue="" itemLabel="NM - NOMINA NORMAL"/>
+                                            <f:selectItems value="#{tipoprocesoBean.procesosEspeciales}" var="tp" 
+                                                           itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                                        </p:selectOneMenu>
+
+                                        <p:inputText value="#{listadonominasBean.periodo}" size="5" style="text-align: center" placeholder="Periodo"/>
+
+                                        <p:inputText value="#{listadonominasBean.anio}" size="5" style="text-align: center" placeholder="Año"/>
+
+                                        <p:commandButton icon="ui-icon-refresh" title="Traer Empleados"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{listadonominasBean.updateEmpleados(event)}"
+                                                         update="idEmpleadoslistado" onclick="statusDialog.show();"/>
+
+                                        <p:selectCheckboxMenu id="idEmpleadoslistado" panelStyle="width:300px" filter="true" filterMatchMode="contains"
+                                                              style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                              value="#{listadonominasBean.selectedRelaciones}" label="Empleado(s)">
+                                            <f:selectItems value="#{listadonominasBean.relaciones}"/> 
+                                        </p:selectCheckboxMenu>
+                                        <p:message for="idEmpleados" display="tooltip"/>
+
+                                        <p:commandButton value="Consultar" actionListener="#{listadonominasBean.consultar(event)}"
+                                                         update=":msgs, :form" styleClass="style_botones" icon="icon-search" onclick="statusDialog.show();"/>
+
+
+                                        <p:selectOneMenu id="idTipoSalida" style="width: 100px" filter="true" filterMatchMode="contains"
+                                                         value="#{listadonominasBean.selectedtipo}"
+                                                         required="true" requiredMessage="#{appBean.mensajeErrorTipoNomina}">  
+                                            <f:selectItems value="#{appBean.comboTiposalidaarchivoListado}"/>  
+                                        </p:selectOneMenu>
+
+                                    </h:panelGrid>
+                                    <p:panelGrid>
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <p:outputLabel value="#{listadonominasBean.informacion}"/> 
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right" style="margin-bottom: 5px;">
+                                                        <p:commandButton value="Limpiar" icon="ui-icon-trash" styleClass="style_botones"
+                                                                         actionListener="#{listadonominasBean.limpiar(event)}"
+                                                                         update=":msgs, :form" onclick="statusDialog.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Re-Timbrar" icon="ui-icon-refresh" styleClass="style_botones"
+                                                                         oncomplete="handleCreateInicidencia(args)"
+                                                                         update=":formCancelar:display, :msgs" 
+                                                                         disabled="#{!permisosBean.permisoOperacionesCalculoNominas}"
+                                                                         onclick="confirmRetimbrarNomina.show();"/>&nbsp;
+
+                                                        <p:commandButton  id="idbotonTimbar" value="Timbrar" icon="ui-icon-script" styleClass="style_botones"
+                                                                          oncomplete="handleCreateInicidencia(args)"
+                                                                          update=":formCancelar:display, :msgs"
+                                                                          rendered="#{loginBean.usuario.permisoCalculoNomina}"
+                                                                          onclick="confirmTimbrarNomina.show();"/>&nbsp;
+                                                    </div>
+                                                    <div align="right">
+                                                        <p:commandButton value="Descargar Listado Nómina" title="Listado Nómina" icon="icon-down"
+                                                                         styleClass="style_botones" onclick="confirmTipoReporte.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Descargar C/Firmas" title="Descargar Reporte Con Firmass" icon="icon-down"
+                                                                         actionListener="#{listadonominasBean.descargarReporteFirmas()}"
+                                                                         oncomplete="handleLShow(args)" 
+                                                                         styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Descargar Preliminar" title="Descargar Preliminar" icon="icon-down"
+                                                                         actionListener="#{listadonominasBean.descargarPreliminar()}"
+                                                                         oncomplete="handleLShow(args)" 
+                                                                         styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Descargar Reporte General" title="Descargar Reporte General" icon="icon-down"
+                                                                         actionListener="#{listadonominasBean.descargarArchivoNomina()}"
+                                                                         oncomplete="handleLShow(args)" 
+                                                                         styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Reporte Alpha" title="Reporte Alpha" icon="icon-down"
+                                                                         rendered="#{appBean.servicioAlpha}"
+                                                                         actionListener="#{listadonominasBean.descargarArchivoAlpha(event)}"
+                                                                         oncomplete="handleLShow(args)" 
+                                                                         styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp;
+
+                                                        <p:commandButton value="Reporte Nomina Costo Empresa" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{listadonominasBean.descargarReporteNominaCostoEmpresa()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs"/>&nbsp;
+
+                                                        <p:commandButton value="Reporte Nomina" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)" rendered="#{appBean.servicioGrupoBakertilly}"
+                                                                         actionListener="#{listadonominasBean.descargarReporteNominaEmpresaBakertilly()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs"/>&nbsp;
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableNomina" var="nomina" value="#{listadonominasBean.listadoNomina}"
+                                                             resizableColumns="true" style="font-size: .8em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                             filteredValue="#{listadonominasBean.filteredListadoNomina}"
+                                                             scrollable="true" scrollHeight="300"
+                                                             selection="#{listadonominasBean.selectedListadoNomina}"
+                                                             rowKey="#{nomina.idrellab}"
+                                                             widgetVar="registrosTableNomina">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTableNomina.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{listadonominasBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="csv" actionListener="#{listadonominasBean.descargarReporteCsv()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                                    <p:column style="width:3%" exportable="false">
+                                                        <p:rowToggler />
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="false" style="text-align: center"
+                                                              sortBy="#{nomina.estatusrecibo}" filterBy="#{nomina.estatusrecibo}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="E. Recibo" title="Estatus Recibo"/>
+                                                        </f:facet>
+                                                        <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{nomina.estatusrecibo==1}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{nomina.estatusrecibo==0}"/>
+                                                        <h:graphicImage value="#{appBean.urlEstadoCancelado}" rendered="#{nomina.estatusrecibo==2}"/>
+                                                    </p:column>
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{nomina.numeroempleado}" filterBy="#{nomina.numeroempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.numeroempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{nomina.nombreempleado}" filterBy="#{nomina.nombreempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Nombre" title="Nombre Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.nombreempleado}"/>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="Total:"/>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{nomina.rfc}" filterBy="#{nomina.rfc}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="R.F.C." title="R.F.C."/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.rfc}"/>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="Total:"/>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{nomina.depto}" filterBy="#{nomina.depto}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Departamento" title="Departamento"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.depto}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{nomina.puesto}" filterBy="#{nomina.puesto}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Puesto" title="Puesto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.puesto}"/>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{nomina.percepciones}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Percepción" title="Percepciones"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.percepciones}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{listadonominasBean.totalPercepciones}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{nomina.deducciones}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Deducción"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.deducciones}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{listadonominasBean.totalDeducciones}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{nomina.provisiones}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Provisión"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.provisiones}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{listadonominasBean.totalProvisiones}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{nomina.percepciones-nomina.deducciones}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Importe Neto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.percepciones-nomina.deducciones}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{listadonominasBean.totalNeto}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" sortBy="#{nomina.impuestoretenido}" style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="ISR" title="ISR"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{nomina.impuestoretenido}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:rowExpansion>
+                                                        <p:panelGrid  columns="2" style="width: 1020px">
+                                                            <p:panelGrid columns="1">
+                                                                <f:facet name="header">
+                                                                    <p:outputLabel value="Percepciones"/> 
+                                                                </f:facet>
+                                                                <p:dataTable  value="#{nomina.conceptosPercepciones}" var="percepcion"
+                                                                              style="font-size: 1em;"
+                                                                              emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                              scrollable="true" scrollHeight="150" >
+
+                                                                    <p:column headerText="No. Concepto" sortBy="#{percepcion.concepto}" style="text-align: left; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{percepcion.concepto}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Concepto" sortBy="#{percepcion.nombre}" style="text-align: left; background-color: #C6C6C6; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{percepcion.nombre}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Tiempo" sortBy="#{percepcion.tiempo}" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{percepcion.tiempo}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Importe" style="text-align: right; background-color: #C6C6C6; font-size: 13px;">
+                                                                        <p:outputLabel value="*" rendered="#{percepcion.isn==1}"/>
+                                                                        <p:outputLabel value="•" rendered="#{percepcion.naturaleza=='01'}"/>
+                                                                        <p:outputLabel value="#{percepcion.valor}" style="color: #{percepcion.suma=='0'?'#1A1A1A':'#058205'};">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+                                                                    <p:column headerText="Saldo" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{percepcion.saldo}">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+                                                                </p:dataTable>
+                                                            </p:panelGrid>
+                                                            <p:panelGrid columns="1">
+                                                                <f:facet name="header">
+                                                                    <p:outputLabel value="Deducciones"/> 
+                                                                </f:facet>
+                                                                <p:dataTable  value="#{nomina.conceptosDeducciones}" var="deduccion"
+                                                                              style="font-size: 1em;"
+                                                                              emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                              scrollable="true" scrollHeight="150">
+
+                                                                    <p:column headerText="No. Concepto" sortBy="#{deduccion.concepto}" style="text-align: left; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{deduccion.concepto}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Concepto" sortBy="#{deduccion.nombre}" style="text-align: left; background-color: #C6C6C6; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{deduccion.nombre}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Tiempo" sortBy="#{deduccion.nombre}" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{deduccion.tiempo}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Importe" style="text-align: right; background-color: #C6C6C6; font-size: 13px;">
+                                                                        <p:outputLabel value="*" rendered="#{deduccion.isn==1}"/>
+                                                                        <p:outputLabel value="•" rendered="#{deduccion.naturaleza=='01'}"/>
+                                                                        <p:outputLabel value="#{deduccion.valor}" style="color: #{deduccion.suma=='0'?'#1A1A1A':'#058205'}">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Saldo" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{deduccion.saldo}" style="color: #{deduccion.suma=='0'?'#1A1A1A':'#058205'}">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+                                                                </p:dataTable>
+                                                            </p:panelGrid>
+                                                            <p:panelGrid columns="1">
+                                                                <f:facet name="header">
+                                                                    <p:outputLabel value="Provisiones"/> 
+                                                                </f:facet>
+                                                                <p:dataTable  value="#{nomina.conceptosProvisiones}" var="provision"
+                                                                              style="font-size: 1em;"
+                                                                              emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                              scrollable="true" scrollHeight="150">
+
+                                                                    <p:column headerText="No. Concepto" sortBy="#{provision.concepto}" style="text-align: left; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{provision.concepto}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Concepto" sortBy="#{provision.nombre}" style="text-align: left; background-color: #C6C6C6; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{provision.nombre}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Tiempo" sortBy="#{provision.nombre}" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{provision.tiempo}"/>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Importe" style="text-align: right; background-color: #C6C6C6; font-size: 13px;">
+                                                                        <p:outputLabel value="*" rendered="#{provision.isn==1}"/>
+                                                                        <p:outputLabel value="•" rendered="#{provision.naturaleza=='01'}"/>
+                                                                        <p:outputLabel value="#{provision.valor}" style="color: #{provision.suma=='0'?'#1A1A1A':'#058205'}">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+
+                                                                    <p:column headerText="Saldo" style="text-align: right; background-color: #B8B8B8; color: #1A1A1A; font-size: 10px">
+                                                                        <p:outputLabel value="#{provision.saldo}" style="color: #{provision.suma=='0'?'#1A1A1A':'#058205'}">
+                                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                        </p:outputLabel>
+                                                                    </p:column>
+                                                                </p:dataTable>
+                                                            </p:panelGrid>
+                                                        </p:panelGrid>
+                                                    </p:rowExpansion>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:tab>
+                            </p:tabView>
+
+                        </div>
+                    </p:fieldset>   
+                </h:form>
+
+                <h:form id="formCancelar">
+                    <p:dialog header="Resúmen" 
+                              widgetVar="createDialog" id="cancelarDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="90%">  
+                        <h:panelGrid id="display">
+                            <f:facet name="footer">
+                                <div align="left">
+                                    <p:commandButton value="Cerrar" icon="icon-cancel" 
+                                                     onclick="createDialog.hide();"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </f:facet>
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="#{listadonominasBean.informaciontimbres}"/>            
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableConceptos" var="res" value="#{listadonominasBean.respuesta}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" widgetVar="respuestaTable"
+                                                 scrollHeight="300px" resizableColumns="true" style="font-size: .8em; width: 100%">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableConceptos" fileName="RespuestaTimbres" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column sortBy="#{res.uuid}" exportable="true">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="UUID/No. Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.uuid}" style="#{res.exito?'':'color:red'}"/> 
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.errorGeneral}" exportable="true">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Error General"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.errorGeneral}" style="#{res.exito?'':'color:red'}"/>
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.errorEspecifico}" exportable="true">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Error Especifico"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.errorEspecifico}" style="#{res.exito?'':'color:red'}"/>
+                                        </p:column>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <h:form id="fomrConfirmTimbrar">
+                    <p:dialog header="Alerta: Timbrado de nómina" widgetVar="confirmTimbrarNomina" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="¿Está seguro de timbrar la nómina: #{calculonominaBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             actionListener="#{listadonominasBean.descargarPAC(false)}"
+                                             oncomplete="handleCreateInicidencia(args)"
+                                             update=":formCancelar:display, :msgs"
+                                             onclick="statusDialog.show();
+                                                                 confirmTimbrarNomina.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmTimbrarNomina.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrConfirmTipoReporte">
+                    <p:dialog header="Seleccione tipo de reporte" widgetVar="confirmTipoReporte" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="300px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:commandButton value="Reporte General" icon="icon-down"
+                                             actionListener="#{listadonominasBean.descargarReporteOrdas()}" 
+                                             oncomplete="handleLShow(args)"
+                                             update=":formCancelar:display, :msgs"
+                                             onclick="statusDialog.show();
+                                                                 confirmTipoReporte.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="Por Departamentos" icon="icon-down"
+                                             actionListener="#{listadonominasBean.descargarReportePorDepartamento()}" 
+                                             oncomplete="handleLShow(args)"
+                                             update=":formCancelar:display, :msgs"
+                                             onclick="statusDialog.show();
+                                                                 confirmTipoReporte.hide();"
+                                             styleClass="style_botones"/>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrConfirmReTimbrar">
+                    <p:dialog header="Alerta: Re-Timbrado de nómina" widgetVar="confirmRetimbrarNomina" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="¿Está seguro de re-timbrar las nóminas seleccionadas: #{calculonominaBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             actionListener="#{listadonominasBean.descargarPAC(true)}"
+                                             oncomplete="handleCreateInicidencia(args)"
+                                             update=":formCancelar:display, :msgs"
+                                             onclick="statusDialog.show();
+                                                                 confirmRetimbrarNomina.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmRetimbrarNomina.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
