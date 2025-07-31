@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../templates/templateDefoult.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <header>
+                        <div class="logo">
+                            <img class="inconLogo" src="../../resources/images/logos/NewCeniccoLogo.png"/>
+                        </div>
+
+                        <div class="contenedor1" id="azul">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaTiempoAsistencias(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="icon" src="../../resources/images/fondos/tiempo.png"/>
+                            </p:commandLink>                           
+                            <p class="texto">Tiempo y Asistencias</p>
+                        </div>
+                        <div class="contenedor1" id="morado">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaEmpleados(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="icon" src="../../resources/images/fondos/empleado.png"/>
+                            </p:commandLink>
+                            <p class="texto">Empleados</p>
+                        </div>
+                        <div class="contenedor1" id="amarillo">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaRecursosHumanos(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="icon" src="../../resources/images/fondos/recursos.png"/>
+                            </p:commandLink>
+
+                            <p class="texto">Recursos Humanos</p>
+                        </div>
+                        <div class="perfil">
+                            <h:form>
+                                <h:panelGrid columns="2">
+                                    <p:row>
+                                        <p:column>
+                                            <h:panelGrid columns="1">
+                                                <p:outputLabel value="#{loginBean.usuario.nombre} #{loginBean.usuario.apellidoPaterno} #{loginBean.usuario.apellidoMaterno}"/>
+                                                <p:commandButton value="Salir" 
+                                                                 actionListener="#{loginBean.logout(event)}" styleClass="style_botones"
+                                                                 icon="icon-exit"
+                                                                 oncomplete="handleLogoutRequest(args)"/>
+                                                <p:commandButton label="Editar Contraseña" 
+                                                                 icon="icon-key" value="Editar Contraseña"
+                                                                 styleClass="style_botones"
+                                                                 onclick="recoverDialog.show();"/>
+                                            </h:panelGrid>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:graphicImage value="#{loginBean.imagen}" height="90px" cache="false"/>      
+                                        </p:column>
+                                    </p:row>
+
+                                </h:panelGrid>
+                            </h:form>
+                        </div>
+                        <div class="contenedor2" id="rosa">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaNominas(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="icon" src="../../resources/images/fondos/nomina.png"/>
+                            </p:commandLink>
+                            <p class="texto">Nóminas</p>
+                        </div>
+                        <div class="contenedor2" id="verde">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaFiscal(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="icon" src="../../resources/images/fondos/ahorro.png"/>
+                            </p:commandLink>
+                            <p class="texto">Fiscal</p>
+                        </div>
+                        <div class="ajustes" id="ajustes">
+                            <p:commandLink actionListener="#{menuBean.actionPantallaConfiguracion(event)}" target="_blank"
+                                           oncomplete="handleLShow(args)">
+                                <img class="ajustes" src="../../resources/images/fondos/ajustes.png"/>
+                            </p:commandLink>
+                        </div>
+                    </header>    
+                </h:form>
+                <h:form id="formPassword">
+                    <p:dialog header="Editar Contraseña" widgetVar="recoverDialog" resizable="false" closable="false" draggable="false"
+                              hideEffect="explode" showEffect="fade" position="center,center" closeOnEscape="true" modal="true">  
+                        <p:growl id="growl" showDetail="true" life="3000" />
+
+                        <h:panelGrid columns="3" cellpadding="5">   
+
+                            <h:outputLabel value="Nueva Contraseña: *" />  
+                            <p:password id="idPasswordUno" value="#{loginBean.passwordUno}"
+                                        required="true" requiredMessage="#{appBean.mensajeErrorPassword}"/>
+                            <p:message for="idPasswordUno" display="text"/>
+
+                            <h:outputLabel value="Confirmar Contraseña: *" />  
+                            <p:password id="idPasswordDos" value="#{loginBean.passwordDos}"
+                                        required="true" requiredMessage="#{appBean.mensajeErrorPassword}"/>  
+                            <p:message for="idPasswordDos" display="text"/>
+
+                            <f:facet name="footer">  
+                                <p:commandButton value="Aceptar" icon="icon-check"
+                                                 actionListener="#{loginBean.modificarPassword(event)}"
+                                                 update="growl"
+                                                 oncomplete="handlePasswordRequest(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton value="Cancelar" icon="icon-cancel" 
+                                                 onclick="recoverDialog.hide();" update=":formPassword"
+                                                 styleClass="style_botones" immediate="true">
+                                    <p:resetInput target="formPassword"/>
+                                </p:commandButton>
+                            </f:facet>
+                        </h:panelGrid>
+                    </p:dialog> 
+                </h:form>
+                <script type="text/javascript" src="../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
