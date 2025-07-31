@@ -1,0 +1,638 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="true" life="10000"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="12" style="margin-top: 25px">
+                            <p:inputText id="idNumeroEmpleado" size="15" value="#{incidenciaBean.numeroEmpleado}" placeholder="Número Empleado"
+                                         style="text-align: center"/>
+                            <p:message for="idNumeroEmpleado" display="tooltip"/>
+
+                            <p:selectOneMenu id="idestatusempleado" style="width: 150px" 
+                                             filter="true" filterMatchMode="contains" value="#{incidenciaBean.selectedestatus}">  
+                                <f:selectItem itemValue="" itemLabel="Estatus Empleados"/>
+                                <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idestatusempleado" display="tooltip"/>
+
+                            <p:selectOneMenu id="idGrupoPago" value="#{incidenciaBean.selectedGrupoPago}" 
+                                             style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="Grupo de Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" var="grupoPago" 
+                                               itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idGrupoPago" display="tooltip"/>
+
+                            <p:selectOneMenu value="#{incidenciaBean.selectedTipoproceso}" 
+                                             style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                <f:selectItem id="idTipoProceso" itemValue="" itemLabel="NM - NOMINA NORMAL"/>
+                                <f:selectItems value="#{tipoprocesoBean.procesosEspeciales}" var="tp" 
+                                               itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:inputText id="idPeriodo" value="#{incidenciaBean.selectedPeriodo}" placeholder="Periodo" style="text-align: center"
+                                         size="10"/>
+                            <p:message for="idPeriodo" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{incidenciaBean.anio}" placeholder="Año" style="text-align: center" size="10"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" icon="icon-search" styleClass="style_botones"
+                                             actionListener="#{incidenciaBean.consultar(event)}"
+                                             onclick="statusDialog.show();"
+                                             update=":form, :msgs"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Incidencias - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="6">
+                                <p:commandButton value="Generar Incidencias" styleClass="style_botones"
+                                                 onclick="confirmGenerarIncidencias.show();" rendered="#{appBean.servicioDelMonte}"
+                                                 title="Generar Incidencias"
+                                                 onstart="statusDialog.show()" disabled="#{!permisosBean.permisoTimbresRecibos}"/>
+                                <p:commandButton value="Layout Incidencias" styleClass="style_botones" icon="icon-csv"
+                                                 actionListener="#{incidenciaBean.descargarLayoutIncidecias(event)}"
+                                                 oncomplete="handleLShow(args)"
+                                                 title="Archivo Layout para carga de incidencias masivas"/>
+                                <p:commandButton value="Cargar Archivo" styleClass="style_botones" icon="icon-csv"
+                                                 oncomplete="handleCreateInicidenciaArchivo(args);"
+                                                 actionListener="#{incidenciaBean.limpiarAltaArchivo(event)}"
+                                                 onstart="statusDialog.show()"
+                                                 title="Compania,NoEmpleado,NoConcepto,Fecha,Tiempo,Importe,Referencia"
+                                                 onclick="incidenciasDialog.show();"/>
+                                <p:commandButton value="Alta" styleClass="style_botones" icon="icon-add"
+                                                 actionListener="#{incidenciaBean.limpiarAlta(event)}"
+                                                 oncomplete="handleCreateInicidencia(args)"
+                                                 onstart="statusDialog.show()" update=":msgs, :formCreate"/>
+                                <p:commandButton value="Resúmen" styleClass="style_botones" icon="ui-icon-document"
+                                                 actionListener="#{incidenciaBean.calcularresumen(event)}"
+                                                 onclick="resumenDialog.show();" onstart="statusDialog.show()" update=":formResumen:display"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{incidenciaBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="incidencia"
+                                                 value="#{incidenciaBean.incidencias}"
+                                                 filteredValue="#{incidenciaBean.filteredIncidencias}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{incidenciaBean.selectedIncidencias}"
+                                                 rowKey="#{incidencia.idincidencia}"
+                                                 editable="true" editMode="cell"
+                                                 disabledSelection="#{incidencia.idconcepto.incapacidad == 1 or (incidencia.autorizar == 1 and !permisosBean.permisoEliminarIncidenciasAutorizadas) }">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf" actionListener="#{incidenciaBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="csv">
+                                                    <p:commandLink id="csv" actionListener="#{incidenciaBean.descargarReporteCsv()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                        <p:column filterMatchMode="exact" width="70" style="text-align:center" exportable="false" sortBy="#{incidencia.autorizar}" filterBy="#{incidencia.autorizar}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Autorizado" title="Autorizado"/>
+                                            </f:facet>
+                                            <p:tooltip id="toolTipA" for="toolTipAuto" value="Autorizado"/>
+                                            <p:tooltip id="toolTipNA" for="toolTipNoAuto" value="Falta por autorizar"/>
+
+                                            <h:graphicImage id="toolTipAuto" value="#{pathManager.path}/resources/images/icons/authorize.png" rendered="#{incidencia.autorizar == 1}"/>
+                                            <h:graphicImage id="toolTipNoAuto" value="#{pathManager.path}/resources/images/icons/aurized.png" rendered="#{incidencia.autorizar == 10}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.idincidencia}" sortBy="#{incidencia.idincidencia}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idincidencia}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.idperiodo.periodo}" sortBy="#{incidencia.idperiodo.periodo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idperiodo.periodo} (#{incidencia.idperiodo.fechaInicioStr}-#{incidencia.idperiodo.fechaFinStr})"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.idperiodo.idtipoproceso.nombre}" sortBy="#{incidencia.idperiodo.idtipoproceso.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Proceso" title="Tipo Proceso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idperiodo.idtipoproceso.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.idrellab.numeroempleado}"
+                                                  sortBy="#{incidencia.idrellab.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idrellab.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.idrellab.idempleado.nombre} #{incidencia.idrellab.idempleado.apellidopaterno} #{incidencia.idrellab.idempleado.apellidomaterno}"
+                                                  sortBy="#{incidencia.idrellab.idempleado.nombre} #{incidencia.idrellab.idempleado.apellidopaterno} #{incidencia.idrellab.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idrellab.idempleado.nombre} #{incidencia.idrellab.idempleado.apellidopaterno} #{incidencia.idrellab.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incidencia.idconcepto.concepto} - #{incidencia.idconcepto.nombre}" sortBy="#{incidencia.idconcepto.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.idconcepto.concepto} - #{incidencia.idconcepto.nombre}"
+                                                           title="#{incidencia.idconcepto.concepto} - #{incidencia.idconcepto.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{incidencia.FActualiza}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Regsitro" title="Fecha Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.FActualiza}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="false"
+                                                  filterBy="#{incidencia.FAux01}" headerText="F. Incidencia">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{incidencia.FAux01}"/>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputMask id="dateAux01" value="#{incidencia.FAux01}" mask="99/99/9999" size="10"/>    
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="false" headerText="Unidades"
+                                                   filterBy="#{incidencia.unidades}" sortBy="#{incidencia.unidades}" >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{incidencia.unidades}"/>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputText value="#{incidencia.unidades}" size="10"/>    
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column> 
+
+                                        <p:column  filterMatchMode="contains" exportable="false" headerText="Importe"
+                                                   filterBy="#{incidencia.importe}" sortBy="#{incidencia.importe}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{incidencia.importe}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputText value="#{incidencia.importe}" size="10"/>    
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="false" headerText="Referencia"
+                                                   filterBy="#{incidencia.referencia01}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{incidencia.referencia01}"/>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputText value="#{incidencia.referencia01}" size="10"/>    
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton icon="icon-save"
+                                                             styleClass="style_botones"
+                                                             update="dataTable, :msgs"
+                                                             actionListener="#{incidenciaBean.editarIncidencia(incidencia)}"
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Autorizar Incidencias" icon="icon-approve" styleClass="style_botones"
+                                                             onclick="confirmAutorizar.show();" update=":msgs" rendered="#{permisosBean.autorizarIncidencias}"/> 
+                                            <p:commandButton value="Eliminar Incidencias" icon="icon-cancel" styleClass="style_botones" disabled="#{!permisosBean.permisoOperacionesCalculoNominas}" 
+                                                             actionListener="#{incidenciaBean.delete(event)}"
+                                                             onclick="statusDialog.show();"
+                                                             update=":form, :msgs"/> 
+                                            <p:commandButton value="Descargar Preliminar" title="Descargar Preliminar" icon="icon-down"
+                                                             rendered="#{incidenciaBean.descargarPreliminar}"
+                                                             actionListener="#{incidenciaBean.descargarPreliminar()}"
+                                                             oncomplete="handleLShow(args)" 
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Generar Faltas" icon="icon-down" styleClass="style_botones" rendered="#{appBean.servicioAlpha}"
+                                                             onclick="fechasGenerarFaltas.show();" update=":msgs"/> 
+                                        </div>
+
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Incidencia(s)" 
+                              widgetVar="createDialog" resizable="true" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="70%" height="500px">
+                        <f:facet name="footer">
+                            <div align="center">
+                                <p:commandButton value="Guardar" icon="icon-save" 
+                                                 actionListener="#{incidenciaBean.create(event)}"
+                                                 onclick="statusDialog.show();"
+                                                 oncomplete="handleCreate(args)"
+                                                 styleClass="style_botones"
+                                                 update=":msgs, :form, :formCreate"/>
+                                <p:commandButton value="Cancelar" icon="icon-cancel" 
+                                                 onclick="createDialog.hide();"
+                                                 styleClass="style_botones"/>
+                            </div>
+                        </f:facet>
+                        <div align="center">
+                            <p:panelGrid columns="4" style="text-align: left">
+                                <p:outputLabel value="Empresa:" style="font-weight: bold"/>
+                                <p:outputLabel value="#{incidenciaBean.grupoPago.idcompania.nombre}"
+                                               style="font-size: .8em; color: #7D5757"/>
+                                <p:outputLabel value="Grupo Pago:" style="font-weight: bold"/>
+                                <p:outputLabel value="#{incidenciaBean.grupoPago.nombre}"
+                                               style="font-size: .8em; color: #7D5757"/>
+                                <p:outputLabel value="Tipo Proceso:" style="font-weight: bold"/>
+                                <p:outputLabel value="#{incidenciaBean.tipoproceso.nombre}"
+                                               style="font-size: .8em; color: #7D5757"/>
+                                <p:outputLabel value="Periodo:" style="font-weight: bold"/>
+                                <p:outputLabel value="#{incidenciaBean.periodo.periodo} (#{incidenciaBean.periodo.fechaInicioStr} - #{incidenciaBean.periodo.fechaFinStr})"
+                                               style="font-size: .8em; color: #7D5757"/>
+                            </p:panelGrid>
+                            <h:panelGrid columns="1" style="margin-top: 20px;text-align: center">
+                                <p:selectCheckboxMenu id="menu" panelStyle="width:600px" filter="true" filterMatchMode="contains"
+                                                      value="#{incidenciaBean.selectedRelaciones}" label="Empleado(s)"
+                                                      style="width: 400px;text-align: center">
+                                    <f:selectItems value="#{incidenciaBean.relaciones}"/> 
+                                </p:selectCheckboxMenu>
+
+                                <p:dataTable id="dataTableIncEmpleado" var="incidencia" value="#{incidenciaBean.incidenciasGral}"
+                                             scrollable="true" scrollHeight="300" style="margin-top: 15px;width: 800px"
+                                             emptyMessage="#{appBean.mensajeTablaVacia}" widgetVar="registrosTableIncEmpleados"
+                                             filteredValue="#{incidenciaBean.filteredIncidenciasGral}" resizableColumns="true"
+                                             editable="true" editMode="cell"
+                                             rowKey="#{incidencia.idincidencia}">
+
+                                    <p:column filterMatchMode="contains" headerText="Concepto" sortBy="#{incidencia.idconcepto.concepto}"
+                                              style="font-size: .8em" filterBy="#{incidencia.idconcepto.concepto} - #{incidencia.idconcepto.nombre}">
+                                        <div align="left">
+                                            <h:outputText value="#{incidencia.idconcepto.concepto} - #{incidencia.idconcepto.nombre}"/> 
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Fecha">
+                                        <p:inputMask id="dateAux01" value="#{incidencia.FAux01}" mask="99/99/9999" size="10"/>     
+                                    </p:column>
+
+                                    <p:column headerText="Tiempo">
+                                        <p:inputText value="#{incidencia.unidades}" size="10"/>  
+                                    </p:column>
+
+                                    <p:column headerText="Importe">
+                                        <p:inputText value="#{incidencia.importe}" size="10"/>
+                                    </p:column>
+
+                                    <p:column headerText="Referencia">
+                                         <p:inputText value="#{incidencia.referencia01}" size="10"/>
+                                    </p:column>
+
+                                </p:dataTable>
+                            </h:panelGrid>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formIncidencia"  enctype="multipart/form-data">
+                    <p:dialog header="Alta Incidencias" widgetVar="incidenciasDialog" resizable="false" id="incidenciaDlg"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{incidenciaBean.archivo}" mode="advanced" oncomplete="incidenciasDialog.hide();handleLShow(args)"
+                                           fileUploadListener="#{incidenciaBean.fileUploadListener}"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs, :form, :formCreate"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formResumen">
+                    <p:dialog header="Resúmen" 
+                              widgetVar="resumenDialog" resizable="false" id="resumenDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="70%">  
+                        <h:panelGrid id="display">
+                            <f:facet name="footer">
+                                <div align="left">
+                                    <p:commandButton value="Cerrar" icon="icon-cancel" 
+                                                     onclick="resumenDialog.hide();"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </f:facet>
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="#{incidenciaBean.informacionResumen}"/>            
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableConceptos" var="res" value="#{incidenciaBean.resumen}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" widgetVar="conceptosTable"
+                                                 filteredValue="#{incidenciaBean.filteredResumen}" scrollHeight="300px"
+                                                 resizableColumns="true" style="font-size: .8em;width: 100%">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="conceptosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableConceptos" fileName="ResumenIncidencias" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{res.descripcion}" sortBy="#{res.descripcion}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.descripcion}"/> 
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.tiempo}" style="text-align: right" exportable="true">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Tiempo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.tiempo}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.importe}" style="text-align: right" exportable="true">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrConfirmIncidencias">
+                    <p:dialog header="Generar Incidencias" widgetVar="confirmGenerarIncidencias" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="300px" height="100px" style="text-align: center"> 
+
+                        <p:selectOneMenu value="#{incidenciaBean.selectedTipoprocesoIncidencias}" style="width: 200px"
+                                         filter="true" filterMatchMode="contains">
+                            <f:selectItem itemValue="" itemLabel="Tipo Proceso"/>
+                            <f:selectItems value="#{tipoprocesoBean.tiposProceso}" var="tp" 
+                                           itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>  
+                        </p:selectOneMenu>
+                        <br/><br/><br/> 
+                        <p:inputText value="#{incidenciaBean.selectedPeriodoIncidencias}" size="5" placeholder="Periodo" style="text-align: center; width: 100px"/>
+                        &nbsp;&nbsp;&nbsp;
+                        <p:inputText value="#{incidenciaBean.selectedAnioIncidencias}" size="5" placeholder="Año" style="text-align: center; width: 100px"/>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar" icon="icon-check"
+                                             actionListener="#{incidenciaBean.generarIncidencias()}"
+                                             onclick="confirmGenerarIncidencias.hide();"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="confirmGenerarIncidencias.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrConfirmAutorizar">
+                    <p:dialog header="Alerta: Incidencias para autorizar" widgetVar="confirmAutorizar" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="¿Está seguro de autorizar las incidencias seleccionadas: #{incidenciaBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Autorizar" icon="icon-check"
+                                             actionListener="#{incidenciaBean.autorizarIncidencias()}"
+                                             onclick="statusDialog.show();
+                                                     confirmAutorizar.hide();"
+                                             update=":form:display, :msgs"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="confirmAutorizar.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form>
+                    <p:dialog header="Generar Faltas" widgetVar="fechasGenerarFaltas" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="clip" hideEffect="clip" modal="true" width="500px" style="text-align: center"> 
+                        <p:inputMask id="idFechaInicioGrl" value="#{incidenciaBean.fechaInicio}" mask="99/99/9999"  style="text-align: center"
+                                     title="Fecha" placeholder="Fecha Inicio" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>&nbsp;&nbsp;
+
+                        <p:inputMask id="idFechaFinGrl" value="#{incidenciaBean.fechaFin}" mask="99/99/9999"  style="text-align: center"
+                                     title="Fecha" placeholder="Fecha Fin" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar Faltas" icon="icon-down"
+                                             actionListener="#{incidenciaBean.generarFaltasAsistencias()}"
+                                             onclick="statusDialog.show();
+                                                     fechasGenerarFaltas.hide();"
+                                             update=":msgs, :formGenerarFaltas:dataTableFaltas"
+                                             oncomplete="fechasFaltas.show();"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="fechasGenerarFaltas.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+                <h:form id="formGenerarFaltas">
+                    <p:dialog header="Generar Faltas" widgetVar="fechasFaltas" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="clip" hideEffect="clip" modal="true" width="90%" style="text-align: center">
+                        <div align="center">
+                            <h:panelGrid columns="6" style="margin-top: 25px">
+                                <p:selectOneMenu value="#{incidenciaBean.selectedTipoproceso}" 
+                                                 style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                    <f:selectItems value="#{tipoprocesoBean.procesos}" var="tp" itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                                </p:selectOneMenu>
+
+                                <p:inputText value="#{incidenciaBean.selectedPeriodo}" placeholder="Periodo" style="text-align: center" size="10"/>
+
+                                <p:inputText value="#{incidenciaBean.anio}" placeholder="Año" style="text-align: center" size="10"/>
+                            </h:panelGrid>
+                        </div>
+                        <div align="center">
+                            <h:outputText value="#{incidenciaBean.notificacion}"/>  
+                        </div>
+                        <p:panelGrid id="displayFaltas" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{incidenciaBean.informacionAux}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableFaltas" var="falta"
+                                                 value="#{incidenciaBean.faltas}"
+                                                 selection="#{incidenciaBean.selectedFaltas}"
+                                                 resizableColumns="true" 
+                                                 paginator="true" rows="15" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                                 style="font-size: .8em; width: 1300px"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{falta.rellab.idrellab}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableFaltas" fileName="Faltas"/>  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column selectionMode="multiple" style="width:16px; text-align:center"/>
+                                        <p:column exportable="true" sortBy="#{falta.rellab.numeroempleado}" style="width: 150px;"
+                                                  filterBy="#{falta.rellab.numeroempleado}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Numero Empleado" title="Numero Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{falta.rellab.numeroempleado}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{falta.rellab.idempleado.nombre}"  style="width: 350px;"
+                                                  filterBy="#{falta.rellab.idempleado.nombre}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre" />
+                                            </f:facet>
+                                            <p:outputLabel value="#{falta.rellab.idempleado.nombre} #{falta.rellab.idempleado.apellidopaterno} #{falta.rellab.idempleado.apellidomaterno}" style="text-align: left;"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{falta.faltas}"
+                                                  filterBy="#{falta.faltas}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Faltas" title="Faltas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{falta.faltas}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar Incidencias" icon="icon-down"
+                                             actionListener="#{incidenciaBean.generarIncidenciasFaltas()}"
+                                             onclick="statusDialog.show();"
+                                             update=":msgs"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="fechasFaltas.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
