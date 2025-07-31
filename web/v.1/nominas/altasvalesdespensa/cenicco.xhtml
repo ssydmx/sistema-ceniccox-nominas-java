@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Altas Vales de Despensa - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="2">
+
+                                <p:commandButton value="Consultar" icon="icon-search"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{altaValesDespensaBean.consultar(event)}"
+                                                 update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                <p:commandButton value="Descargar" title="Descargar" icon="icon-down"
+                                                 actionListener="#{altaValesDespensaBean.create(event)}"
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{altaValesDespensaBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="vista"
+                                                 value="#{altaValesDespensaBean.vista}"
+                                                 filteredValue="#{altaValesDespensaBean.filteredVista}"
+                                                 selection="#{altaValesDespensaBean.selectedVista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{vista.numeroempleado}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="ValesDespensa" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column width="4%" selectionMode="multiple" style="text-align:center"/>
+                                        <p:column width="8%" filterMatchMode="contains" exportable="true" style="text-align: center;"
+                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}" >
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroempleado}" style="color: #B8B8B8"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{vista.nombre} #{vista.apaterno} #{vista.amaterno}"  sortBy="#{vista.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombre} #{vista.apaterno} #{vista.amaterno}" style="color: #B8B8B8"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.email}"  sortBy="#{vista.email}">
+                                            <f:facet name="header">
+                                                <h:outputText value="E-Mail" title="E-Mail"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.email}" style="color: #B8B8B8"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center;"
+                                                  filterBy="#{vista.ctavale}"  sortBy="#{vista.ctavale}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cuenta" title="Cuenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.ctavale}" style="color: #B8B8B8"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center;"
+                                                  filterBy="#{vista.tarjetavales}"  sortBy="#{vista.tarjetavales}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Tarjeta" title="Número Cuenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.tarjetavales}" style="color: #B8B8B8"/>
+                                            <f:facet name="footer">
+                                                <h:outputText value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column width="8%" filterMatchMode="contains" exportable="true" style="text-align: center;"
+                                                  filterBy="#{vista.sexo}"  sortBy="#{vista.sexo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Genero" title="Genero"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.sexo}" style="color: #B8B8B8"/>
+                                            
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center;"
+                                                  filterBy="#{vista.numerocelular}"  sortBy="#{vista.numerocelular}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Teléfono" title="Teléfono"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numerocelular}" style="color: #B8B8B8"/>
+                                           
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
