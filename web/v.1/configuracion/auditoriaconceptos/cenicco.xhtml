@@ -1,0 +1,308 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="5">
+
+                            <p:inputText value="#{auditoriaconceptosBean.concepto}" placeholder="Número Concepto" style="text-align: center"/>
+
+                            <p:selectOneMenu id="idoperacion" style="width: 150px" filter="true" filterMatchMode="contains"
+                                             value="#{auditoriaconceptosBean.selectedOperacion}">  
+                                <f:selectItem itemValue="" itemLabel="- Operación -"/>
+                                <f:selectItems value="#{appBean.comboAuditoria}"                                                var="causa" itemValue="#{causa.nombre}" itemLabel="#{causa.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:calendar value="#{auditoriaconceptosBean.fechainicio}" placeholder="Fecha Inicio" 
+                                        pattern="dd/MM/yyyy"/> 
+
+                            <p:calendar value="#{auditoriaconceptosBean.fechafin}" placeholder="Fecha Fin" 
+                                        pattern="dd/MM/yyyy"/> 
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{auditoriaconceptosBean.consultar(event)}"
+                                             update=":form" onclick="statusDialog.show();"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Auditoría Conceptos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{auditoriaconceptosBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="auditoria"
+                                                 value="#{auditoriaconceptosBean.auditoria}"
+                                                 filteredValue="#{auditoriaconceptosBean.filteredauditoria}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em;"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable" rowKey="#{auditoria.idmovimiento}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="AuditoriaConceptos"/>  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column style="width:3%" exportable="false">
+                                            <p:rowToggler />
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="width: 5%"
+                                                  filterBy="#{auditoria.idconcepto}" sortBy="#{auditoria.idconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="ID"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.idconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="width: 12%"
+                                                  sortBy="#{auditoria.usuario}" filterBy="#{auditoria.usuario}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Usuario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.usuario}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{auditoria.fechaoperacion.toGregorianCalendar().time}" style="width: 10%; text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.fechaoperacion.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel> 
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{auditoria.fechaoperacion.toGregorianCalendar().time}" style="width: 10%; text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Hora"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.fechaoperacion.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="HH:mm:ss" />
+                                            </p:outputLabel> 
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="width: 10%"
+                                                  filterBy="#{auditoria.operacion}" sortBy="#{auditoria.operacion}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Operación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.operacion}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center;width: 10%"
+                                                  filterBy="#{auditoria.concepto}" sortBy="#{auditoria.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Conc. Act."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.concepto}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center;width: 10%"
+                                                  filterBy="#{auditoria.nconcepto}" sortBy="#{auditoria.nconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Conc. Nuevo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.nconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="width: 15%"
+                                                  filterBy="#{auditoria.nombre}" sortBy="#{auditoria.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre Act."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.nombre}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="width: 15%"
+                                                  filterBy="#{auditoria.nnombre}" sortBy="#{auditoria.nnombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre Nuevo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{auditoria.nnombre}"/>
+                                        </p:column>
+                                        
+                                        <p:rowExpansion>
+                                            <p:panelGrid  columns="9" style="width: 100%">
+                                                <f:facet name="header">
+                                                    <p:panelGrid columns="9">
+                                                        <p:outputLabel value=""/>
+                                                        <p:outputLabel value="Actual"/>
+                                                        <p:outputLabel value="Nuevo"/>
+
+                                                        <p:outputLabel value=""/>
+                                                        <p:outputLabel value="Actual"/>
+                                                        <p:outputLabel value="Nuevo"/>
+
+                                                        <p:outputLabel value=""/>
+                                                        <p:outputLabel value="Actual"/>
+                                                        <p:outputLabel value="Nuevo"/>
+                                                    </p:panelGrid>
+                                                </f:facet>
+                                                
+                                                <p:outputLabel value="Tipo:"/>
+                                                <p:outputLabel value="#{auditoria.tipoconcepto=='01'?'PERCEPCION':(auditoria.tipoconcepto=='02'?'DEDUCCION':(auditoria.tipoconcepto=='03'?'PROVISION':'KARDEX'))}"/>
+                                                <p:outputLabel value="#{auditoria.ntipoconcepto=='01'?'PERCEPCION':(auditoria.ntipoconcepto=='02'?'DEDUCCION':(auditoria.ntipoconcepto=='03'?'PROVISION':'KARDEX'))}"/>
+                                                
+                                                <p:outputLabel value="Etiqueta:"/>
+                                                <p:outputLabel value="#{auditoria.nombrecorto}"/>
+                                                <p:outputLabel value="#{auditoria.nnombrecorto}"/>
+                                                
+                                                <p:outputLabel value="Etiqueta Aux.:"/>
+                                                <p:outputLabel value="#{auditoria.auxiliar}"/>
+                                                <p:outputLabel value="#{auditoria.nauxiliar}"/>
+                                                
+                                                <p:outputLabel value="Unidad:"/>
+                                                <p:outputLabel value="#{auditoria.unidad=='01'?'IMPORTE':(auditoria.unidad=='02'?'TIEMPO':'PORCENTAJE')}"/>
+                                                <p:outputLabel value="#{auditoria.nunidad=='01'?'IMPORTE':(auditoria.nunidad=='02'?'TIEMPO':'PORCENTAJE')}"/>
+                                                
+                                                <p:outputLabel value="Naturaleza:"/>
+                                                <p:outputLabel value="#{auditoria.naturaleza=='01'?'GRAVADO':(auditoria.naturaleza=='02'?'EXENTO':(auditoria.naturaleza=='03'?'GRAV/EXENT':'INFORMATIVO'))}"/>
+                                                <p:outputLabel value="#{auditoria.nnaturaleza=='01'?'GRAVADO':(auditoria.nnaturaleza=='02'?'EXENTO':(auditoria.nnaturaleza=='03'?'GRAV/EXENT':'INFORMATIVO'))}"/>
+                                                
+                                                <p:outputLabel value="Formula:"/>
+                                                <p:outputLabel value="#{auditoria.formula}"/>
+                                                <p:outputLabel value="#{auditoria.nformula}"/>
+                                                
+                                                <p:outputLabel value="Prioridad Calc.:"/>
+                                                <p:outputLabel value="#{auditoria.prioridad}"/>
+                                                <p:outputLabel value="#{auditoria.nprioridad}"/>
+                                                
+                                                <p:outputLabel value="Prioridad Desc.:"/>
+                                                <p:outputLabel value="#{auditoria.prioridaddescuento}"/>
+                                                <p:outputLabel value="#{auditoria.nprioridaddescuento}"/>
+
+                                                <p:outputLabel value="Reportado:"/>
+                                                <h:graphicImage url="#{auditoria.reportado=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nreportado=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Reportado:"/>
+                                                <h:graphicImage url="#{auditoria.reportado=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nreportado=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Incidencia:"/>
+                                                <h:graphicImage url="#{auditoria.incidencia=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nincidencia=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Falta"/>
+                                                <h:graphicImage url="#{auditoria.falta=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nfalta=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Incapacidad:"/>
+                                                <h:graphicImage url="#{auditoria.incapacidad=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nincapacidad=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Crédito:"/>
+                                                <h:graphicImage url="#{auditoria.credito=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.ncredito=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Finiquito:"/>
+                                                <h:graphicImage url="#{auditoria.finiquito=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nfiniquito=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Sistema:"/>
+                                                <h:graphicImage url="#{auditoria.sistema=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nsistema=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Suma:"/>
+                                                <h:graphicImage url="#{auditoria.suma=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nsuma=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Recibo Nómina:"/>
+                                                <h:graphicImage url="#{auditoria.recibonomina=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nrecibonomina=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Indemnizacion:"/>
+                                                <h:graphicImage url="#{auditoria.indemnizacion=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nindemnizacion=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="ISR:"/>
+                                                <h:graphicImage url="#{auditoria.isr=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nisr=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Pension:"/>
+                                                <h:graphicImage url="#{auditoria.pension=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.npension=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Poliza Contable:"/>
+                                                <h:graphicImage url="#{auditoria.polizacontable=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.npolizacontable=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+
+                                                <p:outputLabel value="Cuenta Contable:"/>
+                                                <p:outputLabel value="#{auditoria.cuentacontable}"/>
+                                                <p:outputLabel value="#{auditoria.ncuentacontable}"/>
+
+                                                <p:outputLabel value="Cargo/Abono:"/>
+                                                <h:graphicImage url="#{auditoria.cargoabono=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.ncargoabono=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                
+                                                <p:outputLabel value="Nomina Especial:"/>
+                                                <h:graphicImage url="#{auditoria.nominaespecial=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                <h:graphicImage url="#{auditoria.nnominaespecial=='1'?'../../../resources/images/icons/check.png':'../../../resources/images/icons/cancel.png'}"/>
+                                                
+                                                <p:outputLabel value="Atributo:"/>
+                                                <p:outputLabel value="#{auditoria.atributo}"/>
+                                                <p:outputLabel value="#{auditoria.natributo}"/>
+                                                
+                                                <p:outputLabel value="Nodo:"/>
+                                                <p:outputLabel value="#{auditoria.tiponodo}"/>
+                                                <p:outputLabel value="#{auditoria.ntiponodo}"/>
+                                                
+                                                <p:outputLabel value="Estados ISN:"/>
+                                                <p:outputLabel value="#{auditoria.estadosisn}"/>
+                                                <p:outputLabel value="#{auditoria.nestadosisn}"/>
+                                                
+                                                <p:outputLabel value="Concepto Exento:"/>
+                                                <p:outputLabel value="#{auditoria.conceptoexento}"/>
+                                                <p:outputLabel value="#{auditoria.nconceptoexento}"/>
+                                                
+                                                <p:outputLabel value="Concepto Gravado:"/>
+                                                <p:outputLabel value="#{auditoria.conceptogravado}"/>
+                                                <p:outputLabel value="#{auditoria.nconceptogravado}"/>
+
+
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
