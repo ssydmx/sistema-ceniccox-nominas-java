@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Módulos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="1">
+                                <p:commandButton title="Alta Módulo" value="Alta" icon="icon-add"
+                                                 actionListener="#{modulosBean.limpiar(event)}"
+                                                 onclick="createDlg.show();" update=":formCreate:display"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{modulosBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="modulo"
+                                                 value="#{modulosBean.modulos}"
+                                                 filteredValue="#{modulosBean.filteredModulos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{modulo.idModulo}"  editable="true" editMode="cell">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" filterBy="#{modulo.etiqueta}" sortBy="#{modulo.etiqueta}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Etiqueta" title="Etiqueta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{modulo.etiqueta}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" filterBy="#{modulo.modulo}" sortBy="#{modulo.modulo}"
+                                                  headerText="Módulo">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{modulo.modulo}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{modulo.modulo}" size="50"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" filterBy="#{modulo.menu}" sortBy="#{modulo.menu}"
+                                                  headerText="Menú">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{modulo.menu}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{modulo.menu}" size="50"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column width="30">
+                                            <p:commandButton title="Guardar" icon="icon-save"
+                                                             actionListener="#{modulosBean.editar(modulo)}"
+                                                             update=":msgs, :form:display"
+                                                             styleClass="style_botones" 
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Actualizar" icon="ui-icon-refresh"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{modulosBean.consultar(event)}"
+                                                             update=":form:display" onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <!--FORM CREATE-->
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Módulo" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="2">
+                            <p:outputLabel value="Etiqueta:"/>
+                            <p:inputText id="idEtiqueta" value="#{modulosBean.modulo.etiqueta}"/>
+
+                            <p:outputLabel value="Módulo:"/>
+                            <p:inputText id="idModulo" value="#{modulosBean.modulo.modulo}"/>
+
+                            <p:outputLabel value="Menú:"/>
+                            <p:inputText id="idMenu" value="#{modulosBean.modulo.menu}"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{modulosBean.create(event)}"
+                                                 update=":form:display ,:formCreate:display, :msgs"
+                                                 oncomplete="handleCreate(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="createDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
