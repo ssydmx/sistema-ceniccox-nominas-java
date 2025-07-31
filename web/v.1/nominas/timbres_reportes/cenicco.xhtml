@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Reporte Timbres - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="center">
+                            <h:panelGrid columns="12">
+                                <p:inputText value="#{reportetimbreBean.recibo.idRellab.numeroempleado}" placeholder="Número Empleado" size="13"/>
+
+                                <p:selectOneMenu id="idGrupoPago" value="#{reportetimbreBean.recibo.idRellab.idgrupopago.idgrupopago}" 
+                                                 style="width: 150px" filter="true" filterMatchMode="contains"
+                                                 required="true" requiredMessage="Favor de Seleccionar Grupo de Pago">  
+                                    <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                    <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                   var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                </p:selectOneMenu>
+                                <p:message for="idGrupoPago" display="tooltip"/>
+
+                                <p:selectOneMenu id="idTipoProceso" value="#{reportetimbreBean.recibo.idRellab.idgrupopago.idTipoproceso.idtipoproceso}" 
+                                                 style="width: 150px" filter="true" filterMatchMode="contains" >  
+                                    <f:selectItem itemValue="" itemLabel="Proceso"/>
+                                    <f:selectItems value="#{tipoprocesoBean.procesos}"
+                                                   var="tipoProceso" itemValue="#{tipoProceso.idtipoproceso}" itemLabel="#{tipoProceso.tipoproceso} - #{tipoProceso.nombre}"/>  
+                                    <f:ajax event="change" />
+                                </p:selectOneMenu>
+                                <p:message for="idTipoProceso" display="tooltip"/>
+
+                                <p:selectOneMenu id="idEstatus" value="#{reportetimbreBean.recibo.estatus}" 
+                                                 style="width: 100px" filter="true" filterMatchMode="contains" >  
+                                    <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                    <f:selectItems value="#{appBean.comboEstatusRecibos}"/>
+                                </p:selectOneMenu>
+
+                                <p:inputText id="idPeriodo" value="#{reportetimbreBean.recibo.idPeriodo.periodo}" placeholder="Periodo" style="text-align: center"
+                                             required="true" requiredMessage="Favor de Ingresar Período" size="5"/>
+                                <p:message for="idPeriodo" display="tooltip"/>
+
+                                <p:inputText id="idAnio" value="#{reportetimbreBean.recibo.idPeriodo.anio}" placeholder="Año" style="text-align: center"
+                                             required="true" requiredMessage="Favor de Ingresar Año" size="5"/>
+                                <p:message for="idAnio" display="tooltip"/>
+
+                                <p:commandButton value="Consultar" icon="icon-search"
+                                                 styleClass="style_botones" update=":msgs,:form"
+                                                 onclick="statusDialog.show();"
+                                                 actionListener="#{reportetimbreBean.consultar(event)}"/>
+                                <p:commandButton value="Descargar" icon="icon-down" 
+                                                 actionListener="#{reportetimbreBean.listenerSelected()}"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="statusDialog.show();"/>
+                            </h:panelGrid>
+                        </div>
+
+                        <div align="center">
+                            <p:panelGrid columns="1" style="margin-top: 10px">
+                                <f:facet name="footer">
+                                    <div align="right">
+                                        <p:commandButton value="Cancelar Recibos" icon="ui-icon-cancel"
+                                                         onclick="confirmCancelarRecibos.show();"
+                                                         update=":formCancelar:display, :msgs"
+                                                         styleClass="style_botones" disabled="#{!permisosBean.permisoCancelarRecibos}" 
+                                                         title="#{permisosBean.permisoCancelarRecibos ?'Cancelar recibos seleccionados':'No cuentas con permisos para realizar esta acción'}"/>
+                                        <p:commandButton value="Enviar Mails" icon="ui-icon-mail-open"
+                                                         onclick="confirmEnviarRecibos.show();"
+                                                         update=":formCancelar:display, :msgs"
+                                                         styleClass="style_botones"/>
+                                       
+                                    </div>
+                                </f:facet>
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{reportetimbreBean.informacion}"/> 
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:column>recibo
+                                            <p:dataTable id="dataTable" var="recibo" value="#{reportetimbreBean.recibos}"
+                                                         style="font-size: .8em"
+                                                         emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                         filteredValue="#{reportetimbreBean.filteredRecibos}"
+                                                         resizableColumns="true" draggableColumns="true"
+                                                         scrollable="true" scrollHeight="300" scrollWidth="75%"
+                                                         selection="#{reportetimbreBean.selectedRecibos}"
+                                                         rowKey="#{recibo.idrecibocfdi}"
+                                                         widgetVar="registrosTable">
+
+                                                <f:facet name="header">
+                                                    <p:outputPanel>
+                                                        <h:outputText value="Buscador:" />  
+                                                        <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                        <div class="datableImagenes" id="pdf">
+                                                            <p:commandLink id="pdf" actionListener="#{reportetimbreBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                            </p:commandLink>
+                                                        </div>
+                                                        <div class="datableImagenes" id="csv">
+                                                            <h:commandLink id="csv">  
+                                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                <p:dataExporter type="csv" target=":form:dataTable" fileName="ReporteTimbres" />  
+                                                            </h:commandLink>
+                                                        </div>
+                                                    </p:outputPanel>
+                                                </f:facet>
+
+                                                <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+
+                                                <p:column filterMatchMode="contains" exportable="true" width="70"
+                                                          sortBy="#{recibo.idRellab.numeroempleado}" filterBy="#{recibo.idRellab.numeroempleado}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="No. Empl." title="Número Empleado"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.idRellab.numeroempleado}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column filterMatchMode="contains" exportable="true" width="180"
+                                                          sortBy="#{recibo.idRellab.idempleado.nombre} #{recibo.idRellab.idempleado.apellidopaterno} #{recibo.idRellab.idempleado.apellidomaterno}" 
+                                                          filterBy="#{recibo.idRellab.idempleado.nombre} #{recibo.idRellab.idempleado.apellidopaterno} #{recibo.idRellab.idempleado.apellidomaterno}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Nombre" title="Nombre"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.idRellab.idempleado.nombre} #{recibo.idRellab.idempleado.apellidopaterno} #{recibo.idRellab.idempleado.apellidomaterno}"
+                                                                   style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column filterMatchMode="contains" exportable="true" width="103"
+                                                          sortBy="#{recibo.idRellab.idempleado.rfc}" filterBy="#{recibo.idRellab.idempleado.rfc}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="R.F.C." title="R.F.C."/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.idRellab.idempleado.rfc}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column filterMatchMode="contains" exportable="true"
+                                                          sortBy="#{recibo.uuid}" filterBy="#{recibo.uuid}" width="250">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="U.U.I.D." title="U.U.I.D."/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.uuid}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+                                                <p:column  exportable="true" width="100" 
+                                                           sortBy="#{recibo.idRellab.idgrupopago.nombre}" >
+                                                    <f:facet name="header">
+                                                        <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.idRellab.idgrupopago.nombre}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column exportable="true" 
+                                                          sortBy="#{recibo.idPeriodo.periodo}" width="50">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Periodo" title="Periodo"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.idPeriodo.periodo}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column exportable="true" sortBy="#{recibo.fechaPagoStr}" width="60">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="F. Pago" title="Fecha Pago"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.fechaPagoStr}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}"/>
+                                                </p:column>
+
+                                                <p:column exportable="true" sortBy="#{recibo.total}" width="60">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Total" title="Total"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{recibo.total}" style="#{recibo.estatus==0||recibo.estatus==2?'color:red':''}">
+                                                        <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                    </p:outputLabel>
+                                                </p:column>
+
+                                                <p:column style="text-align: center" exportable="false" width="30">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="PDF" title="Descarga archivo PDF"/>
+                                                    </f:facet>
+                                                    <p:commandButton oncomplete="handleLShow(args)" actionListener="#{reportetimbreBean.descargarDocumentoPDF(recibo)}" 
+                                                                     icon="icon-pdf" title="Descargar Recibo"/>
+                                                </p:column>
+                                                <p:column style="text-align: center" exportable="false" width="30">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="XML" title="Descarga archivo XML"/>
+                                                    </f:facet>
+                                                    <p:commandButton oncomplete="handleLShow(args)" actionListener="#{reportetimbreBean.descargarDocumentoXML(recibo)}" 
+                                                                     icon="icon-xml" title="Descargar .XML"/>
+                                                </p:column>
+                                                <p:column style="text-align: center" exportable="false" width="30">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="PNG" title="Descarga archivo QR"/>
+                                                    </f:facet>
+                                                    <p:commandButton oncomplete="handleLShow(args)" actionListener="#{reportetimbreBean.descargarDocumentoPng(recibo)}" 
+                                                                     icon="ui-icon-image" title="Descargar Timbre"/>
+                                                </p:column>
+                                                <p:column style="text-align: center" exportable="false" width="70">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Enviar recibo" title="Envia recibo individual de nómina al correo del empleado"/>
+                                                    </f:facet>
+                                                    <p:commandButton icon="ui-icon-mail-open" title="Enviar Mail" 
+                                                                     actionListener="#{reportetimbreBean.enviarCorreo(recibo)}"
+                                                                     onclick="statusDialog.show();"
+                                                                     update=":msgs"/>
+                                                </p:column>
+                                                <p:column style="text-align: center" exportable="false" width="90">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="XML Cancelación" title="Descarga archivo XML resultante de la cancelacion"/>
+                                                    </f:facet>
+                                                    <p:commandButton oncomplete="handleLShow(args)" actionListener="#{reportetimbreBean.descargarDocumentoXMLCancelacion(recibo)}" 
+                                                                     icon="icon-xml" title="Descargar .XML recibo cancelado" update=":msgs"/>
+                                                </p:column>
+                                                <p:rowExpansion>
+                                                    <p:panelGrid  columns="1" style="width:30%">
+                                                        <f:facet name="header">
+                                                            <p:outputLabel value="Detalle"/>
+                                                        </f:facet>
+                                                        <p:dataTable  value="#{recibo.registros}" var="registro" style="font-size: 1em"
+                                                                      emptyMessage="#{appBean.mensajeTablaVacia}">
+
+                                                            <p:column headerText="Clave" width="20%" sortBy="#{registro.clave}">
+                                                                <p:outputLabel value="#{registro.clave}"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Tiempo" width="10%" sortBy="#{registro.tiempo}">
+                                                                <p:outputLabel value="#{registro.tiempo}"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Concepto" width="30%" sortBy="#{registro.concepto}">
+                                                                <p:outputLabel value="#{registro.concepto} "/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Percepción" width="10%" style="text-align: right">
+                                                                <p:outputLabel value="#{registro.importePercepcion}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </p:column>
+
+                                                            <p:column headerText="Deducción" width="10%" style="text-align: right">
+                                                                <p:outputLabel value="#{registro.importeDeduccion}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </p:column>
+
+                                                            <p:column headerText="Importe" width="10%" style="text-align: right">
+                                                                <p:outputLabel value="#{registro.importeTotal}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </p:column>
+
+                                                            <p:column headerText="Saldo" width="10%" style="text-align: right">
+                                                                <p:outputLabel value="#{registro.saldo}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </p:column>
+
+                                                        </p:dataTable>
+                                                    </p:panelGrid>
+                                                </p:rowExpansion>
+
+                                            </p:dataTable>
+                                        </p:column>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formCancelar">
+                    <p:dialog header="Resúmen" 
+                              widgetVar="createDialog" resizable="false" id="cancelarDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="60%">  
+                        <h:panelGrid id="display">
+                            <f:facet name="footer">
+                                <div align="left">
+                                    <p:commandButton value="Cerrar" icon="icon-cancel" 
+                                                     onclick="createDialog.hide();"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </f:facet>
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="#{reportetimbreBean.informacionCancelados}"/>            
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableConceptos" var="res" value="#{reportetimbreBean.respuesta}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" widgetVar="respuestaTable"
+                                                 scrollHeight="300px" resizableColumns="true" style="font-size: .8em">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableConceptos" fileName="RespuestaCancelacion" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column sortBy="#{res.detallesCancelacion.value}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Detalle Cancelación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.detallesCancelacion.value}" style="#{res.isOperacionExitosa()?'color: #E0E0E0':'color:red'}"/> 
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.mensajeError.value}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Mensaje Error"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.mensajeError.value}" style="#{res.isOperacionExitosa()?'color: #E0E0E0':'color:red'}"/>
+                                        </p:column>
+
+                                        <p:column sortBy="#{res.mensajeErrorDetallado.value}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Error Detallado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{res.mensajeErrorDetallado.value}" style="#{res.isOperacionExitosa()?'color: #E0E0E0':'color:red'}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <h:form id="fomrConfirmCancelarRecibos">
+                    <p:dialog header="Alerta: cancelación recibos nómina" widgetVar="confirmCancelarRecibos" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="Está seguro de cancelar los recibos seleccionados: #{calculonominaBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             update=":msgs"
+                                             actionListener="#{reportetimbreBean.limpiar(null)}"
+                                             onclick="statusDialog.show();
+                                                         confirmCancelarRecibos.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmCancelarRecibos.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+            
+
+
+                <h:form id="fomrConfirmEnviarRecibos">
+                    <p:dialog header="Alerta: Envio Recibos Nómina" widgetVar="confirmEnviarRecibos" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="350px" style="text-align: center">
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="Está seguro de enviar los recibos seleccionados: #{calculonominaBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             update=":msgs"
+                                             actionListener="#{reportetimbreBean.enviarCorreoMasivo()}"
+                                             onclick="statusDialog.show();
+                                                         confirmEnviarRecibos.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmEnviarRecibos.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
