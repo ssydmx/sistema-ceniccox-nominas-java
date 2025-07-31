@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <h:panelGrid columns="2">
+                        <p:fieldset legend="Catálogo Variables- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                            <div align="right">
+                                <h:panelGrid columns="2">
+                                    <p:commandButton id="btnSearch" icon="ui-icon-refresh" 
+                                                     title="Actualizar" value="Actualizar"
+                                                     actionListener="#{variableFormulaBean.consultar(event)}"
+                                                     update=":form:displayVariables"
+                                                     onclick="searchDialog.show();"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCreate" icon="icon-add" 
+                                                     actionListener="#{variableFormulaBean.limpiar(event)}"
+                                                     update=":formCreate:display"
+                                                     onclick="createDialog.show();"
+                                                     title="Alta" value="Alta" 
+                                                     styleClass="style_botones"/>
+                                </h:panelGrid>
+                            </div>
+                            <div align="center">
+                                <p:panelGrid id="displayVariables" columns="1">
+                                    <f:facet name="header">
+                                        <p:row>
+                                            <p:column>
+                                                <div align="center">
+                                                    <p:outputLabel value="#{variableFormulaBean.informacion}" style="color: white"/>             
+                                                </div>
+                                            </p:column>
+                                        </p:row>
+                                    </f:facet>
+                                    <p:dataTable id="dataTable" var="variable" value="#{variableFormulaBean.variables}" 
+                                                 style="font-size: .8em; width: 450px" 
+                                                 scrollable="true" scrollHeight="250"
+                                                 rowKey="#{variable.idVariable}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{variableFormulaBean.filteredVariables}"
+                                                 widgetVar="registrosTableVariables"
+                                                 selection="#{variableFormulaBean.selectedVariable}" selectionMode="single">  
+
+                                        <p:ajax event="rowSelect" update=":formUpdate" oncomplete="updateDialog.show()"/>
+
+                                        <f:facet name="header">  
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTableVariables.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column sortBy="#{variable.variable}" filterBy="#{variable.idVariable} - #{variable.variable}" 
+                                                  filterMatchMode="contains" exportable="true" width="50%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Etiqueta" title="Etiqueta"/>
+                                            </f:facet>
+                                            <h:outputText value="#{variable.idVariable} - #{variable.variable}"/>  
+                                        </p:column>
+
+                                        <p:column sortBy="#{variable.descripcion}" filterBy="#{variable.descripcion}" 
+                                                  filterMatchMode="contains" exportable="true" width="50%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Descripción" title="Descripción"/>
+                                            </f:facet>
+                                            <h:outputText value="#{variable.descripcion}"/>  
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panelGrid>
+                            </div>
+                        </p:fieldset>
+                        <p:fieldset legend="Relación Variables-Conceptos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                            <div align="right">
+                                <h:panelGrid columns="2">
+                                    <p:commandButton id="btnSearchRel" icon="ui-icon-refresh" 
+                                                     title="Actualizar" value="Actualizar"
+                                                     actionListener="#{relacionFormulaBean.consultar(event)}"
+                                                     update=":form:display"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCreateRel" icon="icon-add" 
+                                                     actionListener="#{relacionFormulaBean.limpiar(event)}"
+                                                     update=":formCreate:display"
+                                                     title="Alta" value="Alta" 
+                                                     styleClass="style_botones"/>
+                                </h:panelGrid>
+                            </div>
+                            <div align="center">
+                                <p:panelGrid id="display" columns="1">
+                                    <f:facet name="header">
+                                        <p:row>
+                                            <p:column>
+                                                <div align="center">
+                                                    <p:outputLabel value="#{relacionFormulaBean.informacion}" style="color: white"/>             
+                                                </div>
+                                            </p:column>
+                                        </p:row>
+                                    </f:facet>
+                                    <p:dataTable id="dataTableRelacion" var="relacion" value="#{relacionFormulaBean.relacionesFormulaVariable}" 
+                                                 style="font-size: .8em" 
+                                                 scrollable="true" scrollHeight="250"
+                                                 resizableColumns="true"
+                                                 rowKey="#{relacion.idrelacion}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{relacionFormulaBean.filteredRelacionesFormulaVariable}" 
+                                                 widgetVar="registrosTable">  
+
+                                        <f:facet name="header">  
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column sortBy="#{relacion.idVariable.variable}" exportable="true" filterBy="#{relacion.idVariable.variable}" 
+                                                  filterMatchMode="contains" width="20%" headerText="Variable(Etiqueta)">
+                                            <h:outputText value="#{relacion.idVariable.variable}"/>  
+                                        </p:column>
+
+                                        <p:column sortBy="#{relacion.idConcepto.concepto}" filterBy="#{relacion.idConcepto.concepto} - #{relacion.idConcepto.nombre}" 
+                                                  filterMatchMode="contains" exportable="true" width="20%"
+                                                  headerText="Concepto">
+                                            <h:outputText value="#{relacion.idConcepto.concepto} - #{relacion.idConcepto.nombre}"/>  
+                                        </p:column>
+
+                                        <p:column filterBy="#{relacion.idConcepto.nombrecorto}" 
+                                                  filterMatchMode="contains" exportable="true" width="20%" headerText="Etiqueta">
+                                            <h:outputText value="#{relacion.idConcepto.nombrecorto}"/>  
+                                        </p:column>
+
+                                        <p:column filterBy="#{relacion.idConcepto.auxiliar}" 
+                                                  filterMatchMode="contains" exportable="true" width="20%" headerText="Auxiliar">
+                                            <h:outputText value="#{relacion.idConcepto.auxiliar}"/>  
+                                        </p:column>
+
+                                        <p:column filterBy="#{relacion.idConcepto.dependencias}" 
+                                                  filterMatchMode="contains" exportable="true" width="15%" headerText="Dependencias">
+                                            <h:outputText value="#{relacion.idConcepto.dependencias}"/>  
+                                        </p:column>
+                                        
+                                        <p:summaryRow>
+                                            <p:column style="text-align:right">
+                                                <h:outputText value="Fórmula:" />
+                                            </p:column>
+                                            <p:column colspan="4">
+                                                <p:outputLabel value="#{relacion.idConcepto.formula}"/>
+                                            </p:column>
+                                        </p:summaryRow>
+
+                                    </p:dataTable>
+                                </p:panelGrid>
+                            </div>
+                        </p:fieldset>
+                    </h:panelGrid>
+
+                </h:form>
+
+                <!--FORM CREATE-->
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Variable" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+                            <p:outputLabel value="Etiqueta: *"/>
+                            <p:inputText id="idEtiqueta" value="#{variableFormulaBean.variable.variable}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorConcepto}"/>
+                            <p:message for="idEtiqueta" display="tooltip"/>
+
+                            <p:outputLabel value="Descripción: "/>
+                            <p:inputText id="idVariable" value="#{variableFormulaBean.variable.descripcion}"/>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{variableFormulaBean.create(event)}"
+                                             update=":formCreate:display, :msgs"
+                                             oncomplete="handleCreate(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <!--FORM UPDATE-->
+                <h:form id="formUpdate">
+                    <p:dialog header="Editar Concepto" 
+                              widgetVar="updateDialog" resizable="false" id="updateDlg" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+                            <p:outputLabel value="Etiqueta (#{variableFormulaBean.selectedVariable.idVariable}) : *"/>        
+                            <p:inputText id="idEtiqueta" value="#{variableFormulaBean.selectedVariable.variable}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorConcepto}"/>
+                            <p:message for="idEtiqueta" display="tooltip"/> 
+
+                            <p:outputLabel value="Descripción:"/>        
+                            <p:inputText id="idVariable" value="#{variableFormulaBean.selectedVariable.descripcion}"/>
+
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-save" 
+                                             title="Aceptar" value="Guardar"
+                                             actionListener="#{variableFormulaBean.edit(event)}"
+                                             update=":formUpdate:display, :msgs"
+                                             oncomplete="handleUpdate(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="updateDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
