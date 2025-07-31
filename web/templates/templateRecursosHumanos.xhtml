@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssHexagonos.css"/>
+        <style>
+            body{
+                background-color : rgb(32,32,32);
+            }
+        </style>
+        <title>RecursosHumanos</title>
+    </h:head>
+
+    <h:body>
+
+
+
+        <div id="menu" class="ui-widget ui-widget-header ui-corner-all">
+            <h:form>  
+                <div align="right">
+                    <h:panelGrid columns="4">
+                    <p:clock pattern="dd/MM/yyyy HH:mm:ss" mode="server"/>
+                    <p:selectOneMenu id="idComboModulo" value="#{urlsBean.selectedModulo}" style="width: 180px;text-align: left;" effect="fold"
+                                     valueChangeListener="#{urlsBean.cambiarURL}"> 
+                        <f:selectItems value="#{urlsBean.comboUrl}"/>
+                        <p:ajax partialSubmit="true"/>
+                    </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+
+                <p:menubar>  
+                    <p:submenu label="EstructuraOrganizacional">
+                        <p:menuitem value="DatosCompania" url="#{appBean.basePath}recursoshumanos/datoscompania/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                        <p:menuitem value="ExpedienteEmpleado" url="#{appBean.basePath}recursoshumanos/expediente_empleado/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+
+                        <p:submenu label="AdministracionPuesto">
+                            <p:menuitem value="NivelJerarquicoPuesto" url="#{appBean.basePath}recursoshumanos/niveljerarquicopuesto/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="CatalogoPuesto" url="#{appBean.basePath}recursoshumanos/catalogopuesto/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="VariablesPuesto" url="#{appBean.basePath}recursoshumanos/variablespuesto/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="AdministracionPlaza" url="#{appBean.basePath}recursoshumanos/administracionplaza/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="DependenciasFuncionales" url="#{appBean.basePath}recursoshumanos/dependenciasfuncionales/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                        </p:submenu>
+
+                        <p:submenu label="ControlPlantilla">
+                            <p:menuitem value="R_EmpleadosActivosBajas" url="#{appBean.basePath}recursoshumanos/r_empleadosactivosbajas/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="R_EmpleadosPuesto" url="#{appBean.basePath}recursoshumanos/r_empleadospuesto/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="R_EmpleadosPlaza" url="#{appBean.basePath}recursoshumanos/r_empleadosplaza/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="R_EmpleadosAgrupacion" url="#{appBean.basePath}recursoshumanos/r_empleadosagrupacion/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                        </p:submenu>
+
+                        <p:submenu label="Organigramas">
+                            <p:menuitem value="OrganigramaGeneral" url="#{appBean.basePath}recursoshumanos/organigramageneral/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="OrganigramaDepartamento" url="#{appBean.basePath}recursoshumanos/organigramadepartamento/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="OrganigramaArea" url="#{appBean.basePath}recursoshumanos/organigramaarea/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="OrganigraPersonal" url="#{appBean.basePath}recursoshumanos/organigrapersonal/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="OrganigraPersonal" url="#{appBean.basePath}recursoshumanos/organigrapersonal/logintest.xhtml"/>
+                        </p:submenu>
+                    </p:submenu>
+
+                    <p:submenu label="Recutamiento">
+                        <p:menuitem value="Libre" url="#{appBean.basePath}recursoshumanos/libre/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                    </p:submenu>  
+
+                    <p:submenu label="Capacitacion">
+                        <p:menuitem value="Libre1" url="#{appBean.basePath}recursoshumanos/libre1/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                    </p:submenu>
+
+                    <p:submenu label="DesarrolloPersonal">
+                        <p:menuitem value="DesarrolloPersonal" url="#{appBean.basePath}recursoshumanos/desarrollopersonal/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                        <p:menuitem value="AdministracionObjetivos" url="#{appBean.basePath}recursoshumanos/administracionobjetivos/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                        <p:menuitem value="GestionEvaluacion" url="#{appBean.basePath}recursoshumanos/gestionevaluacion/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                        <p:menuitem value="PlanCarrera" url="#{appBean.basePath}recursoshumanos/plancarrera/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                        <p:menuitem value="ParrillaRemplazo" url="#{appBean.basePath}recursoshumanos/parrillaremplazo/cenicco.xhtml" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>
+                    </p:submenu>
+
+                    <p:menuitem value="Inicio" url="#{appBean.basePath}inicio/index.xhtml" icon="ui-icon-home"/>  
+                </p:menubar>
+            </h:form>
+        </div>
+
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>
+
