@@ -1,0 +1,291 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="true" life="12000"/>
+
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Modificaciones Masivas - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false" >  
+                        <div align="center">
+                            <h:panelGrid columns="5">
+                                <p:commandButton value="Global Empleado(s)" style="font-size: 18px;width: 250px;height: 130px; color: #AB4545;"
+                                                 onstart="statusDialog.show()" onclick="globalDialog.show();"/>
+                                <p:commandButton value="Generales Empleado(s)" style="font-size: 18px;width: 250px;height: 130px; color: #AB4545;"
+                                                 onstart="statusDialog.show()" onclick="generalesDialog.show();"/>
+                                <p:commandButton value="Relaciones Laborales" style="font-size: 18px;width: 250px;height: 130px; color: #2E86C1"
+                                                 onstart="statusDialog.show()" onclick="relacionesDialog.show();"/>
+                                <p:commandButton value="Cuentas Bancarias" style="font-size: 18px;width: 250px;height: 130px; color: #117A65"
+                                                 onstart="statusDialog.show()" onclick="cuentasDialog.show();"/>
+                                <p:commandButton value="Posiciones Laborales" style="font-size: 18px;width: 250px;height: 130px; color: #BA4A00"
+                                                 onstart="statusDialog.show()" onclick="posicionesDialog.show();"/>
+
+                                <p:commandButton value="Layout Global" style="font-size: 18px;width: 250px;height: 30px; color: #000000;"  oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutGlobal(event)}"/>
+                                <p:commandButton value="Layout Generales" style="font-size: 18px;width: 250px;height: 30px; color: #000000;"  oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutGenerales(event)}"/>
+                                <p:commandButton value="Layout Relaciones" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutRelacionesLaborales(event)}"/>
+                                <p:commandButton value="Layout Cuentas" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutCuentasBancarias(event)}"/>
+                                <p:commandButton value="Layout Posiciones" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutPosicionesLaborales(event)}"/>
+
+                                <p:commandButton value="Sueldos" style="font-size: 18px;width: 250px;height: 130px; color: #4A45AB"
+                                                 onstart="statusDialog.show()" onclick="sueldosDialog.show();"/>
+                                <p:commandButton value="Bajas" style="font-size: 18px;width: 250px;height: 130px; color: #A045AB"
+                                                 onstart="statusDialog.show()" onclick="bajasDialog.show();"/>
+                                <p:commandButton value="Acumulados" style="font-size: 18px;width: 250px;height: 130px; color: #AB4576" update=":formAcumulados:displayAcumulados"
+                                                 onstart="statusDialog.show()" onclick="acumuladosDialog.show();" actionListener="#{altamasivaBean.iniciarParametros()}"/>
+                                <p:commandButton value="Domicilios" style="font-size: 18px;width: 250px;height: 130px; color: #AB4545"
+                                                 onstart="statusDialog.show()" onclick="domiciliosDialog.show();"/>
+                                <p:commandButton value="Estatus Empleados" style="font-size: 18px;width: 250px;height: 130px; color: #424949"
+                                                 onstart="statusDialog.show()" onclick="estatusDialog.show();"/>
+
+                                <p:commandButton value="Layout Sueldos" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutSueldos(event)}"/>
+                                <p:commandButton value="Layout Bajas" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="infoBajas.show()" actionListener="#{altamasivaBean.descargarLayoutBajas(event)}"/>
+                                <p:commandButton value="Layout Acumulados" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutAcumulados(event)}"/>
+                                <p:commandButton value="Layout Domicilios" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutDomicilios(event)}"/>
+                                <p:commandButton value="Layout Cambio Estatus" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutCambioEstatus(event)}"/>
+
+                                <p:commandButton value="Fecha Ingreso" style="font-size: 18px;width: 250px;height: 130px; color: #424949"
+                                                 onstart="statusDialog.show()" onclick="fechaDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 130px; color: #4A45AB" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="sueldosDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 130px; color: #4A45AB" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="sueldosDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 130px; color: #4A45AB" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="sueldosDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 130px; color: #4A45AB" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="sueldosDialog.show();"/>
+
+                                <p:commandButton value="Layout Cambio Fechas" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{altamasivaBean.descargarLayoutCambioFechaIngreso(event)}"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="generalesDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="generalesDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="generalesDialog.show();"/>
+                                <p:commandButton value="" style="font-size: 18px;width: 250px;height: 30px; color: #000000;" disabled="true"
+                                                 onstart="statusDialog.show()" onclick="generalesDialog.show();"/>
+
+                            </h:panelGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formGlobal"  enctype="multipart/form-data">
+                    <p:dialog id="globalDlg" header="Masivas Global" widgetVar="globalDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="globalDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerGlobal}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formGenerales"  enctype="multipart/form-data">
+                    <p:dialog id="generalesDlg" header="Masivas Generales" widgetVar="generalesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="generalesDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListener}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formRelaciones"  enctype="multipart/form-data">
+                    <p:dialog id="relacionesDlg" header="Masivas Relaciones Laborales" widgetVar="relacionesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="relacionesDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerRelacionesLaborales}"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs" auto="true"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formDomicilios"  enctype="multipart/form-data">
+                    <p:dialog id="DomiciliosDlg" header="Masivas Domicilios" widgetVar="domiciliosDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="domiciliosDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerDomicilios}"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs" auto="true"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formCuentasBancarias"  enctype="multipart/form-data">
+                    <p:dialog id="cuentasBancariasDlg" header="Masivas Cuentas Bancarias" widgetVar="cuentasDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="cuentasDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerCuentasBancarias}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formPosiciones"  enctype="multipart/form-data">
+                    <p:dialog id="posicionesDlg" header="Masivas Posiciones Laborales" widgetVar="posicionesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="posicionesDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerPosiciones}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formSueldos"  enctype="multipart/form-data">
+                    <p:dialog id="posicionesDlg" header="Masivas Sueldos" widgetVar="sueldosDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="sueldosDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerSueldos}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formBajas"  enctype="multipart/form-data">
+                    <p:dialog id="bajasDlg" header="Masivas Bajas" widgetVar="bajasDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="handleCreate(args)"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerBajas}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+                <h:form id="formEstatus"  enctype="multipart/form-data">
+                    <p:dialog id="statusDlg" header="Masivas Cambio Estatus" widgetVar="estatusDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="handleCreate(args)"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerEstatus}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+                    </p:dialog>
+                </h:form>
+                <h:form id="formFechas"  enctype="multipart/form-data">
+                    <p:dialog id="fechaDlg" header="Masivas Cambio Fechas Ingreso" widgetVar="fechaDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="handleCreate(args)"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerFechaIngreso}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+                    </p:dialog>
+                </h:form>
+                <h:form id="formAcumulados"  enctype="multipart/form-data">
+                    <p:dialog id="acumuladosDlg" header="Acumulados" widgetVar="acumuladosDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="displayAcumulados" columns="3">
+
+                            <p:selectOneMenu id="mesAcumulado" style="width: 180px" value="#{altamasivaBean.mes}"
+                                             filter="true" filterMatchMode="contains">
+                                <p:ajax partialSubmit="true"/>
+                                <f:selectItem itemValue="" itemLabel="Mes a Aplicar"/>
+                                <f:selectItems value="#{appBean.comboMeses}"/>
+                            </p:selectOneMenu>
+
+                            <p:inputText id="anioAcumulado" value="#{altamasivaBean.anio}" placeholder="Año a Aplicar">
+                                <p:ajax partialSubmit="true"/>
+                            </p:inputText>
+
+                            <p:selectOneMenu id="gpAcumulado" style="width: 200px" value="#{altamasivaBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <p:ajax partialSubmit="true"/>
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <f:facet name="footer">
+                                <div align="center">
+                                    <p:fileUpload value="#{altamasivaBean.archivo}" mode="advanced" auto="true" oncomplete="acumuladosDialog.hide();"
+                                                  fileUploadListener="#{altamasivaBean.fileUploadListenerAcumulados}" 
+                                                  uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>    
+                                </div>
+                            </f:facet>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formVariables"  enctype="multipart/form-data">
+                    <p:dialog id="posicionesDlg" header="Masivas Variables" widgetVar="variablesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{altamasivaBean.archivo}" mode="advanced" oncomplete="variablesDialog.hide()"
+                                           fileUploadListener="#{altamasivaBean.fileUploadListenerVariables}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <p:dialog modal="true" widgetVar="infoBajas" header="Información importante"   
+                          draggable="false" closable="true" resizable="false" > 
+                    <P>
+                        <h2>La columna 'Causa Baja' debe ser llenado con uno de <br/>los siguientes conceptos en MAYUSCULAS y sin espacios:</h2>
+                    </P>
+                    <p>
+                        <span>1</span> &nbsp;&nbsp;&nbsp;&nbsp; ABANDONOEMPLEO<br/>
+                        <span>2</span> &nbsp;&nbsp;&nbsp;&nbsp; DEFUNCION<br/>
+                        <span>3</span> &nbsp;&nbsp;&nbsp;&nbsp; OTRAS<br/>
+                        <span>4</span> &nbsp;&nbsp;&nbsp;&nbsp; PENSION<br/>
+                        <span>5</span> &nbsp;&nbsp;&nbsp;&nbsp; RECISIONCONTRATO<br/>
+                        <span>6</span> &nbsp;&nbsp;&nbsp;&nbsp; SEPARACIONVOLUNTARIA<br/>
+                        <span>7</span> &nbsp;&nbsp;&nbsp;&nbsp; TERMINOCONTRATO<br/>
+                        <span>8</span> &nbsp;&nbsp;&nbsp;&nbsp; AUSENTISMO<br/>
+                        <span>9</span> &nbsp;&nbsp;&nbsp;&nbsp; CONFLICTOSLABORALES<br/>
+                        <span>10</span> &nbsp;&nbsp;&nbsp;RENUNCIATRABAJADOR<br/>
+                        <span>11</span> &nbsp;&nbsp;&nbsp;CLAUSURA<br/>
+                        <span>12</span> &nbsp;&nbsp;&nbsp;JUBILACION<br/>
+                    </p>
+
+                </p:dialog>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
