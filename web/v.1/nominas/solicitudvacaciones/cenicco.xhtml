@@ -1,0 +1,201 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="6" style="margin-top: 25px">
+                            <p:inputText value="#{solicitudvacacionesBean.numeroempleado}" placeholder="Número Empleado"
+                                         style="width: 190px"/>
+
+                            <p:selectOneMenu style="width: 200px" value="#{solicitudvacacionesBean.selectedidgrupopago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idEstatus" style="width: 200px" value="#{solicitudvacacionesBean.selectedestatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatusSolicitudVacaciones}"/>  
+                            </p:selectOneMenu>
+
+                            <p:inputMask value="#{solicitudvacacionesBean.fechainicio}" mask="99/99/9999" title="Fecha Inicio Registro" placeholder="Fecha Inicio Registro"/>
+
+                            <p:inputMask value="#{solicitudvacacionesBean.fechafin}" mask="99/99/9999" title="Fecha Fin Registro" placeholder="Fecha Fin Registro"/>
+
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                             actionListener="#{solicitudvacacionesBean.consultar(event)}" onstart="statusDialog.show()"
+                                             update=":msgs, :form"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Consulta Solicitudes - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{solicitudvacacionesBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="solicitud"
+                                                 value="#{solicitudvacacionesBean.solicitudes}"
+                                                 filteredValue="#{solicitudvacacionesBean.filteredsolicitudes}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 editable="true" editMode="cell"
+                                                 rowKey="#{solicitud.idsolicitud}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="SolicitudVacaciones" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{solicitud.idsolicitud}" sortBy="#{solicitud.idsolicitud}" width="5%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.idsolicitud}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{solicitud.rellab.numeroempleado } - #{solicitud.rellab.idempleado.nombre} #{solicitud.rellab.idempleado.apellidopaterno} #{solicitud.rellab.idempleado.apellidomaterno}"
+                                                  width="20%" sortBy="#{solicitud.rellab.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.rellab.numeroempleado} - #{solicitud.rellab.idempleado.nombre} #{solicitud.rellab.idempleado.apellidopaterno} #{solicitud.rellab.idempleado.apellidomaterno}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{solicitud.rellab.idgrupopago.grupopago} - #{solicitud.rellab.idgrupopago.nombre}"
+                                                  width="13%" sortBy="#{solicitud.rellab.idgrupopago.grupopago} - #{solicitud.rellab.idgrupopago.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Grupo Pago" title="Grupo de Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.rellab.idgrupopago.grupopago} - #{solicitud.rellab.idgrupopago.nombre}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{solicitud.saldoVacaciones.tabuladorSistemaAntiguedad.concepto.concepto}"
+                                                  width="13%" sortBy="#{solicitud.saldoVacaciones.tabuladorSistemaAntiguedad.concepto.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.saldoVacaciones == null ? 'Día Home Office' : ''.concat(solicitud.saldoVacaciones.tabuladorSistemaAntiguedad.concepto.concepto).concat(' - ').concat(solicitud.saldoVacaciones.tabuladorSistemaAntiguedad.concepto.nombre)}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{solicitud.fecharegistro.toGregorianCalendar().time}" 
+                                                  width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Registro" title="Fecha de Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.fecharegistro.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{solicitud.dias}"
+                                                  width="12%" sortBy="#{solicitud.dias}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="D. Solicitar" title="Días a Solicitar"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.dias} días"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{solicitud.fechainicio.toGregorianCalendar().time}" 
+                                                  width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Inicio" title="Fecha Inicio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.fechainicio.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{solicitud.fechafin.toGregorianCalendar().time}" 
+                                                  width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Fin" title="Fecha Fin"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{solicitud.fechafin.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column headerText="Estatus" width="10%">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{solicitud.estatus==0? 'Cancelado' : (solicitud.estatus==1? 'Autorizado' : (solicitud.estatus==2?  'Eliminado' : 'Solicitado'))}"
+                                                                       style="color: #{solicitud.estatus==0? 'red' : (solicitud.estatus==1? 'green': (solicitud.estatus==2? 'grey' : 'rgb(46,154,254)'))}"/>
+                                                    </div>
+                                                </f:facet>
+
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:selectOneMenu value="#{solicitud.estatus}" style="width: 110px;text-align: left"
+                                                                         disabled="#{solicitud.estatus==1 and !permisosBean.permisoEliminarIncidenciasAutorizadas }">  
+                                                            <f:selectItems value="#{appBean.comboEstatusSolicitudVacaciones}"/>
+                                                        </p:selectOneMenu>
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column width="10%" exportable="false">
+                                            <p:commandButton title="Guardar" value="Guardar" icon="icon-save"
+                                                             actionListener="#{solicitudvacacionesBean.editar(solicitud)}"
+                                                             update=":form:display" styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Reporte Home Office" 
+                                                             icon="icon-down" styleClass="style_botones" id="csvHomeOffice" 
+                                                             actionListener="#{solicitudvacacionesBean.generarCsvHomeOffice()}"
+                                                             oncomplete="handleLShow(args)" rendered="#{appBean.servicioAlpha}">  
+                                            </p:commandButton>
+                                        </div>
+
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
