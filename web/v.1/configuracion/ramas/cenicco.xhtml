@@ -1,0 +1,274 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:fieldset legend="Parametros- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                        <div align="center">
+                            <p:tabView id="tabGeneral">
+                                <p:tab title="Ramas Imss" id="tabRamasImss">
+                                    <div align="right">
+                                        <h:panelGrid columns="1">
+                                            <p:commandButton id="btnCreate" icon="ui-icon-refresh" 
+                                                             title="Actualizar" value="Actualizar" 
+                                                             actionListener="#{ramaimssBean.consultar(event)}"
+                                                             update="tabRamasImss"
+                                                             onclick="createDialog.show();"
+                                                             styleClass="style_botones"/>
+                                        </h:panelGrid>
+                                    </div>
+                                    <div align="center">
+                                        <p:panelGrid id="display" columns="1">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{ramaimssBean.informacion}" style="color: white"/>             
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:dataTable id="dataTable" var="rama" value="#{ramaimssBean.ramasImss}" 
+                                                         style="font-size: .8em" 
+                                                         scrollable="true" scrollHeight="250"
+                                                         rowKey="#{rama.idRama}"
+                                                         emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                         filteredValue="#{ramaimssBean.filterdRamasImss}"
+                                                         widgetVar="registrosTable" editable="true" editMode="cell">  
+
+                                                <f:facet name="header">  
+                                                    <p:outputPanel>  
+                                                        <h:outputText value="Buscador:" />  
+                                                        <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                        <div class="datableImagenes" id="csv">
+                                                            <h:commandLink id="csv">  
+                                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                <p:dataExporter type="csv" target="dataTable" fileName="ramas" />  
+                                                            </h:commandLink>
+                                                        </div>
+                                                    </p:outputPanel>
+                                                </f:facet>
+
+                                                <p:column sortBy="#{rama.rama}" filterBy="#{rama.rama}" 
+                                                          filterMatchMode="contains" exportable="true" width="65%"
+                                                          headerText="Rama">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{rama.rama}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{rama.rama}" size="80"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+
+                                                <p:column sortBy="#{rama.empleado}" exportable="true" width="15%"
+                                                          style="text-align: right" headerText="V. Empleado">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{rama.empleado}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{rama.empleado}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+
+                                                <p:column sortBy="#{rama.patron}" exportable="true" width="15%"
+                                                          style="text-align: right" headerText="V. Patrón">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{rama.patron}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{rama.patron}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+
+                                                <p:column width="5%" style="text-align: center">
+                                                    <p:commandButton icon="icon-save" title="Guardar" update=":msgs,dataTable"
+                                                                     onclick="createDialog.show();"
+                                                                     actionListener="#{ramaimssBean.editar(rama)}"/>
+                                                </p:column>
+                                            </p:dataTable>
+                                        </p:panelGrid>
+                                    </div>                                                                        
+                                </p:tab>
+
+                                <p:tab title="Tabulador Antiguedad" id="tabTabuladorAntiguedad">                                    
+                                    <div align="center">
+                                        <h:panelGrid columns="4"> 
+                                            
+                                            <p:selectOneMenu id="idSistemaAntiguedad" value="#{sistemaantiguedadBean.sistemasAntiguedad}"
+                                                             filter="true" valueChangeListener="#{tabuladorsistemaantiguedadBean.tabuladorSistemaAntiguedades}"
+                                                             style="width: 160px">  
+                                                <f:selectItem itemValue="" itemLabel="Sistema"/>
+                                                <f:selectItems value="#{sistemaantiguedadBean.sistemasAntiguedad}" var="sistema"
+                                                               itemValue="#{sistema.idsistemaantiguedad}" itemLabel="#{sistema.nombre}"/>
+                                                <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="dataTable1"/>
+                                            </p:selectOneMenu> 
+                                            
+                                            
+                                            <p:commandButton id="btnCreate1" icon="ui-icon-refresh" 
+                                                             title="Actualizar" value="Actualizar" 
+                                                             actionListener="#{tabuladorsistemaantiguedadBean.consultar(event)}"
+                                                             update="tabTabuladorAntiguedad"
+                                                             onclick="createDialog.show();"
+                                                             styleClass="style_botones"/>                                                                                        
+                                        </h:panelGrid>
+                                    </div> 
+                                    <div align="center">
+                                        <p:panelGrid columns="1">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{tabuladorsistemaantiguedadBean.informacion}" style="color: white"/>             
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            
+                                            <p:dataTable id="dataTable1" var="tabulador" value="#{tabuladorsistemaantiguedadBean.tabuladorSistemaAntiguedades}" 
+                                                         style="font-size: .8em" 
+                                                         scrollable="true" scrollHeight="250"
+                                                         rowKey="#{tabulador.idtabulador}"
+                                                         emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                         filteredValue="#{tabuladorsistemaantiguedadBean.filteredTabuladorSistemaAntiguedades}"
+                                                         widgetVar="registrosTable" editable="true" editMode="cell">
+                                                
+                                                <f:facet name="header">  
+                                                    <p:outputPanel>  
+                                                        <h:outputText value="Buscador:" />  
+                                                        <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                        <div class="datableImagenes" id="csv">
+                                                            <h:commandLink id="csv">  
+                                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                <p:dataExporter type="csv" target="dataTable1" fileName="tabulador" />  
+                                                            </h:commandLink>
+                                                        </div>
+                                                    </p:outputPanel>
+                                                </f:facet>
+                                                
+                                                <p:column sortBy="#{tabulador.fechaactualizacion}" exportable="true" width="15%"
+                                                          style="text-align: right" headerText="Fecha Actualización">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.fechaactualizacion}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.fechaactualizacion}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+                                                
+                                                <p:column sortBy="#{tabulador.idsistemaantiguedad.nombre}" exportable="true" width="20%"
+                                                          style="text-align: right" headerText="Sistema Antiguedad">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.idsistemaantiguedad.nombre}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.idsistemaantiguedad.nombre}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+                                                
+                                                <p:column sortBy="#{tabulador.limitesuperior}" exportable="true" width="10%"
+                                                          style="text-align: right" headerText="Límite Superior">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.limitesuperior}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.limitesuperior}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+                                                
+                                                <p:column sortBy="#{tabulador.limiteinferior}" exportable="true" width="10%"
+                                                          style="text-align: right" headerText="Límite Inferior">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.limiteinferior}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.limiteinferior}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+
+                                                <p:column sortBy="#{tabulador.diasAguinaldo}" exportable="true" width="10%"
+                                                          style="text-align: right" headerText="Días Aguinaldo">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.diasAguinaldo}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.diasAguinaldo}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+                                                
+                                                <p:column sortBy="#{tabulador.diasVacaciones}" exportable="true" width="10%"
+                                                          style="text-align: right" headerText="Días Vacaciones">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.diasVacaciones}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.diasVacaciones}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+                                                
+                                                <p:column sortBy="#{tabulador.primaVacacional}" exportable="true" width="10%"
+                                                          style="text-align: right" headerText="Prima Vacacional">
+                                                    <p:cellEditor>
+                                                        <f:facet name="output">
+                                                            <p:outputLabel value="#{tabulador.primaVacacional}"/>
+                                                        </f:facet>
+                                                        <f:facet name="input">
+                                                            <p:inputText value="#{tabulador.primaVacacional}" size="10"/>
+                                                        </f:facet>
+                                                    </p:cellEditor>
+                                                </p:column>
+
+                                                <p:column width="5%" style="text-align: center">
+                                                    <p:commandButton icon="icon-save" title="Guardar" update=":msgs,dataTable1"
+                                                                     onclick="createDialog.show();"
+                                                                     actionListener="#{tabuladorsistemaantiguedadBean.editar(tabulador)}"/>
+                                                </p:column>                                                                                                                                          
+                                            </p:dataTable>
+                                        </p:panelGrid>                                        
+                                    </div>                                    
+                                </p:tab>
+                            </p:tabView>
+                        </div>
+
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
