@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssHexagonos.css"/>
+        <style>
+            body{
+                background-color : rgb(32,32,32);
+            }
+            body .ui-menu .ui-menu-list .ui-menu-child {
+                width: 250px;
+            }
+        </style>
+        <title>Nóminas</title>
+    </h:head>
+
+    <h:body>
+
+
+        <div id="menu" class="ui-widget ui-widget-header ui-corner-all">
+            <h:form>  
+                <div align="right">
+                    <h:panelGrid columns="4">
+                        <h:form>
+                            <p:clock pattern="dd/MM/yyyy HH:mm:ss" mode="server"/>
+                        </h:form>
+                        <p:selectOneMenu id="idComboModulo" value="#{urlsBean.selectedModulo}" style="width: 180px;text-align: left;" effect="fold"
+                                         valueChangeListener="#{urlsBean.cambiarURL}" filter="true" filterMatchMode="contains" > 
+                            <f:selectItems value="#{urlsBean.comboUrl}"/>
+                            <p:ajax partialSubmit="true"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+
+                <p:menubar>  
+                    <p:submenu label="Timbres">
+                        <p:menuitem value="Reporte Timbres" url="#{appBean.basePath}nominas/timbres_reportes/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoTimbresReportes}"/>  
+                        <p:menuitem value="Consulta Comprobantes" url="#{appBean.basePath}nominas/consultacomprobantes/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoTimbresRecibos}"/>  
+                        <p:menuitem value="Reporte Timbres por Mes y Año" url="#{appBean.basePath}nominas/timbres_reportesxmes/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoTimbresReportes}"/>  
+                    </p:submenu>
+                    <p:submenu label="Operaciones">
+                        <p:menuitem value="Incidencias" url="#{appBean.basePath}nominas/incidencias/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesIncidencias}"/>  
+                        <p:menuitem value="Marcajes" url="#{appBean.basePath}nominas/terminales/cenicco.xhtml" update="idComboModulo" rendered="#{appBean.servicioDelMonte}"/>  
+                        <p:menuitem value="Reporte Asistencias" url="#{appBean.basePath}nominas/reporteasistencia/cenicco.xhtml" update="idComboModulo" rendered="#{appBean.servicioDelMonte}"/>  
+                        <p:submenu label="Nómina">
+                            <p:menuitem value="Cálculo Nóminas" url="#{appBean.basePath}nominas/calculonomina/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>
+                            <p:menuitem value="Reporte General" url="#{appBean.basePath}nominas/comparacion/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>
+                        </p:submenu>
+                        <p:submenu label="Finiquitos">
+                            <p:menuitem value="Cálculo Finiquitos" url="#{appBean.basePath}nominas/calculofiniquitos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoFiniquitos}"/>      
+                            <p:menuitem value="Consulta Finiquitos" url="#{appBean.basePath}nominas/consultasfiniquitos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesConsultaFiniquitos}"/>      
+                        </p:submenu>
+                        <p:submenu label="PTU">
+                            <p:menuitem value="Cálculo de distribución PTU" url="#{appBean.basePath}nominas/calculoptu/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>
+                        </p:submenu>
+                        <p:submenu label="Aguinaldo">
+                            <p:menuitem value="Cálculo" url="#{appBean.basePath}nominas/calculoaguinaldo/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>      
+                        </p:submenu>
+                        <p:submenu label="Incapacidades">
+                            <p:menuitem value="Registro" url="#{appBean.basePath}nominas/incapacidades/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesIncidencias}"/>
+                            <p:menuitem value="Consulta" url="#{appBean.basePath}nominas/consultasincapacidades/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesIncidencias}"/>
+                        </p:submenu>
+                        <p:submenu label="Créditos">
+                            <p:menuitem value="Alta Créditos" url="#{appBean.basePath}nominas/altascreditos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCreditosAlta}"/>  
+                            <p:submenu label="Vistas">
+                                <p:menuitem value="Consulta Créditos" url="#{appBean.basePath}nominas/consultascreditos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCreditosConsultas}"/>      
+                                <p:menuitem value="Consulta Amortización" url="#{appBean.basePath}nominas/consultasamortizacion/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesAmortizacionConsultas}"/>      
+                                <p:menuitem value="Por Saldos" url="#{appBean.basePath}nominas/saldocreditos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesAmortizacionConsultas}"/>      
+                            </p:submenu>
+                            <p:menuitem value="Sobregiros" url="#{appBean.basePath}nominas/sobregiros/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCreditosAlta}"/>  
+                        </p:submenu>
+                        <p:submenu label="Vacaciones" rendered="#{permisosBean.permisoOperacionesIncidencias}">
+                            <p:menuitem value="Saldos" url="#{appBean.basePath}nominas/saldovacaciones/cenicco.xhtml" update="idComboModulo"/>  
+                            <p:menuitem value="Saldos Extra Legales" url="#{appBean.basePath}nominas/saldovacacionesextralegales/cenicco.xhtml" update="idComboModulo" rendered="#{!appBean.servicioMelonn}"/>  
+                            <p:menuitem value="Solicitudes" url="#{appBean.basePath}nominas/solicitudvacaciones/cenicco.xhtml" update="idComboModulo"/>  
+                            <p:menuitem value="Calendario" url="#{appBean.basePath}nominas/calendariovacaciones/cenicco.xhtml" update="idComboModulo"/>  
+                        </p:submenu>
+                    </p:submenu>  
+                    <p:submenu label="Entregables">
+                        <p:menuitem value="Entregables Nóminas" url="#{appBean.basePath}nominas/entregables/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:submenu label="Dispersión" rendered="#{permisosBean.permisoEntregablesNominas}">
+                            <p:menuitem value="Dispersión Nómina" url="#{appBean.basePath}nominas/dispersion/cenicco.xhtml" update="idComboModulo"/>
+                        </p:submenu>
+                        <p:submenu label="Póliza Contable" rendered="#{permisosBean.permisoEntregablesNominas}">
+                            <p:menuitem value="Por Periodo" url="#{appBean.basePath}nominas/polizacontable/cenicco.xhtml" update="idComboModulo"/>
+                            <p:menuitem value="Por Mes" url="#{appBean.basePath}nominas/polizacontablepormes/cenicco.xhtml" update="idComboModulo"/>
+                        </p:submenu>
+                        <p:submenu label="Vales Despensa" rendered="#{permisosBean.permisoEntregablesNominas}">
+                            <p:menuitem value="Dispersión" url="#{appBean.basePath}nominas/valesdespensa/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                            <p:menuitem value="Altas" url="#{appBean.basePath}nominas/altasvalesdespensa/cenicco.xhtml" update="idComboModulo" rendered="#{appBean.servicioWhiteHat}"/>
+                        </p:submenu>
+                        <p:submenu label="Fondo de Ahorro">
+                            <p:menuitem value="Aportaciones" url="#{appBean.basePath}nominas/fondoahorro/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                            <p:menuitem value="Altas" url="#{appBean.basePath}nominas/altasfondoahorro/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        </p:submenu>
+                        <p:submenu label="Altas Cuentas Bancarias">
+                            <p:menuitem value="BANAMEX" url="#{appBean.basePath}nominas/altascuentasbancarias/cenicco.xhtml" update="idComboModulo"/>
+                            <p:menuitem value="BANORTE" url="#{appBean.basePath}nominas/altascuentasbancariasbanorte/cenicco.xhtml" update="idComboModulo"/>
+                        </p:submenu>
+                    </p:submenu>
+                    <p:submenu label="Reportes">
+                        <p:menuitem value="Concepto(s) Por Periodo" url="#{appBean.basePath}nominas/conceptoxperiodo/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:menuitem value="Mensuales" url="#{appBean.basePath}nominas/mensualxconcepto/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:menuitem value="Exentos/Gravados" url="#{appBean.basePath}nominas/gravadosexentos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:menuitem value="Detalle Exentos/Gravados" url="#{appBean.basePath}nominas/detallegravadosexentos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:menuitem value="Detalle Percepciones/Deducciones" url="#{appBean.basePath}nominas/detallepercepcionesdeducciones/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                        <p:menuitem value="Impuestos" url="#{appBean.basePath}nominas/reporteimpuestos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoEntregablesNominas}"/>
+                    </p:submenu>
+                    <p:menuitem value="Inicio" url="#{appBean.basePath}inicio/index.xhtml" icon="ui-icon-home"/>  
+                </p:menubar>
+            </h:form>
+        </div>
+
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>
