@@ -1,0 +1,449 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="8">
+                            <p:selectOneMenu id="grupoPago" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" valueChangeListener="#{finiquitoBean.changeGrupoPago}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="idEmpleados"/>
+                            </p:selectOneMenu>
+                            <p:message for="grupoPago" display="tooltip"/>
+
+                            <p:selectCheckboxMenu id="idEmpleados" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{finiquitoBean.selectedRelaciones}" label="Empleado(s)"
+                                                  required="true" requiredMessage="#{appBean.mensajeErrorSeleccionEmpleados}">
+                                <f:selectItems value="#{finiquitoBean.relaciones}"/> 
+                            </p:selectCheckboxMenu>
+                            <p:message for="idEmpleados" display="tooltip"/>
+
+                            <p:inputText id="idperiodo" value="#{finiquitoBean.periodonomina}" size="15" placeholder="Periodo Nómina" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Periodo Nómina"/>
+                            <p:message for="idperiodo" display="tooltip"/>
+
+                            <p:inputText id="idanio" value="#{finiquitoBean.aniononimina}" size="15" placeholder="Año Nómina" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Año Nómina"/>
+                            <p:message for="idanio" display="tooltip"/>
+
+                            <p:inputMask id="idFechaPago" value="#{finiquitoBean.fechaPago}" mask="99/99/9999"
+                                         title="Fecha Pago" placeholder="Fecha Pago" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                            <p:message for="idFechaPago" display="tooltip"/>
+
+                            <p:selectOneMenu id="idTipoFiniquito" style="width: 200px" filter="true" filterMatchMode="contains"
+                                             value="#{finiquitoBean.selectedTipoFiniquito}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorTipoFiniquito}">  
+                                <f:selectItem itemValue="" itemLabel="Tipo Finiquito"/>
+                                <f:selectItems value="#{finiquitoBean.tiposFiniquitos}"  
+                                               var="tipoFiniquito" itemValue="#{tipoFiniquito.idgrupoconcepto}" itemLabel="#{tipoFiniquito.nombre}"/> 
+                                <p:ajax partialSubmit="true" update="console"/>
+                            </p:selectOneMenu>
+                            <p:message for="idTipoFiniquito" display="tooltip"/>
+
+                            <p:selectOneMenu id="idCausaBaja" style="width: 150px" filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorCausaBaja}"
+                                             value="#{finiquitoBean.selectedCausaBaja}">  
+                                <f:selectItem itemValue="" itemLabel="Causa Baja"/>
+                                <f:selectItems value="#{catalogoGeneralBean.causasEmpresas}" 
+                                               var="causa" itemValue="#{causa.nombre}" itemLabel="#{causa.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idCausaBaja" display="tooltip"/>
+
+                            <p:selectOneRadio id="console" value="#{finiquitoBean.selectedTipoSalario}" style="color: white">
+                                <f:selectItem itemLabel="Art. 84" itemValue="0" />
+                                <f:selectItem itemLabel="S.D." itemValue="1" />
+                                <f:selectItem itemLabel="S.D.I." itemValue="2" />
+                                <f:selectItem itemLabel="SBC.ST" itemValue="3" />
+                            </p:selectOneRadio>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Cálculo Finiquitos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="3">
+                                <p:commandButton value="Calcular" icon="ui-icon-play"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{finiquitoBean.create(event)}"
+                                                 update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                <p:commandButton title="Registro de Incidencias" value="Registro de Incidencias" icon="icon-add"
+                                                 actionListener="#{finiquitoBean.createIncidencias(event)}"
+                                                 oncomplete="handleCreateInicidencia(args)"
+                                                 update=":form, :formCreate, :msgs"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton value="Descargar Preliminar" title="Descargar Preliminar" icon="icon-down"
+                                                 actionListener="#{finiquitoBean.descargarReporte()}"
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{finiquitoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="finiquito"
+                                                 value="#{finiquitoBean.finiquitos}"
+                                                 filteredValue="#{finiquitoBean.filteredFiniquitos}"
+                                                 selection="#{finiquitoBean.selectedFiniquitos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{finiquito.relacionlaboral.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Finiquitos"/>  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" selectionMode="multiple" style="text-align:center"/>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="12%" exportable="true"
+                                                  filterBy="#{finiquito.relacionlaboral.numeroempleado}"
+                                                  sortBy="#{finiquito.relacionlaboral.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.relacionlaboral.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="13%" exportable="true"
+                                                  filterBy="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}"
+                                                  sortBy="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="13%" exportable="true"
+                                                  filterBy="#{finiquito.causabaja}"
+                                                  sortBy="#{finiquito.causabaja}">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Baja" title="Causa Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.causabaja}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" width="13%" exportable="true"
+                                                  filterBy="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}"
+                                                  sortBy="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.relacionlaboral.idempleado.nombre} #{finiquito.relacionlaboral.idempleado.apellidopaterno} #{finiquito.relacionlaboral.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="8%" exportable="true" sortBy="#{finiquito.sd}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="SD" title="Salario Diario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.sd}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="8%" exportable="true" sortBy="#{finiquito.sdi}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="SDI" title="Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.sdi}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="10%" exportable="true" sortBy="#{finiquito.relacionlaboral.fechaIngresoStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Ingreso" title="Fecha Ingreso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.relacionlaboral.fechaIngresoStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="10%" exportable="true" sortBy="#{finiquito.relacionlaboral.fechaAntiguedadStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Antiguedad" title="Fecha Antiguedad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.relacionlaboral.fechaAntiguedadStr}"/>
+                                        </p:column>
+
+                                        <p:column width="8%" exportable="true" sortBy="#{finiquito.totalPercepcion}" 
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Percepción" title="Total Percepción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.totalPercepcion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column width="8%" exportable="true" sortBy="#{finiquito.totalDeduccion}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Deducción" title="Total Deducción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.totalDeduccion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column width="8%" exportable="true" style="text-align: right" sortBy="#{finiquito.netoPagar}">
+                                            <f:facet name="header">
+                                                <h:outputText value="N. Pagar" title="Neto Pagar"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{finiquito.netoPagar}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton oncomplete="handleLShow(args)" actionListener="#{finiquitoBean.descargarDocumentoXls(finiquito)}" onclick="statusDialog.show();"
+                                                             icon="icon-down" title="Variables Indemnización"/>
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 600px">
+                                                <p:panel header="Percepciones" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{finiquito.percepciones}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Concepto" rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}">
+                                                            <h:outputText value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#FFFFFF':'#6ED14C'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{finiquito.totalPercepcion}" style="color: #FF603E;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                                <p:panel header="Deducciones" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{finiquito.deducciones}" var="concepto"
+                                                                  style="font-size: 1em;">
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}">
+                                                            <p:outputLabel value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#FFFFFF':'#6ED14C'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{finiquito.totalDeduccion}" style="color: #FF603E;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                                <p:panel header="Provisiones" toggleable="true" collapsed="true" >
+                                                    <p:dataTable  value="#{finiquito.provisiones}" var="concepto"
+                                                                  style="font-size: 1em;">
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}">
+                                                            <p:outputLabel value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0) or (concepto.concepto == 6480)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#FFFFFF':'#6ED14C'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{finiquito.totalProvisiones}" style="color: #FF603E;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <h:panelGrid columns="4">
+                                                <p:selectOneMenu style="width: 180px" value="#{finiquitoBean.mesaaplicar}"
+                                                                 filter="true" filterMatchMode="contains">  
+                                                    <f:selectItem itemValue="" itemLabel="Mes a Aplicar"/>
+                                                    <f:selectItems value="#{appBean.comboMeses}"/>  />
+                                                </p:selectOneMenu>
+                                                <p:inputText value="#{finiquitoBean.anioaaplicar}" placeholder="Año a Aplicar"/>
+                                                <p:commandButton value="Guardar" icon="icon-save"
+                                                                 actionListener="#{finiquitoBean.edit(event)}" update=":msgs"
+                                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                                <p:commandButton value="Limpiar" icon="ui-icon-trash"
+                                                                 styleClass="style_botones" immediate="true"
+                                                                 actionListener="#{finiquitoBean.limpiar(event)}"
+                                                                 update=":form" onclick="statusDialog.show();"/> 
+                                            </h:panelGrid>
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Detalle ISR" title="Descargar Detalle ISR" icon="icon-down"
+                                                             actionListener="#{finiquitoBean.descargarDetalleISR()}"
+                                                             oncomplete="handleLShow(args)"
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp;
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <h:form id="formCreate">
+                    <p:dialog header="Incidencias Reportadas" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="1000px">  
+                        <f:facet name="footer">
+                            <div align="left">
+                                <p:commandButton value="Calcular" icon="ui-icon-play" 
+                                                 styleClass="style_botones"
+                                                 actionListener="#{finiquitoBean.agregarConceptosReportados(event)}"
+                                                 onclick="statusDialog.show();"
+                                                 update=":msgs, :form, :formCreate"/>
+                                <p:commandButton value="Cancelar" icon="icon-cancel" 
+                                                 onclick="createDialog.hide();"
+                                                 styleClass="style_botones"/>
+                            </div>
+                        </f:facet>
+                        <f:facet name="header">
+                            <p:outputLabel value="Captura de incidencias para finiquito" style="color: white;"/>    
+                        </f:facet>
+                        <p:scrollPanel style="height:500px;">
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableConceptos" var="concepto" value="#{finiquitoBean.conceptosReportados}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 scrollable="true" scrollHeight="450"
+                                                 filteredValue="#{finiquitoBean.filteredConceptosReportados}"
+                                                 selection="#{finiquitoBean.selectedConceptos}"
+                                                 rowKey="#{concepto.idconcepto}" resizableColumns="true"
+                                                 style="font-size: .8em;width: 970px;" editable="true" editMode="cell">
+
+                                        <p:column selectionMode="multiple" style="text-align:center" width="20"/>
+
+                                        <p:column filterMatchMode="contains" headerText="Concepto"
+                                                  filterBy="#{concepto.concepto} - #{concepto.nombre}" sortBy="#{concepto.concepto} - #{concepto.nombre}">
+                                            <h:outputText value="#{concepto.concepto} - #{concepto.nombre}"/> 
+                                        </p:column>
+
+                                        <p:column headerText="Unidad" sortBy="#{concepto.unidad}">
+                                            <h:outputText value="IMPORTE" rendered="#{concepto.unidad=='01'}"/> 
+                                            <h:outputText value="Tiempo" rendered="#{concepto.unidad=='02'}"/> 
+                                            <h:outputText value="HORAS" rendered="#{concepto.unidad=='03'}"/> 
+                                            <h:outputText value="PORCENTAJE" rendered="#{concepto.unidad=='04'}"/> 
+                                        </p:column>
+
+                                        <p:column headerText="Importe/Tiempo">
+                                            <p:inputText value="#{concepto.valor}" size="30"/>
+                                            <!--<p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{concepto.valor}"/>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputText value="#{concepto.valor}" size="10"/>
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>-->
+                                        </p:column>
+
+                                        <p:column headerText="Naturaleza" sortBy="#{concepto.tipoconcepto}">
+                                            <div align="center">
+                                                <h:outputText value="+" rendered="#{concepto.tipoconcepto=='01'}" style="color: #06AD0B; font-size: 1.2em"/> 
+                                                <h:outputText value="-" rendered="#{concepto.tipoconcepto=='02'}" style="color: #FF5733; font-size: 1.2em"/> 
+                                            </div>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:scrollPanel>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
