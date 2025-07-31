@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+
+            <ui:define name="content">
+                <p:fieldset legend="Logs - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                    <div align="center">
+                        <h:form id="formPingNube">
+                            <p:panel id="pingNube" header="Conexión con Sistema de Timbrado" style="margin-bottom:20px" toggleable="true">
+                                <h:panelGrid columns="1" cellpadding="10">
+                                    <f:facet name="header">
+                                        <p:commandButton value="Probar" styleClass="style_botones" icon="ui-icon-play" 
+                                                         actionListener="#{conexionBean.ejecutarPingTimbrado()}"
+                                                         onclick="statusDialog.show();"
+                                                         update="salidaNube"/>
+                                    </f:facet>
+                                    <p:inputTextarea id="salidaNube" rows="20" cols="150" 
+                                                     value="#{conexionBean.pingNube}" readonly="true" />
+                                </h:panelGrid>
+                            </p:panel>
+                        </h:form>
+                        <h:form id="formPingBD">
+                            <p:panel id="pingBD" header="Conexión a BD" style="margin-bottom:20px" toggleable="true">
+                                <h:panelGrid columns="1" cellpadding="10">
+                                    <f:facet name="header">
+                                        <p:commandButton value="Probar" styleClass="style_botones" icon="ui-icon-play"
+                                                         actionListener="#{conexionBean.ejecutarPingBaseDatos()}"
+                                                         onclick="statusDialog.show();"
+                                                         update="salidaBaseDatos"/>
+                                    </f:facet>
+                                    <p:inputTextarea id="salidaBaseDatos" rows="20" cols="150" value="#{conexionBean.pingBaseDatos}" readonly="true" />
+                                </h:panelGrid>
+                            </p:panel>
+                        </h:form>
+                    </div>
+
+                    <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                    <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                              draggable="false" closable="false" resizable="false" > 
+                        <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                    </p:dialog>
+
+                </p:fieldset>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
