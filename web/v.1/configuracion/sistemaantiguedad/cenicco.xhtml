@@ -1,0 +1,270 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:tabView id="gral" style="margin-top: 2%">
+                        <p:tab title="Sistemas Antiguedad" id="displaysistemas">
+                            <div align="center">
+                                <h:panelGrid columns="4">
+                                    <p:inputText id="idclave" value="#{sistemaantiguedadBean.sistema.clave}" placeholder="Clave"/>
+
+                                    <p:inputText id="idnombre" value="#{sistemaantiguedadBean.sistema.nombre}" placeholder="Nombre"/>
+
+                                    <p:commandButton value="Alta" icon="icon-add"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{sistemaantiguedadBean.create(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                    
+                                    <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                     styleClass="style_botones" immediate="true"
+                                                     actionListener="#{sistemaantiguedadBean.consultar(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                </h:panelGrid>
+                            </div>
+                            <p:panelGrid style="margin-top: 5px">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{sistemaantiguedadBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTableSistema" var="sistema"
+                                                     value="#{sistemaantiguedadBean.sistemas}"
+                                                     filteredValue="#{sistemaantiguedadBean.filteredSistemas}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTableSistemas" editable="true" editMode="cell"
+                                                     rowKey="#{sistema.idsistemaantiguedad}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableSistemas.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <p:commandLink id="csv" actionListener="#{sistemaantiguedadBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png"/>  
+                                                        </p:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column filterMatchMode="contains" exportable="true" headerText="Clave"
+                                                      filterBy="#{sistema.clave}"  sortBy="#{sistema.clave}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{sistema.clave}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{sistema.clave}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" exportable="true" headerText="Nombre"
+                                                      filterBy="#{sistema.nombre}"  sortBy="#{sistema.nombre}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{sistema.nombre}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{sistema.nombre}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="false" width="30"> 
+                                                <div align="center">
+                                                    <p:commandButton icon="icon-save" title="Editar"
+                                                                     styleClass="style_botones"
+                                                                     actionListener="#{sistemaantiguedadBean.editSistema(sistema)}"
+                                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                                </div>
+
+                                            </p:column>
+                                        </p:dataTable> 
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </p:tab>
+                        <p:tab title="Tabuladores"  id="displaytabuladores">
+                            <div align="center">
+                                <h:panelGrid columns="4">
+                                    <p:selectOneMenu id="idSistemaantiguedad" style="width: 180px" 
+                                                     filter="true" filterMatchMode="contains" value="#{tabuladorsistemaantiguedadBean.selectedSistema}">  
+                                        <f:selectItem itemValue="" itemLabel="Sistema Antiguedad"/>
+                                        <f:selectItems value="#{sistemaantiguedadBean.sistemas}"
+                                                       var="sistema" itemValue="#{sistema.idsistemaantiguedad}" itemLabel="#{sistema.clave} - #{sistema.nombre}"/>  
+                                    </p:selectOneMenu>
+
+                                    <p:inputText id="idlimiteinferior" value="#{tabuladorsistemaantiguedadBean.tabulador.limiteinferior}" placeholder="Límite Inferior"/>
+
+                                    <p:inputText id="idlimitesuperior" value="#{tabuladorsistemaantiguedadBean.tabulador.limitesuperior}" placeholder="Límite Superior"/>
+
+                                    <p:commandButton value="Alta" icon="icon-add"
+                                                     styleClass="style_botones" style="width: 120px"
+                                                     actionListener="#{tabuladorsistemaantiguedadBean.create(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                                    <p:inputText id="diasaguinaldo" value="#{tabuladorsistemaantiguedadBean.tabulador.diasAguinaldo}" placeholder="Días Aguinaldo"/>
+
+                                    <p:inputText id="diasvacaciones" value="#{tabuladorsistemaantiguedadBean.tabulador.diasVacaciones}" placeholder="Días Vacaciones"/>
+
+                                    <p:inputText id="primavacacional" value="#{tabuladorsistemaantiguedadBean.tabulador.primaVacacional}" placeholder="Prima Vacacional"/>
+
+                                    <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                     styleClass="style_botones" style="width: 120px" immediate="true"
+                                                     actionListener="#{tabuladorsistemaantiguedadBean.consultar(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                </h:panelGrid>
+                            </div>
+                            <p:panelGrid style="margin-top: 5px">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{tabuladorsistemaantiguedadBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTableTabulador" var="tab"
+                                                     value="#{tabuladorsistemaantiguedadBean.tabuladorSistemaAntiguedades}"
+                                                     filteredValue="#{tabuladorsistemaantiguedadBean.filteredTabuladorSistemaAntiguedades}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTableTabuladores" editable="true" editMode="cell"
+                                                     rowKey="#{tabulador.idtabulador}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableTabuladores.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <p:commandLink id="csv" actionListener="#{tabuladorsistemaantiguedadBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png"/>  
+                                                        </p:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column exportable="true" headerText="S. Antiguedad" sortBy="#{tab.idsistemaantiguedad.idsistemaantiguedad}" style="text-align: center"
+                                                      filterBy="#{tab.idsistemaantiguedad.nombre}" filterMatchMode="contains">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:selectOneMenu style="width: 150px" value="#{tab.idsistemaantiguedad.idsistemaantiguedad}" disabled="true">  
+                                                            <f:selectItem itemValue="" itemLabel="Sistema Antiguedad"/>
+                                                            <f:selectItems value="#{sistemaantiguedadBean.sistemas}"
+                                                                           var="sistema" itemValue="#{sistema.idsistemaantiguedad}" itemLabel="#{sistema.clave} - #{sistema.nombre}"/>  
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:selectOneMenu style="width: 150px" value="#{tab.idsistemaantiguedad.idsistemaantiguedad}"
+                                                                         filter="true" filterMatchMode="contains">  
+                                                            <f:selectItem itemValue="" itemLabel="Sistema Antiguedad"/>
+                                                            <f:selectItems value="#{sistemaantiguedadBean.sistemas}"
+                                                                           var="sistema" itemValue="#{sistema.idsistemaantiguedad}" itemLabel="#{sistema.clave} - #{sistema.nombre}"/>  
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+
+                                            <p:column exportable="true" headerText="Límite Inferior" sortBy="#{tab.limiteinferior}" style="text-align: center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{tab.limiteinferior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{tab.limiteinferior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Límite Inferior" sortBy="#{tab.limitesuperior}" style="text-align: center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{tab.limitesuperior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{tab.limitesuperior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Días Aguinaldo" sortBy="#{tab.diasAguinaldo}" style="text-align: center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{tab.diasAguinaldo}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{tab.diasAguinaldo}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Días Vacaciones" sortBy="#{tab.diasVacaciones}" style="text-align: center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{tab.diasVacaciones}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{tab.diasVacaciones}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Prima Vacacional" sortBy="#{tab.primaVacacional}" style="text-align: center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{tab.primaVacacional}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{tab.primaVacacional}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="false" width="30"> 
+                                                <div align="center">
+                                                    <p:commandButton icon="icon-save" title="Editar"
+                                                                     styleClass="style_botones"
+                                                                     actionListener="#{tabuladorsistemaantiguedadBean.editar(tab)}"
+                                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                                </div>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </p:tab>
+                    </p:tabView>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
