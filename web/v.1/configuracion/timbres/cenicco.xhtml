@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Información PAC" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="3">
+                                <p:commandButton value="Actualizar" styleClass="style_botones" icon="ui-icon-refresh"
+                                                 actionListener="#{facturaInteligenteBean.actualizar(event)}"
+                                                 onstart="statusDialog.show()" update="display"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{facturaInteligenteBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="timbre"
+                                                 value="#{facturaInteligenteBean.detalletimbres}"
+                                                 filteredValue="#{facturaInteligenteBean.filtereddetalletimbres}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="DetalleTimbres" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column exportable="true" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Activación" title="Fecha Activación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.fechaactivacion}"/>
+                                        </p:column>
+                                        <p:column exportable="true"  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Vencimiento" title="Fecha Vencimiento"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.fechavencimiento}"/>
+                                        </p:column>
+                                        <p:column exportable="true"  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Esta en Uso?" title="Esta en Uso?"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.estaenuso}"/>
+                                        </p:column>
+                                        <p:column exportable="true"  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Esta Vigente?" title="Esta Vigente?"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.esvigente}"/>
+                                        </p:column>
+                                        <p:column exportable="true"  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Total Timbres" title="Total Timbres"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.timbres}"/>
+                                        </p:column>
+                                        <p:column exportable="true" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Timbres Usados" title="Timbres Usados"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.timbresusados}"/>
+                                        </p:column>
+                                        <p:column exportable="true" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Timbres Restantes" title="Timbres Restantes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{timbre.timbresrestantes}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
