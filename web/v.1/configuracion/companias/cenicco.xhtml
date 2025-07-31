@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <body>
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <!-- Encabezado -->
+                <p:fieldset legend="Compañias - #{appBean.compania.nombre}" 
+                            styleClass="bg_color" toggleable="true" collapsed="false">
+                    <div align="right">
+                        <h:form>
+                            <h:panelGrid columns="1">
+                                <p:commandButton id="btnCreatePais" icon="icon-add"
+                                                 actionListener="#{companiasBean.limpiar(event)}"
+                                                 update=":formCreateCompania:display"
+                                                 title="Alta" value="Alta" rendered="false"
+                                                 onclick="createDialogCompania.show();"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </h:form>    
+                    </div>
+                    <!-- Tabla de datos --> 
+
+                    <h:form id="formCompania">
+                        <p:panelGrid id="display" columns="1">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <p:outputLabel value="#{companiasBean.informacion}"/>    
+                                </div>
+                            </f:facet>
+                            <p:dataTable id="dataTableCompanias" var="compania" value="#{companiasBean.companias}" 
+                                         resizableColumns="true" style="font-size: 1em"
+                                         rowKey="#{compania.idcompania}"
+                                         emptyMessage="#{appBean.mensajeTablaVacia}"
+                                         filteredValue="#{companiasBean.filteredCompanias}"
+                                         selection="#{companiasBean.compania}"
+                                         scrollable="true" scrollHeight="170"
+                                         widgetVar="registrosTableCompania" selectionMode="single">
+
+                                <p:ajax event="rowSelect" update=":formUpdateCompania:display" oncomplete="updateDialogCompania.show()"/>
+
+
+                                <f:facet name="header">  
+                                    <p:outputPanel>  
+                                        <h:outputText value="Buscador:" />  
+                                        <p:inputText id="globalFilter" onkeyup="registrosTableCompania.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column width="10%" exportable="true" filterBy="#{compania.clave}"
+                                          sortBy="#{compania.clave}" style="text-align: center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Clave"/>
+                                    </f:facet>
+                                    <h:outputText value="#{compania.clave}"/>  
+                                </p:column>
+                                <p:column width="150px" exportable="true" filterBy="#{compania.nombre}"
+                                          sortBy="#{compania.nombre}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Nombre"/>
+                                    </f:facet>
+                                    <h:outputText value="#{compania.nombre}"/>  
+                                </p:column>
+                                <p:column width="20%" exportable="true" filterBy="#{compania.rfc}"
+                                          sortBy="#{compania.rfc}" style="text-align: center">
+                                    <f:facet name="header">
+                                        <h:outputText value="R.F.C."/>
+                                    </f:facet>
+                                    <h:outputText value="#{compania.rfc}"/>  
+                                </p:column>
+                                <p:column width="20%" exportable="true" filterBy="#{compania.nombreCorto}"
+                                          sortBy="#{compania.nombreCorto}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Nombre Corto"/>
+                                    </f:facet>
+                                    <h:outputText value="#{compania.nombreCorto}"/>  
+                                </p:column>
+
+                            </p:dataTable>
+                        </p:panelGrid>
+                    </h:form>
+
+                    <h:form id="formCreateCompania">
+                        <p:dialog header="Alta Compañía" 
+                                  widgetVar="createDialogCompania" resizable="false" id="createDlg"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="2" cellpadding="3">
+                                <p:outputLabel value="Clave:"/>
+                                <p:inputText value="#{companiasBean.compania.clave}"/>
+
+                                <p:outputLabel value="Nombre:"/>
+                                <p:inputText value="#{companiasBean.compania.nombre}"/>
+
+                                <p:outputLabel value="N. Corto:"/>
+                                <p:inputText value="#{companiasBean.compania.nombreCorto}"/>
+
+                                <p:outputLabel value="R.F.C.:"/>
+                                <p:inputText value="#{companiasBean.compania.rfc}"/>
+
+                                <p:outputLabel value="C. Procesados:"/>
+                                <p:inputText value="#{companiasBean.compania.pathCarpetaProcesados}"/>
+
+                                <p:outputLabel value="C. Timbres:"/>
+                                <p:inputText value="#{companiasBean.compania.pathCarpetaTimbre}"/>
+
+                                <p:outputLabel value="C. PAC:"/>
+                                <p:inputText value="#{companiasBean.compania.pathCarpetaTxt}"/>
+
+                            </h:panelGrid> 
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{companiasBean.create(event)}"
+                                                 update=":formCreateCompania:display, :msgs"
+                                                 oncomplete="handleCreate(args)"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialog.hide();"/>
+                            </f:facet>
+                        </p:dialog>
+                    </h:form>
+
+                    <h:form id="formUpdateCompania">
+                        <p:dialog header="Editar Compañia" 
+                                  widgetVar="updateDialogCompania" resizable="false" id="updateDlgCompania" closable="false"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="false"
+                                  showEffect="fade" hideEffect="explode" modal="true">
+                            <div align="center">
+                                <p:graphicImage id="imagen" value="#{companiasBean.imagen}" height="130px" cache="false"/> 
+                            </div>
+                            <p:panelGrid id="displaycom">
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Nombre:"/>
+                                    </p:column>
+                                    <p:column colspan="3">
+                                        <p:inputText id="idnombre" value="#{companiasBean.compania.nombre}" style="width: 450px"/>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Clave:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:inputText value="#{companiasBean.compania.clave}"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:outputLabel value="Estatus:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:outputLabel value="#{companiasBean.compania.estatus == 0 ? 'Inactivo' : 'Activo'}"/>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Nombre Corto: "/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:inputText value="#{companiasBean.compania.nombreCorto}"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:outputLabel value="R.F.C.: "/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:inputText value="#{companiasBean.compania.rfc}"/>
+                                    </p:column>
+                                </p:row>
+
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Path Procesados:"/>
+                                    </p:column>
+                                    <p:column colspan="3">
+                                        <p:outputLabel value="#{companiasBean.compania.pathCarpetaProcesados}"/>
+                                    </p:column>
+                                </p:row>
+
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Path Timbres:"/>
+                                    </p:column>
+                                    <p:column colspan="3">
+                                        <p:outputLabel value="#{companiasBean.compania.pathCarpetaTimbre}"/>
+                                    </p:column>
+                                </p:row>
+
+                                <p:row>
+                                    <p:column>
+                                        <p:outputLabel value="Path TXT:"/>
+                                    </p:column>
+                                    <p:column colspan="3">
+                                        <p:outputLabel value="#{companiasBean.compania.pathCarpetaTxt}"/>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+
+                            <h:panelGrid id="display" columns="3"> 
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Guardar Cambios" value="Guardar Cambios"
+                                                     actionListener="#{companiasBean.editar(compania)}"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     actionListener="#{companiasBean.consultar(event)}"
+                                                     onclick="formUpdateCompania.hide();"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </p:dialog>
+                    </h:form>
+
+                    <h:form id="formFoto"  enctype="multipart/form-data">
+                        <p:dialog header="Editar Foto" widgetVar="fotoDialog" resizable="false" id="fotoDlg"  
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+
+                            <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                                <p:fileUpload  value="#{companiasBean.compania.logo}" mode="advanced" oncomplete="fotoDialog.hide()" invalidFileMessage="Archivo inválido" invalidSizeMessage="Límite de 10MB excedido"
+                                               fileUploadListener="#{catalogoempleadoBean.fileUploadListenerFoto}" sizeLimit="1000000" allowTypes="/(\.|\/)(jpe?g|png)$/"
+                                               uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" />
+                            </h:panelGrid>
+
+                        </p:dialog>
+                    </h:form>
+
+                </p:fieldset>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
