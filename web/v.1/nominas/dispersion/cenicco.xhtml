@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="14">
+
+                            <p:inputMask id="idFechaPago" value="#{dispersionbancomerBean.fechapago}" mask="999999" size="5"
+                                         title="Fecha Pago" placeholder="YYMMDD" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                            <p:message for="idFechaPago" display="tooltip"/>
+
+                            <p:selectOneMenu id="idestatusempleadolno" style="width: 150px" 
+                                             filter="true" filterMatchMode="contains" value="#{dispersionbancomerBean.selectedestatus}">  
+                                <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectCheckboxMenu id="idGruposPago" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{dispersionbancomerBean.selectedGruposPago}" label="Grupo(s) Pago" requiredMessage="#{appBean.mensajeErrorGrupoPago}" required="true">
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectCheckboxMenu>
+                            <p:message for="idGruposPago" display="tooltip"/>
+
+                            <p:selectCheckboxMenu value="#{dispersionbancomerBean.selectedCentrosCostos}" 
+                                                  filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px"
+                                                  rendered="#{appBean.servicioAemsa or appBean.servicioMartillo}"
+                                                  label="Centros(s) Costo(s)">  
+                                <f:selectItems value="#{centrocostosBean.centroCostos}" var="centro" itemValue="#{centro.idCentroCostos}" itemLabel="#{centro.centroCosto} - #{centro.nombre}"/>
+                            </p:selectCheckboxMenu>
+
+                            <p:selectOneMenu value="#{dispersionbancomerBean.selectedTipoproceso}" 
+                                             style="width: 150px;text-align: left" filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="NM - NOMINA NORMAL"/>
+                                <f:selectItems value="#{tipoprocesoBean.procesosEspeciales}" var="tp" 
+                                               itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idBanco" style="width: 150px" value="#{dispersionbancomerBean.selectedBanco}"
+                                             filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorBanco}">  
+                                <f:selectItem itemValue="" itemLabel="Banco"/>
+                                <f:selectItems value="#{bancoBean.bancosdispersion}"
+                                               var="banco" itemValue="#{banco.idbanco}" itemLabel="#{banco.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idBanco" display="tooltip"/>
+
+                            <p:inputText id="idPeriodo" value="#{dispersionbancomerBean.periodo}" placeholder="Periodo" size="5"  style="text-align: center"
+                                         rendered="true" requiredMessage="#{appBean.mensajeErrorPeriodo}"/>
+                            <p:message for="idPeriodo" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{dispersionbancomerBean.anio}" placeholder="Año" size="5" style="text-align: center"
+                                         rendered="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:selectOneMenu id="idSecuencia" style="width: 100px" required="true" requiredMessage="Favor de Seleccionar Secuencia"
+                                             filter="true" filterMatchMode="contains" value="#{dispersionbancomerBean.secuencia}">  
+                                <f:selectItems value="#{appBean.comboSecuencia}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idSecuencia" display="tooltip"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Dispersión - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{dispersionbancomerBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="cuenta"
+                                                 value="#{dispersionbancomerBean.cuentasBancarias}"
+                                                 filteredValue="#{dispersionbancomerBean.filteredCuentasBancarias}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{dispersionbancomerBean.selectedCuentasBancarias}"
+                                                 rowKey="#{cuenta.idcuenta}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf" actionListener="#{dispersionbancomerBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Dispersion" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" selectionMode="multiple" style="text-align:center"/>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cuenta.numeroempleado}"  sortBy="#{cuenta.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cuenta.apaterno} #{cuenta.amaterno} #{cuenta.nombre}"  sortBy="#{cuenta.apaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.apaterno} #{cuenta.amaterno} #{cuenta.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cuenta.rfc}"  sortBy="#{cuenta.rfc}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C." title="R.F.C."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.rfc}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.cuenta}"  sortBy="#{cuenta.cuenta}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cuenta" title="Cuenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.cuenta}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.clabe}"  sortBy="#{cuenta.clabe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Clabe" title="Clabe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.clabe}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  filterBy="#{cuenta.importe}"  sortBy="#{cuenta.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{dispersionbancomerBean.total}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Consultar" icon="icon-search"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{dispersionbancomerBean.consultar(event)}"
+                                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                                            <p:commandButton value="Descargar Dispersión" title="Descargar Dispersión" icon="icon-down"
+                                                             actionListener="#{dispersionbancomerBean.listenerSelected()}"
+                                                             oncomplete="handleLShow(args)" styleClass="style_botones" 
+                                                             onclick="statusDialog.show();"/> 
+
+                                            <p:commandButton value="Prueba" title="Descargar Prueba 0.01"
+                                                             actionListener="#{dispersionbancomerBean.lanzarPrueba()}"
+                                                             oncomplete="handleLShow(args)" styleClass="style_botones" 
+                                                             onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
