@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <div align="center">
+                    <h:form id="form">
+                        <h:panelGrid columns="1">
+                            <p:fieldset legend="Tipo Proceso(s) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false" collapsed="false">
+                                <div align="right">
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearch:display"
+                                                         actionListener="#{tipoprocesoBean.limpiar(event)}"
+                                                         onclick="searchDialog.show();"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add"
+                                                         title="Alta" value="Alta"
+                                                         update=":formCreate:display"
+                                                         actionListener="#{tipoprocesoBean.limpiar(event)}"
+                                                         onclick="createDialog.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </div>
+
+                                <div align="center">
+                                    <p:panelGrid columns="1">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="#{tipoprocesoBean.informacion}"/> 
+                                        </f:facet>
+                                        <p:dataTable id="dataTable" var="tipoProceso" value="#{tipoprocesoBean.tiposProceso}"
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     rowKey="#{tipoProceso.idtipoproceso}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{tipoprocesoBean.filteredTiposProceso}"
+                                                     selection="#{tipoprocesoBean.tipoProceso}" selectionMode="single"
+                                                     scrollable="true" scrollHeight="250"
+                                                     widgetVar="registrosTable">
+
+                                            <p:ajax event="rowSelect" update=":formUpdate:display" oncomplete="updateDialog.show()"/>
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{tipoprocesoBean.descargarReporte()}" oncomplete="handleLShow(args)">   
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target="dataTable" fileName="Tipo Procesos" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{tipoProceso.tipoproceso}"
+                                                      sortBy="#{tipoProceso.tipoproceso}">
+                                                <f:facet name="header">
+                                                    <p:outputLabel value="Tipo Proceso"/>
+                                                </f:facet>
+                                                <h:outputText value="#{tipoProceso.tipoproceso}"/>
+                                            </p:column>
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{tipoProceso.nombre}"
+                                                      sortBy="#{tipoProceso.nombre}">
+                                                <f:facet name="header">
+                                                    <p:outputLabel value="Nombre"/>
+                                                </f:facet>
+                                                <h:outputText value="#{tipoProceso.nombre}"/>
+                                            </p:column>
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{tipoProceso.periodicidad}"
+                                                      sortBy="#{tipoProceso.periodicidad}">
+                                                <f:facet name="header">
+                                                    <p:outputLabel value="Periodicidad"/>
+                                                </f:facet>
+                                                <h:outputText value="#{tipoProceso.periodicidad}"/>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </div>
+                            </p:fieldset>
+                        </h:panelGrid>
+                    </h:form>
+                </div>
+                <!--FORM CREATE TIPO DE PROCESOS-->
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Tipo Proceso" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+
+                            <p:outputLabel value="Tipo Proceso: *"/>
+                            <p:inputText id="idTipoProceso" value="#{tipoprocesoBean.tipoProceso.tipoproceso}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorTipoProceso}"/>
+                            <p:message for="idTipoProceso" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreTiProc" value="#{tipoprocesoBean.tipoProceso.nombre}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorNombreTiProceso}"/>
+                            <p:message for="idNombreTiProc" display="icon"/>
+
+                            <p:outputLabel value="Periodicidad: *"/>
+                            <p:inputText id="idPeriodicidad" value="#{tipoprocesoBean.tipoProceso.periodicidad}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorPeriodicidad}"/>
+                            <p:message for="idPeriodicidad" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipoprocesoBean.create(event)}"
+                                                 update=":form, formCreate:display, :msgs"
+                                                 oncomplete="handleCreate(args);"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="createDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH TIPO PROCESOS -->
+                <h:form id="formSearch">
+                    <p:dialog header="Consultar Tipo Proceso(s)"
+                              widgetVar="searchDialog" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+
+                            <p:outputLabel value="Tipo Proceso: "/>
+                            <p:inputText value="#{tipoprocesoBean.tipoProceso.tipoproceso}"/>
+
+                            <p:outputLabel value="Nombre: "/>
+                            <p:inputText value="#{tipoprocesoBean.tipoProceso.nombre}"/>
+
+                            <p:outputLabel value="Periodicidad: "/>
+                            <p:inputText value="#{tipoprocesoBean.tipoProceso.periodicidad}"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipoprocesoBean.consultar(event)}"
+                                                 update=":form"
+                                                 onclick="searchDialog.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel"
+                                                 onclick="searchDialog.hide();"
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO UPDATE TIPO PROCESOS-->
+                <h:form id="formUpdate">
+                    <p:dialog header="Editar Tipo Proceso" 
+                              widgetVar="updateDialog" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="3">
+
+                            <p:outputLabel value="Tipo Proceso: *"/>
+                            <p:inputText id="idTipoProceso" value="#{tipoprocesoBean.tipoProceso.tipoproceso}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorTipoProceso}"/>
+                            <p:message for="idTipoProceso" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreTiProc" value="#{tipoprocesoBean.tipoProceso.nombre}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                            <p:message for="idNombreTiProc" display="icon"/>
+
+                            <p:outputLabel value="Periodicidad: *"/>
+                            <p:inputText id="idPeriodicidad" value="#{tipoprocesoBean.tipoProceso.periodicidad}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorPeriodicidad}"/>
+                            <p:message for="idPeriodicidad" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipoprocesoBean.edit(event)}"
+                                                 update=":form, :formUpdate:display, :msgs"
+                                                 onclick="updateDialog.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form> 
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
