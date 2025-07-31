@@ -1,0 +1,491 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="12" style="margin-top: 25px">
+                            <p:inputMask id="idFechainicio" value="#{incidenciaTerminalBean.fechaInicio}" mask="99/99/9999"
+                                         title="Fecha Inicio" placeholder="Fecha Inicio" />
+                            <p:inputMask id="idFechaFin" value="#{incidenciaTerminalBean.fechaFin}" mask="99/99/9999"
+                                         title="Fecha Fin" placeholder="Fecha Fin" />
+
+                            <p:commandButton value="Consultar" icon="icon-search" styleClass="style_botones"
+                                             actionListener="#{incidenciaTerminalBean.consultar(event)}"
+                                             onclick="statusDialog.show();"
+                                             update=":form, :msgs"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Marcajes - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="4">
+                                <p:commandButton value="Actualizar Registros" icon="icon-save"
+                                                 title="#{permisosBean.permisoTimbresRecibos ?'Actualiza los registros modificados y seleccionados de la tabla':'No cuentas con los permisos necesarios para realizar esta acción'}"
+                                                 rendered="#{appBean.servicioDelMonte}" disabled="#{!permisosBean.permisoTimbresRecibos}" onstart="statusDialog.show()"
+                                                 styleClass="style_botones" actionListener="#{incidenciaTerminalBean.modificarMarcajes()}"/> 
+                                <p:commandButton value="Descargar Archivo" styleClass="style_botones" icon="icon-down"
+                                                 oncomplete="handleLShow(args)"
+                                                 actionListener="#{incidenciaTerminalBean.descargarReporteCsv()}"
+                                                 onstart="statusDialog.show()"
+                                                 title="Descarga el archivo csv con los registros mostrados en la tabla"/>
+                                <p:commandButton value="Carga Marcajes" styleClass="style_botones" icon="icon-down"
+                                                 onstart="statusDialog.show()" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"
+                                                 actionListener="#{incidenciaTerminalBean.openModalCargaMarcajes(event)}"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{incidenciaTerminalBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="incidencia"
+                                                 value="#{incidenciaTerminalBean.incidencias}"
+                                                 filteredValue="#{incidenciaTerminalBean.filteredIncidencias}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 paginator="true" rows="50" rowsPerPageTemplate="50,100,200,300" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 selection="#{incidenciaTerminalBean.selectedIncidencias}"
+                                                 widgetVar="registrosTable" editable="#{permisosBean.permisoTimbresRecibos}" editMode="cell"
+                                                 rowKey="#{incidencia.id}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center" rendered="#{permisosBean.permisoTimbresRecibos}"/>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.numeroEmpleado}" sortBy="#{incidencia.numeroEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Numero Empleado" title="Numero Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.numeroEmpleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.nombreEmpleado}" sortBy="#{incidencia.nombreEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre Empleado" title="Nombre Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.nombreEmpleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.cantidad}" sortBy="#{incidencia.cantidad}" headerText="Cantidad">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{incidencia.cantidad}"/>
+                                                    </div>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <div align="center">
+                                                        <p:inputText id="idcantidad" value="#{incidencia.cantidad}" />    
+                                                    </div>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.periodo}" sortBy="#{incidencia.periodo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.periodo}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.concepto}" sortBy="#{incidencia.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.concepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.referencia}" sortBy="#{incidencia.referencia}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.referencia}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.cuadrilla}" sortBy="#{incidencia.cuadrilla}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cuadrilla" title="Cuadrilla"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.cuadrilla}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.rancho}" sortBy="#{incidencia.rancho}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Rancho" title="Rancho"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.rancho}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.localidad}" sortBy="#{incidencia.localidad}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Localidad" title="Localidad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.localidad}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.lote}" sortBy="#{incidencia.lote}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Lote" title="Lote"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.lote}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.llave}" sortBy="#{incidencia.llave}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Llave" title="Llave"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.llave}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.estatusproceso}" sortBy="#{incidencia.estatusproceso}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Estatus" title="Estatus"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.estatusproceso == 1 ? 'Registrada': 'Recibida'}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.fechaRegistroPizca}" sortBy="#{incidencia.fechaRegistroPizca}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Registro" title="Fecha Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.fechaRegistroPizca}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.importe}" sortBy="#{incidencia.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.importe}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.costo}" sortBy="#{incidencia.costo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Costo" title="Costo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.costo}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.alias}" sortBy="#{incidencia.alias}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Alias" title="Alias"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.alias}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.notificacion}" sortBy="#{incidencia.notificacion}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Notificación" title="Notificación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.notificacion}"/>
+                                        </p:column>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+
+                                            <p:commandButton value="Reporte Ajustes Pizca" title="Reporte General" icon="icon-down"
+                                                             rendered="#{appBean.servicioDelMonte}"
+                                                             styleClass="style_botones" onclick="FechaReporteGeneralPizca.show();"/>
+                                            <p:commandButton value="Reporte General" title="Reporte General" icon="icon-down"
+                                                             rendered="#{appBean.servicioDelMonte}"
+                                                             styleClass="style_botones" onclick="FechaReporteGeneral.show();"/> 
+                                            <p:commandButton value="Reporte Lotes" title="Reporte Lotes" icon="icon-down"
+                                                             rendered="#{appBean.servicioDelMonte}"
+                                                             styleClass="style_botones" onclick="FechaReporteMarcajes.show();"/> 
+                                            <p:commandButton value="Reporte Cuadrilla Lotes Costo" title="Reporte Cuadrilla Lotes Costo" icon="icon-down"
+                                                             rendered="#{appBean.servicioDelMonte}"
+                                                             styleClass="style_botones" actionListener="#{incidenciaTerminalBean.openModalPeriodoCuadrillaLoteCosto(event)}"/> 
+                                            <p:commandButton value="Actualizar Comodin" title="Actualizar Comodin" icon="ui-icon-refresh"
+                                                             rendered="#{permisosBean.permisoOperacionesCalculoNominas}"
+                                                             styleClass="style_botones" actionListener="#{incidenciaTerminalBean.openModalUpdateComodinNumeroEmpleadoCosecha(event)}"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="fomrReporteMarcajes">
+                    <p:dialog header="Generar y Descargar Reporte" widgetVar="FechaReporteMarcajes" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="300px" height="50px" style="text-align: center"> 
+                        <p:inputMask id="idFechaBase" value="#{incidenciaTerminalBean.fechaReporte}" mask="99/99/9999"  style="text-align: center"
+                                     title="Fecha" placeholder="Fecha" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar" icon="icon-down"
+                                             actionListener="#{incidenciaTerminalBean.generarReporte()}"
+                                             onclick="FechaReporteMarcajes.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="FechaReporteMarcajes.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrReporteGeneral">
+                    <p:dialog header="Generar y Descargar Reporte" widgetVar="FechaReporteGeneral" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="clip" hideEffect="clip" modal="true" width="450px" height="50px" style="text-align: center"> 
+                        <p:inputMask id="idFechaInicioGrl" value="#{incidenciaTerminalBean.fechaInicioReporteGrl}" mask="99/99/9999"  style="text-align: center"
+                                     title="Fecha" placeholder="Fecha Inicio" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>&nbsp;&nbsp;
+
+                        <p:inputMask id="idFechaFinGrl" value="#{incidenciaTerminalBean.fechaFinReporteGrl}" mask="99/99/9999"  style="text-align: center"
+                                     title="Fecha" placeholder="Fecha Fin" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar" icon="icon-down"
+                                             actionListener="#{incidenciaTerminalBean.generarReporteGeneral()}"
+                                             onclick="FechaReporteGeneral.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="FechaReporteGeneral.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrReporteGeneralPizca">
+                    <p:dialog header="Generar y Descargar Reporte" widgetVar="FechaReporteGeneralPizca" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="clip" hideEffect="clip" modal="true" width="650px" height="70px" style="text-align: center"> 
+                        <h:panelGrid columns="4" style="margin-top: 5px">
+                            <p:selectCheckboxMenu id="idProducto" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{incidenciaTerminalBean.selectedProductos}" label="Producto(s)"
+                                                  required="true" requiredMessage="Favor de seleccionar producto(s)">
+                                <f:selectItems value="#{incidenciaTerminalBean.productos}" var="p" itemLabel="#{p.nombre}" itemValue="#{p.nombre}"/> 
+                            </p:selectCheckboxMenu>
+
+                            <p:inputMask id="idFechaInicioGrlPizca" value="#{incidenciaTerminalBean.fechaInicioReporteGrl}" mask="99/99/9999"  style="text-align: center"
+                                         title="Fecha" placeholder="Fecha Inicio" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>&nbsp;&nbsp;
+
+                            <p:inputMask id="idFechaFinGrlPizca" value="#{incidenciaTerminalBean.fechaFinReporteGrl}" mask="99/99/9999"  style="text-align: center"
+                                         title="Fecha" placeholder="Fecha Fin" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton value="Generar" icon="icon-down"
+                                             actionListener="#{incidenciaTerminalBean.generarReporteGeneralPizca()}"
+                                             onclick="FechaReporteGeneralPizca.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="FechaReporteGeneralPizca.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrReporteCuadrillaLoteCosto">
+                    <p:dialog header="Generar y Descargar Reporte" widgetVar="PeriodoCuadrillaLoteCosto" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="810px" height="70px" style="text-align: center"> 
+                        <h:panelGrid columns="8" style="margin-top: 5px">
+                            <p:selectCheckboxMenu id="idProducto" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{incidenciaTerminalBean.selectedProductos}" label="Producto(s)"
+                                                  required="true" requiredMessage="Favor de seleccionar producto(s)">
+                                <f:selectItems value="#{incidenciaTerminalBean.productos}" var="p" itemLabel="#{p.nombre}" itemValue="#{p.nombre}"/> 
+                            </p:selectCheckboxMenu>
+
+                            <p:inputText id="numeroPeriodo" value="#{incidenciaTerminalBean.numeroPeriodo}" placeholder="No. Periodo" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoCuaLotCost" />
+                            </p:inputText> 
+
+                            <p:inputText id="anioPeriodo" value="#{incidenciaTerminalBean.anioPeriodo}" placeholder="Anio" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoCuaLotCost" />
+                            </p:inputText> 
+
+                            <p:inputText id="tipoCambioUSD" value="#{incidenciaTerminalBean.tipoCambioUSD}" placeholder="Tipo Cambio USD" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoCuaLotCost" />
+                            </p:inputText> 
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton id="gnrRepoCuaLotCost" value="Generar" icon="icon-down" disabled="#{empty incidenciaTerminalBean.numeroPeriodo || empty incidenciaTerminalBean.anioPeriodo || empty incidenciaTerminalBean.tipoCambioUSD}"
+                                             actionListener="#{incidenciaTerminalBean.generarReporteCuadrillaLoteCosto()}"
+                                             onclick="PeriodoCuadrillaLoteCosto.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)" update=":msgs"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="PeriodoCuadrillaLoteCosto.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="fomrUpdateComodinNumeroEmpleadoCosecha">
+                    <p:dialog header="Actualizar Comodin por Empleado" widgetVar="UpdateComodinNumeroEmpleadoCosecha" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="600px" height="50px" style="text-align: center"> 
+                        <h:panelGrid columns="6" style="margin-top: 5px">
+                            <p:inputText id="numeroComodin" value="#{incidenciaTerminalBean.numeroComodin}" placeholder="No. Comodin" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrUpdComNumEmpCos" />
+                            </p:inputText> 
+
+                            <p:inputText id="numeroEmpleado" value="#{incidenciaTerminalBean.numeroEmpleado}" placeholder="No. Empleado" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrUpdComNumEmpCos" />
+                            </p:inputText> 
+
+                            <p:inputMask id="fechaRegistro" value="#{incidenciaTerminalBean.fechaRegistro}" mask="99/99/9999" placeholder="Fecha Registro" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrUpdComNumEmpCos" />
+                            </p:inputMask> 
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton id="gnrUpdComNumEmpCos" value="Actualizar" icon="icon-save" disabled="#{empty incidenciaTerminalBean.numeroComodin || empty incidenciaTerminalBean.numeroEmpleado || empty incidenciaTerminalBean.fechaRegistro}"
+                                             actionListener="#{incidenciaTerminalBean.modificarComodinNumeroEmpleadoCosecha()}"
+                                             onclick="UpdateComodinNumeroEmpleadoCosecha.hide();
+                                                     statusDialog.show();"
+                                             update=":msgs"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Actualizar Comodines Masivo" styleClass="style_botones" icon="icon-down"
+                                             onstart="statusDialog.show()" 
+                                             onclick="UploadComodinesDialog.show();"/> &nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="UpdateComodinNumeroEmpleadoCosecha.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formUploadComodines">
+                    <p:dialog id="comodinesDlg" header="Actualizar Comodines" widgetVar="UploadComodinesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="2" style="margin:0 auto;">  
+                            <p:commandButton value="Layout" icon="icon-down"
+                                             actionListener="#{incidenciaTerminalBean.descargarLayoutActualizarComodines(event)}"
+                                             onclick="UploadComodinesDialog.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)" update=":msgs"
+                                             styleClass="style_botones"/>
+
+                            <h:form id="formFileComodines" enctype="multipart/form-data"> 
+                                <p:commandLink value="Cargar Comodines" oncomplete="PF('submitCargarComodinesDialog').show()"
+                                               style="padding: .3em 1em;" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-text ui-c" />      
+                            </h:form>      
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="UploadComodinesDialog.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                    <p:dialog  widgetVar="submitCargarComodinesDialog" modal="true">
+                        <h:form id="form" enctype="multipart/form-data" > 
+                            <h:panelGrid id="submitPanelGrid" columns="2"  >
+                                <p:fileUpload  value="#{incidenciaTerminalBean.archivo}" mode="advanced" 
+                                               oncomplete="statusDialog.hide(); submitCargarComodinesDialog.hide();"
+                                               fileUploadListener="#{incidenciaTerminalBean.fileUploadListenerActualizarComodines}" auto="true"
+                                               uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                            </h:panelGrid>
+                        </h:form>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formUploadMarcajes">
+                    <p:dialog id="marcajesDlg" header="Cargar Marcajes" widgetVar="UploadMarcajesDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="3" style="margin:0 auto;">  
+                            <p:commandButton value="Layout" icon="icon-down"
+                                             actionListener="#{incidenciaTerminalBean.descargarLayoutCargaMarcajes(event)}"
+                                             onclick="UploadMarcajesDialog.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)" update=":msgs"
+                                             styleClass="style_botones"/>
+
+                            <h:form id="formFileMarcajes" enctype="multipart/form-data"> 
+                                <p:commandLink id="uploadFileMarcajes" value="Cargar Marcajes" oncomplete="PF('submitCargarMarcajesDialog').show()" disabled="#{empty incidenciaTerminalBean.periodoMarcajes}"
+                                               style="padding: .3em 1em;" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-text ui-c" />    
+                            </h:form>
+
+                            <p:inputText id="periodoMarcajes" value="#{incidenciaTerminalBean.periodoMarcajes}" placeholder="Periodo Marcajes" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="@([id$=uploadFileMarcajes])" />
+                            </p:inputText> 
+
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="UploadMarcajesDialog.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                    <p:dialog  widgetVar="submitCargarMarcajesDialog" modal="true">
+                        <h:form id="form" enctype="multipart/form-data" > 
+                            <h:panelGrid id="submitPanelGrid" columns="2"  >
+                                <p:fileUpload  value="#{incidenciaTerminalBean.archivo}" mode="advanced" 
+                                               oncomplete="statusDialog.hide(); submitCargarMarcajesDialog.hide();"
+                                               fileUploadListener="#{incidenciaTerminalBean.fileUploadListenerMarcajes}" auto="true"
+                                               uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                            </h:panelGrid>
+                        </h:form>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
