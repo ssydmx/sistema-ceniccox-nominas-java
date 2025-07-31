@@ -1,0 +1,849 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <p:fieldset legend="Administración Perfiles - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                    <div align="right">
+                        <h:form id="form">
+                            <h:panelGrid columns="3">
+                                <p:selectOneMenu id="estatusUsuario" style="width: 150px" value="#{perfilBean.selectedEstatus}">  
+                                    <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                    <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                </p:selectOneMenu>
+                                <p:commandButton id="btnSearch" value="Consultar" icon="icon-search"
+                                                 actionListener="#{perfilBean.consultar(event)}"
+                                                 styleClass="style_botones"
+                                                 update=":formEmpleados"/> 
+                                <p:commandButton id="btnCreate" icon="icon-add"
+                                                 title="Alta" value="Alta"
+                                                 actionListener="#{perfilBean.limpiar(event)}"
+                                                 update=":formCreatePerfil:display"
+                                                 onclick="createDialog.show();"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </h:form>
+                    </div>
+                    <div align="center">
+                        <h:form id="formEmpleados">
+                            <p:panelGrid id="display" columns="1">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{perfilBean.informacion}"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="perfil" value="#{perfilBean.perfiles}" 
+                                                 resizableColumns="true" style="font-size: .8em; width: 1200px;margin-top: 15px;"
+                                                 scrollable="true" scrollHeight="300"
+                                                 rowKey="#{perfil.idPerfil}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{perfilBean.filteredPerfiles}"
+                                                 selection="#{perfilBean.selectedPerfil}" selectionMode="single"
+                                                 widgetVar="registrosTablePerfiles">
+
+                                        <p:ajax event="rowSelect" onstart="updateDialog.show();" update=":formUpdatePerfil:display"/>
+
+                                        <p:column filterMatchMode="contains" filterBy="#{perfil.nombre}" 
+                                                  sortBy="#{perfil.nombre}" width="120">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <h:outputText value="#{perfil.nombre}"/> 
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.estatus}" width="120"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Estatus" title="Estatus"/>
+                                            </f:facet>
+                                            <h:outputText value="#{perfil.estatus==1?'Activo':'Inactivo'}" 
+                                                          style="font-weight: bold;color: #{perfil.estatus==1?'green':'red'}"/> 
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.empleadosCatalogo}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Kardex" title="Kardex"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.empleadosCatalogo==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.empleadosCatalogo==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.empleadosCatalogo}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="R. Maestro" title="Reporte Maestro"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.empleadosReporteMaestro==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.empleadosReporteMaestro==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.timbreRecibos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Recibos" title="Timbres Recibos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.timbreRecibos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.timbreRecibos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.timbreReportes}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Reportes" title="Timbres Reportes"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.timbreReportes==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.timbreReportes==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesIncidencias}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Incidencias" title="Incidencias"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesIncidencias==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesIncidencias==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesVacaciones}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Vacaciones" title="Vacaciones"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesVacaciones==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesVacaciones==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesCalculoFiniquitos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cálculo Nóminas" title="Cálculo Nóminas"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesCalculoNominas==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesCalculoNominas==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesCalculoFiniquitos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="D. Bancaria" title="Dispersión Bancaria"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesDisperision==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesDisperision==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesCalculoFiniquitos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cálculo Finiquitos" title="Cálculo Finiquitos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesCalculoFiniquitos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesCalculoFiniquitos==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesCalculoFiniquitos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Consulta Finiquitos" title="Finiquitos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesConsultaFiniquitos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesConsultaFiniquitos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesAltaCreditos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="A. Créditos" title="Altas Créditos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesAltaCreditos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesAltaCreditos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesConsltaCreditos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Créditos" title="Consulta Créditos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesConsltaCreditos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesConsltaCreditos==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.operacionesConsultaAmortizacion}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Amortización" title="Consulta Amortización"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.operacionesConsultaAmortizacion==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.operacionesConsultaAmortizacion==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.entregablesAcumulados}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Acumulados" title="Entregables Acumulados"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.entregablesAcumulados==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.entregablesAcumulados==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.entregablesNomina}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Nómina" title="Entregables Nómina"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.entregablesNomina==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.entregablesNomina==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.entregablesLiquidaciones}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Liquidaciones" title="Entregables Liquidaciones"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.entregablesLiquidaciones==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.entregablesLiquidaciones==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatBancos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Bancos" title="Catálogo Bancos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatBancos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatBancos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatCompanias}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Compañías" title="Catálogo Compañías"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatCompanias==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatCompanias==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatExpedientes}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Expedientes" title="Catálogo Expedientes"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatExpedientes==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatExpedientes==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatFormulas}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Fórmulas" title="Catálogo Fórmulas"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatFormulas==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatFormulas==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatGeneral}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. General" title="Catálogo General"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatGeneral==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatGeneral==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatGeografico}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Geográfico" title="Catálogo Geográfico"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatGeografico==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatGeografico==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatConstanciaSat}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. SAT" title="Catálogo Constancias SAT"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatConstanciaSat==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatConstanciaSat==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatPeriodos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Periódos" title="Catálogo Periódos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatPeriodos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatPeriodos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatProcesos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Procesos" title="Catálogo Procesos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatProcesos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatProcesos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatRecursosHumanos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. R.H" title="Catálogo Recursos Humanos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatRecursosHumanos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatRecursosHumanos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatRegistroPatronal}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. R. Patronal" title="Catálogo Registro Patronal"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatRegistroPatronal==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatRegistroPatronal==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confCatRelacionLaboral}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. R. Laboral" title="Catálogo Relación Laboral"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confCatRelacionLaboral==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confCatRelacionLaboral==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confConceptosCatalogo}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Conceptos" title="Catálogo Conceptos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confConceptosCatalogo==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confConceptosCatalogo==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confConceptosGrupos}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Conceptos" title="Grupo Conceptos"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confConceptosGrupos==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confConceptosGrupos==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalAltaIdse}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Alta(IDSE)" title="Fiscal Alta(IDSE)"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalAltaIdse==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalAltaIdse==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalBajaIdse}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Baja(IDSE)" title="Fiscal Baja(IDSE)"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalBajaIdse==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalBajaIdse==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalSalarioIdse}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Salario(IDSE)" title="Fiscal Salario(IDSE)"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalSalarioIdse==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalSalarioIdse==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalMovimientosSua}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="M. SUA" title="Movimientos SUA"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalMovimientosSua==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalMovimientosSua==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalTrabajadoresSua}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. SUA" title="Trabajadores SUA"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalTrabajadoresSua==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalTrabajadoresSua==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalCreditosInfonavit}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Infonavit" title="Créditos Infonavit"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalCreditosInfonavit==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalCreditosInfonavit==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalVariabilidadBimestral}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="V. Bimestral" title="Variabilidad Bimestral"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalVariabilidadBimestral==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalVariabilidadBimestral==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalPreajusteAnual}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="P. Anual" title="Preajuste Anual"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalPreajusteAnual==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalPreajusteAnual==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalAjusteAnual}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="A. Anual" title="Ajuste Anual"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalAjusteAnual==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalAjusteAnual==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalDim}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="DIM" title="DIM"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalDim==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalDim==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.fiscalConstanciasAnuales}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Anuales" title="Constancias Anuales"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.fiscalConstanciasAnuales==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.fiscalConstanciasAnuales==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confLogs}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Soporte Logs" title="Soporte Logs"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confLogs==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confLogs==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confAdminUsuarios}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="A. Usuarios" title="Administración Usuarios"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confAdminUsuarios==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confAdminUsuarios==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confAdminPerfiles}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="A. Perfiles" title="Administración Perfiles"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confAdminPerfiles==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confAdminPerfiles==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confAdminSesiones}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Sesiones" title="Consola Sesiones"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confAdminSesiones==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confAdminSesiones==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confConexiones}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="S. Conexiones" title="Soporte Conexiones"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confConexiones==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confConexiones==0}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confLogs}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="S. Logs" title="Soporte Logs"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.confLogs==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.confLogs==0}"/>
+                                        </p:column>
+                                        
+                                        <p:column filterMatchMode="contains" sortBy="#{perfil.confLogs}"
+                                                  style="text-align: center" width="80">
+                                            <f:facet name="header">
+                                                <h:outputText value="Interface JDE" title="Interface JDE"/>
+                                            </f:facet>
+                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{perfil.empleadosInterface==1}"/>
+                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{perfil.empleadosInterface==0}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:panelGrid>
+                        </h:form>
+                    </div>  
+                    <div align="center">
+                        <h:form id="formUpdatePerfil">
+                            <p:dialog header="Editar Perfil" 
+                                      widgetVar="updateDialog" resizable="false" id="updateDlgPerfil" position="center,center" closeOnEscape="true"
+                                      showEffect="fade" hideEffect="explode" modal="true">  
+
+                                <h:panelGrid id="display" columns="10" cellpadding="10">
+
+                                    <f:facet name="header">
+                                        <div align="center">
+                                            <h:panelGrid columns="6">
+                                                <p:outputLabel value="Nombre: *"/>
+                                                <p:inputText id="idNombre" value="#{perfilBean.selectedPerfil.nombre}"
+                                                             required="true" requiredMessage="#{appBean.mensajeErrorNombre}" size="10"/>
+                                                <p:message for="idNombre" display="icon"/>
+
+                                                <p:outputLabel value="Estatus: *"/>
+                                                <p:selectOneMenu id="estatusSelected" style="width: 110px" value="#{perfilBean.selectedPerfil.estatus}"
+                                                                 required="true" requiredMessage="#{appBean.mensajeErrorEstatus}">  
+                                                    <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                                    <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                                </p:selectOneMenu>
+                                                <p:message for="estatusSelected" display="icon"/>    
+                                            </h:panelGrid>
+                                        </div>
+                                    </f:facet>
+
+                                    <h:outputText value="Kardex: " title="Kardex"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoKardex}" />
+
+                                    <h:outputText value="Reporte Maestro: " title="Reporte Maestro"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoReporteMaestro}" />
+
+                                    <h:outputText value="Timbres Recibos: " title="Timbres Recibos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoTimbresRecibos}" />
+
+                                    <h:outputText value="Timbres Reportes: " title="Timbres Reportes" />
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoTimbresReportes}" />
+
+                                    <h:outputText value="Incidencia: " title="Incidencias"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoIncidencias}" />
+                                    
+                                    <h:outputText value="Vacaciones: " title="Vacaciones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoVacaciones}" />
+
+                                    <h:outputText value="Cálculo Nóminas: " title="Cálculo Nóminas"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCalculoNominas}" />
+                                    
+                                    <h:outputText value="Cálculo Finiquitos: " title="Cálculo Finiquitos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoFiniquitos}" />
+                                    
+                                    <h:outputText value="Dispersión Bancaria: " title="Dispersión Bancaria"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoDispersion}" />
+                                    
+                                    <h:outputText value="Consulta Finiquitos: " title="Consulta Finiquitos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoFiniquitosConsulta}" />
+
+                                    <h:outputText value="A. Créditos: " title="Altas Créditos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCreditosAlta}" />
+
+                                    <h:outputText value="C. Créditos: " title="Consultas Créditos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCreditosConsulta}" />
+                                    
+                                    <h:outputText value="C. Amortización: " title="Consultas Amortización"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoAmortizacionConsulta}" />
+
+                                    <h:outputText value="Ent. Acumulados: " title="Entregables Acumulados"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoEntrgablesAcumulados}" />
+
+                                    <h:outputText value="Ent. Nómina: " title="Entregables Nómina"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoEntrgablesNominas}" />
+
+                                    <h:outputText value="Ent. Liquidaciones: " title="Entregables Liquidaciones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoEntrgablesLiquidaciones}" />
+
+                                    <h:outputText value="Cat. Bancos: " title="Catálogo Bancos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoBancos}" />
+
+                                    <h:outputText value="Cat. Compañías: " title="Catálogo Compañías"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoCompanias}" />
+
+                                    <h:outputText value="Cat. Expedientes: " title="Catálogo Expedientes"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoExpedientes}" />
+
+                                    <h:outputText value="Cat. Fórmulas: " title="Catálogo Fórmulas"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoFormulas}" />
+
+                                    <h:outputText value="Cat. General: " title="Catálogo General"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoGeneral}" />
+
+                                    <h:outputText value="Cat. Geográfico: " title="Catálogo Geográfico"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoGeografico}" />
+
+                                    <h:outputText value="Cat. SAT: " title="Catálogo Constancias SAT"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoConstanciasSat}" />
+
+                                    <h:outputText value="Cat. Periodos: " title="Catálogo Periodos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoPeriodos}" />
+
+                                    <h:outputText value="Cat. Procesos: " title="Catálogo Procesos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoProcesos}" />
+
+                                    <h:outputText value="Cat. R.H.: " title="Catálogo Recursos Humanos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoRecursosHumanos}" />
+
+                                    <h:outputText value="Cat. R. Patronal: " title="Catálogo Registro Patronal"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoRegistroPatronal}" />
+
+                                    <h:outputText value="Cat. R. Laboral: " title="Catálogo Relación Laboral"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoRelacionLaboral}" />
+
+                                    <h:outputText value="Cat. Conceptos: " title="Catálogo Conceptos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoCatalogoConceptos}" />
+
+                                    <h:outputText value="Gpo. Conceptos: " title="Grupo Conceptos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoGrupoConceptos}" />
+
+                                    <h:outputText value="F. Alta(IDSE): " title="Fiscal Alta(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoFiscalAltaIdse}" />
+
+                                    <h:outputText value="F. Baja(IDSE): " title="Fiscal Baja(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoFiscalBajaIdse}" />
+
+                                    <h:outputText value="F. Salario(IDSE)" title="Fiscal Salario(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoFiscalSalarioIdse}" />
+
+                                    <h:outputText value="Consola Sesiones: " title="Consola Sesiones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoAdministradorSesiones}" />
+
+                                    <h:outputText value="Soporte Conexiones: " title="Soporte Conexiones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoConfiguracionConexiones}" />
+
+                                    <h:outputText value="Soporte Logs: " title="Soporte Logs"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoConfiguracionLogs}" />
+
+                                    <h:outputText value="Admin. Usuarios: " title="Administración Usuarios"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoAdministracionUsuarios}" />
+
+                                    <h:outputText value="Admin. Perfiles: " title="Administración Perfiles"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoAdministracionPerfiles}" />
+                                    
+                                    <h:outputText value="Interface JDE: " title="Interface JDE"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.selectedPerfil.permisoInterface}" />
+
+
+                                </h:panelGrid>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-save" 
+                                                     title="Guardar" value="Guardar"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{perfilBean.edit(event)}"
+                                                     oncomplete="handleUpdate(args)"
+                                                     update=":formEmpleados, :formUpdatePerfil:display, :msgs"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     onclick="updateDialog.hide();"
+                                                     styleClass="style_botones" immediate="true"/>
+                                </f:facet>
+                            </p:dialog>
+                        </h:form>
+                    </div>
+                    <div align="center">
+                        <h:form id="formCreatePerfil">
+                            <p:dialog header="Alta Perfil" 
+                                      widgetVar="createDialog" resizable="false" id="createDlgPerfil" position="center,center" closeOnEscape="true"
+                                      showEffect="fade" hideEffect="explode" modal="true">  
+
+                                <h:panelGrid id="display" columns="10" cellpadding="10">
+
+                                    <f:facet name="header">
+                                        <div align="center">
+                                            <h:panelGrid columns="6">
+                                                <p:outputLabel value="Nombre: *"/>
+                                                <p:inputText id="idNombre" value="#{perfilBean.perfil.nombre}"
+                                                             required="true" requiredMessage="#{appBean.mensajeErrorNombre}" size="10"/>
+                                                <p:message for="idNombre" display="icon"/>
+
+                                                <p:outputLabel value="Estatus: *"/>
+                                                <p:selectOneMenu id="estatusSelected" style="width: 110px" value="#{perfilBean.perfil.estatus}"
+                                                                 required="true" requiredMessage="#{appBean.mensajeErrorEstatus}">  
+                                                    <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                                    <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                                </p:selectOneMenu>
+                                                <p:message for="estatusSelected" display="icon"/>    
+                                            </h:panelGrid>
+                                        </div>
+                                    </f:facet>
+
+                                    <h:outputText value="Kardex: " title="Kardex"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoKardex}" />
+
+                                    <h:outputText value="Reporte Maestro: " title="Reporte Maestro"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoReporteMaestro}" />
+
+                                    <h:outputText value="Timbres Recibos: " title="Timbres Recibos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoTimbresRecibos}" />
+
+                                    <h:outputText value="Timbres Reportes: " title="Timbres Reportes" />
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoTimbresReportes}" />
+
+                                    <h:outputText value="Incidencia: " title="Incidencias"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoIncidencias}" />
+                                    
+                                    <h:outputText value="Vacaciones: " title="Vacaciones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoVacaciones}" />
+
+                                    <h:outputText value="Cálculo Nóminas: " title="Cálculo Nóminas"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCalculoNominas}" />
+                                    
+                                    <h:outputText value="Cálculo Finiquitos: " title="Cálculo Finiquitos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoFiniquitos}" />
+                                    
+                                    <h:outputText value="Dispersión Bancaria: " title="Dispersión Bancaria"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoDispersion}" />
+                                    
+                                    <h:outputText value="Consulta Finiquitos: " title="Consulta Finiquitos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoFiniquitosConsulta}" />
+
+                                    <h:outputText value="A. Créditos: " title="Altas Créditos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCreditosAlta}" />
+
+                                    <h:outputText value="C. Créditos: " title="Consultas Créditos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCreditosConsulta}" />
+                                    
+                                    <h:outputText value="C. Amortización:" title="Consultas Amortización"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoAmortizacionConsulta}" />
+
+                                    <h:outputText value="Ent. Acumulados: " title="Entregables Acumulados"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoEntrgablesAcumulados}" />
+
+                                    <h:outputText value="Ent. Nómina: " title="Entregables Nómina"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoEntrgablesNominas}" />
+
+                                    <h:outputText value="Ent. Liquidaciones: " title="Entregables Liquidaciones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoEntrgablesLiquidaciones}" />
+
+                                    <h:outputText value="Cat. Bancos: " title="Catálogo Bancos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoBancos}" />
+
+                                    <h:outputText value="Cat. Compañías: " title="Catálogo Compañías"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoCompanias}" />
+
+                                    <h:outputText value="Cat. Expedientes: " title="Catálogo Expedientes"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoExpedientes}" />
+
+                                    <h:outputText value="Cat. Fórmulas: " title="Catálogo Fórmulas"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoFormulas}" />
+
+                                    <h:outputText value="Cat. General: " title="Catálogo General"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoGeneral}" />
+
+                                    <h:outputText value="Cat. Geográfico: " title="Catálogo Geográfico"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoGeografico}" />
+
+                                    <h:outputText value="Cat. SAT: " title="Catálogo Constancias SAT"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoConstanciasSat}" />
+
+                                    <h:outputText value="Cat. Periodos: " title="Catálogo Periodos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoPeriodos}" />
+
+                                    <h:outputText value="Cat. Procesos: " title="Catálogo Procesos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoProcesos}" />
+
+                                    <h:outputText value="Cat. R.H.: " title="Catálogo Recursos Humanos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoRecursosHumanos}" />
+
+                                    <h:outputText value="Cat. R. Patronal: " title="Catálogo Registro Patronal"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoRegistroPatronal}" />
+
+                                    <h:outputText value="Cat. R. Laboral: " title="Catálogo Relación Laboral"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoRelacionLaboral}" />
+
+                                    <h:outputText value="Cat. Conceptos: " title="Catálogo Conceptos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoCatalogoConceptos}" />
+
+                                    <h:outputText value="Gpo. Conceptos: " title="Grupo Conceptos"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoGrupoConceptos}" />
+
+                                    <h:outputText value="F. Alta(IDSE): " title="Fiscal Alta(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoFiscalAltaIdse}" />
+
+                                    <h:outputText value="F. Baja(IDSE): " title="Fiscal Baja(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoFiscalBajaIdse}" />
+
+                                    <h:outputText value="F. Salario(IDSE)" title="Fiscal Salario(IDSE)"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoFiscalSalarioIdse}" />
+
+                                    <h:outputText value="Consola Sesiones: " title="Consola Sesiones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoAdministradorSesiones}" />
+
+                                    <h:outputText value="Soporte Conexiones: " title="Soporte Conexiones"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoConfiguracionConexiones}" />
+
+                                    <h:outputText value="Soporte Logs: " title="Soporte Logs"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoConfiguracionLogs}" />
+
+                                    <h:outputText value="Admin. Usuarios: " title="Administración Usuarios"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoAdministracionUsuarios}" />
+
+                                    <h:outputText value="Admin. Perfiles: " title="Administración Perfiles"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoAdministracionPerfiles}" />
+                                    
+                                    <h:outputText value="Interface JDE: " title="Interface JDE"/>
+                                    <p:selectBooleanCheckbox value="#{perfilBean.perfil.permisoInterface}" />
+
+
+                                </h:panelGrid>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Guardar"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{perfilBean.create(event)}"
+                                                     oncomplete="handleCreate(args)"
+                                                     update=":formEmpleados, :formCreatePerfil:display, :msgs"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     onclick="createDialog.hide();"
+                                                     styleClass="style_botones" immediate="true"/>
+                                </f:facet>
+                            </p:dialog>
+                        </h:form>
+                    </div>
+                </p:fieldset>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
