@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="6" style="margin-top: 25px">
+
+                            <p:inputText id="idNumeroEmpleado" value="#{consultacreditoBean.numeroEmpleado}" placeholder="Número Empleado"
+                                         style="width: 190px"/>
+                            <p:message for="idNumeroEmpleado" display="tooltip"/>
+
+                            <p:selectOneMenu id="grupoPago" style="width: 200px" value="#{consultacreditoBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.grupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="grupoPago" display="tooltip"/>
+
+                            <p:selectOneMenu id="tipoCredito" style="width: 200px" value="#{consultacreditoBean.selectedConcepto}"
+                                             filter="true" filterMatchMode="contains" >  
+                                <f:selectItem itemValue="" itemLabel="Tipo Crédito"/>
+                                <f:selectItems value="#{consultacreditoBean.conceptos}"
+                                               var="concepto" itemValue="#{concepto.concepto}" itemLabel="#{concepto.concepto} - (#{concepto.nombre})"/>  
+                            </p:selectOneMenu>
+                            <p:message for="tipoCredito" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{consultacreditoBean.anio}" placeholder="Año" required="true" 
+                                         requiredMessage="#{appBean.mensajeErrorAnioNomina}" style="width: 190px"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:inputText id="idPeriodo" value="#{consultacreditoBean.periodo}" placeholder="Periodo" style="width: 190px"/>
+                            <p:message for="idPeriodo" display="tooltip"/>
+
+                            <p:selectOneMenu id="idEstatus" style="width: 200px" value="#{consultacreditoBean.selectedEstatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatusCreditos}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idEstatus" display="tooltip"/>
+
+                        </h:panelGrid>
+                    </div> 
+                    <p:fieldset legend="Consulta Amortización - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{consultacreditoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="credito"
+                                                 value="#{consultacreditoBean.creditos}"
+                                                 filteredValue="#{consultacreditoBean.filteredCreditos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{credito.idVista}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Creditos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.numeroEmpleado}"
+                                                  sortBy="#{credito.numeroEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.numeroEmpleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.nombreEmpleado}"
+                                                  sortBy="#{credito.nombreEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.nombreEmpleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  sortBy="#{credito.folio}" filterBy="#{credito.folio}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.folio}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.estatusCredito}" sortBy="#{credito.estatusCredito}">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Crédito" title="Estatus crédito"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.estatusCredito}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.estatusAmortizacion}" sortBy="#{credito.estatusAmortizacion}">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Amortización" title="Estatus Amortización"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.estatusAmortizacion}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.concepto} - #{credito.descripcionConcepto}"
+                                                  sortBy="#{credito.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.concepto} - #{credito.descripcionConcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  sortBy="#{credito.referencia}" filterBy="#{credito.referencia}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.referencia}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.fechaRegistroStr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Registro" title="Fecha Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.fechaRegistroStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.fechaAPagarStr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. a Pagar" title="Fecha a Pagar"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.fechaAPagarStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.fechaAPagarStr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Pago" title="Fecha Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.fechaPagoStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.deuda}" sortBy="#{credito.deuda}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Deuda" title="Deuda"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.deuda}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.aportacion}" sortBy="#{credito.aportacion}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Aportación" title="Aportación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.aportacion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.importeTotalDeuda}" sortBy="#{credito.importeTotalDeuda}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I. Total" title="Importe Total"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.importeTotalDeuda}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                                             actionListener="#{consultacreditoBean.consultar(event)}" onstart="statusDialog.show()"
+                                                             update=":msgs, :form"/>
+
+                                            <p:commandButton value="Limpiar" icon="ui-icon-trash"
+                                                             styleClass="style_botones"
+                                                             immediate="true"
+                                                             actionListener="#{consultacreditoBean.limpiar(event)}"
+                                                             update="dataTable" onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
