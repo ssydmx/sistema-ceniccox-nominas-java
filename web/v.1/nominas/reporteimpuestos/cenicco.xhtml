@@ -1,0 +1,439 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Impuestos Mensuales - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="center">
+                            <p:tabView id="tabViewGeneral" dynamic="true" cache="false">
+                                <p:ajax event="tabChange" listener="#{reporteImpuestosBean.onTabChange}" update="one-content,two-content,three-content" />
+                                <p:tab title="ISN Global" id="tab1">
+                                    <h:panelGroup id="one-content">
+                                        <h:panelGrid columns="6">
+                                            <p:selectCheckboxMenu panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                                  value="#{reporteImpuestosBean.grupopago}" label="Grupo(s) Pago">
+                                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            </p:selectCheckboxMenu>
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesinicio}" placeholder="Mes Incio" size="10" style="text-align: center"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesfin}" placeholder="Mes Fin" size="10" style="text-align: center"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.anio}" placeholder="Año" size="10" style="text-align: center"/>
+
+                                            <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{reporteImpuestosBean.consultarIsnGlobal(event)}"
+                                                             update="displayIsnGlobal, :msgs" onclick="statusDialog.show();"/> 
+                                        </h:panelGrid>
+                                        <p:panelGrid id="displayIsnGlobal" style="margin-top: 5px;">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{reporteImpuestosBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTable" var="vista"
+                                                                 value="#{reporteImpuestosBean.registros}"
+                                                                 filteredValue="#{reporteImpuestosBean.filteredRegistros}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 scrollHeight="300" style="font-size: .8em"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTable"
+                                                                 rowKey="#{vista.idconceptonomina}">
+
+                                                        <f:facet name="header">
+                                                            <p:outputPanel>  
+                                                                <h:outputText value="Buscador:" />  
+                                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                                <div class="datableImagenes" id="csv">
+                                                                    <p:commandLink id="csv" actionListener="#{reporteImpuestosBean.descargarReporteEstadoIsnMensual()}" oncomplete="handleLShow(args)"
+                                                                                   onclick="statusDialog.show();">  
+                                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    </p:commandLink>
+                                                                </div>
+                                                            </p:outputPanel>
+                                                        </f:facet>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroconcepto} - #{vista.nombreconcepto}"  sortBy="#{vista.numeroconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Concepto" title="Concepto"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroconcepto} - #{vista.nombreconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.grupopago}"  sortBy="#{vista.grupopago}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Grupo Pago" title="Grupo Pago"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.grupopago}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Año" title="Año"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.mes}"  sortBy="#{vista.mes}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Mes" title="Mes"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.mes}"/>
+                                                            <f:facet name="footer">
+                                                                <p:outputLabel value="Total:"/>
+                                                            </f:facet>
+                                                        </p:column>
+
+                                                        <p:column exportable="true" style="text-align: right" sortBy="#{vista.tiempo}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Tiempo" title="Tiempo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalTiempo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                            <f:facet name="footer">
+                                                                <p:outputLabel value="#{reporteImpuestosBean.totalTiempo}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </f:facet>
+                                                        </p:column>
+
+                                                        <p:column exportable="true" style="text-align: right" sortBy="#{vista.importe}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Importe" title="Importe"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                            <f:facet name="footer">
+                                                                <p:outputLabel value="#{reporteImpuestosBean.totalImporte}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </f:facet>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                                <p:tab title="Empleado / Concepto" id="tab2" >
+                                    <h:panelGroup id="two-content">
+                                        <h:panelGrid columns="7">
+
+                                            <p:inputText value="#{reporteImpuestosBean.numeroempleado}" placeholder="No. Empleado" style="text-align: center" size="10"/>
+
+                                            <p:selectCheckboxMenu panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                                  value="#{reporteImpuestosBean.grupopago}" label="Grupo(s) Pago">
+                                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            </p:selectCheckboxMenu>
+
+                                            <p:selectOneMenu style="width: 200px" value="#{reporteImpuestosBean.idregistropatronal}"
+                                                             filter="true" filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+                                                <f:selectItems value="#{registropatronalBean.registros}" 
+                                                               var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}" 
+                                                               itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                                            </p:selectOneMenu>                                                                                  
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesinicio}" placeholder="Mes Incio" style="text-align: center" size="10"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesfin}" placeholder="Mes Fin" style="text-align: center" size="10"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.anio}" placeholder="Año" style="text-align: center" size="10"/>
+
+                                            <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{reporteImpuestosBean.consultarAcumuladoMensual(event)}"
+                                                             update="displayEmpleadoConcepto, :msgs" onclick="statusDialog.show();"/> 
+                                        </h:panelGrid>
+                                        <p:panelGrid id="displayEmpleadoConcepto" style="margin-top: 5px;">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{reporteImpuestosBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTableEmpleadoConcepto" var="vista" paginator="true"
+                                                                 value="#{reporteImpuestosBean.registros}"
+                                                                 filteredValue="#{reporteImpuestosBean.filteredRegistros}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                                                 rowsPerPageTemplate="50,100,200,500,1000"
+                                                                 rows="50" style="font-size: .8em" lazy="true"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTableEmpleado"
+                                                                 rowKey="#{vista.idconceptonomina}">
+
+                                                        <f:facet name="header">
+                                                            <p:outputPanel>  
+                                                                <p:tooltip id="toolTip-csv-a" for="csv-a" value="Reporte Empleado Concepto"/>
+                                                                <p:tooltip id="toolTip-csv-b" for="csv-b" value="Reporte Base ISN"/>
+                                                                <div class="datableImagenes">
+                                                                    <p:commandLink id="csv-b" actionListener="#{reporteImpuestosBean.descargarReporteMensualBaseIsn()}" oncomplete="handleLShow(args)"
+                                                                                   onclick="statusDialog.show();">  
+                                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    </p:commandLink>
+                                                                </div>
+                                                                <div class="datableImagenes">
+                                                                    <p:commandLink id="csv-a" actionListener="#{reporteImpuestosBean.descargarReporteMensualAcumuladosEmpleado()}" oncomplete="handleLShow(args)"
+                                                                                   onclick="statusDialog.show();">  
+                                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    </p:commandLink>
+                                                                </div>
+                                                            </p:outputPanel>
+                                                        </f:facet>
+
+                                                        <p:column headerText="No. Empleado">
+                                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Empleado">
+                                                            <p:outputLabel value="#{vista.nombreempleado} - #{vista.nombreempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="S.D.">
+                                                            <p:outputLabel value="#{vista.sd}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column headerText="S.D.I.">
+                                                            <p:outputLabel value="#{vista.sdi}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column headerText="Grupo Pago">
+                                                            <p:outputLabel value="#{vista.grupopago} - #{vista.nombregrupopago}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Registro Patronal">
+                                                            <p:outputLabel value="#{vista.registropatronal}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Tipo Proceso">
+                                                            <p:outputLabel value="#{vista.tipoproceso}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Concepto">
+                                                            <p:outputLabel value="#{vista.numeroconcepto} - #{vista.nombreconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Naturaleza">
+                                                            <p:outputLabel value="#{vista.naturaleza}"/>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" headerText="Año">
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" headerText="Mes" footerText="Total:">
+                                                            <p:outputLabel value="#{vista.mes}"/>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" sortBy="#{vista.totalTiempo}" headerText="Tiempo">
+                                                            <p:outputLabel value="#{vista.totalTiempo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                            <f:facet name="footer">
+                                                                <p:outputLabel value="#{reporteImpuestosBean.totalTiempo}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </f:facet>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" headerText="Importe" 
+                                                                  footerText="#{reporteImpuestosBean.totalImporte}">
+                                                            <p:outputLabel value="#{vista.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                            <f:facet name="footer">
+                                                                <p:outputLabel value="#{reporteImpuestosBean.totalImporte}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </f:facet>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                                <p:tab title="Acumulados" id="tab3">
+                                    <h:panelGroup id="three-content">
+                                        <h:panelGrid columns="6">
+                                            <p:selectCheckboxMenu panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                                  value="#{reporteImpuestosBean.grupopago}" label="Grupo(s) Pago">
+                                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            </p:selectCheckboxMenu>
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesinicio}" placeholder="Mes Incio" size="10" style="text-align: center"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.mesfin}" placeholder="Mes Fin" size="10" style="text-align: center"/>
+
+                                            <p:inputText value="#{reporteImpuestosBean.anio}" placeholder="Año" size="10" style="text-align: center"/>
+
+                                            <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{reporteImpuestosBean.consultarIsrRetenido(event)}"
+                                                             update="displayIsrRetenido, :msgs" onclick="statusDialog.show();"/> 
+                                        </h:panelGrid>
+                                        <p:panelGrid id="displayIsrRetenido" style="margin-top: 5px;">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{reporteImpuestosBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTableIsrRetenido" var="vista"
+                                                                 value="#{reporteImpuestosBean.registros}"
+                                                                 filteredValue="#{reporteImpuestosBean.filteredRegistros}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 scrollHeight="300" style="font-size: .8em"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTable"
+                                                                 rowKey="#{vista.idconceptonomina}">
+
+                                                        <f:facet name="header">
+                                                            <p:outputPanel>  
+                                                                <h:outputText value="Buscador:" />  
+                                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                                <div class="datableImagenes" id="csv">
+                                                                    <h:commandLink id="csv">  
+                                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                        <p:dataExporter type="csv" target="dataTableIsrRetenido" fileName="ReporteMensualIsrRetenido" />  
+                                                                    </h:commandLink>
+                                                                </div>
+                                                            </p:outputPanel>
+                                                        </f:facet>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="No. Empleado" title="No. Empleado"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreempleado}"  sortBy="#{vista.nombreempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Empleado" title="Empleado"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.grupopago}"  sortBy="#{vista.grupopago}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Grupo Pago" title="Grupo Pago"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.grupopago}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Año" title="Año"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.mes}"  sortBy="#{vista.mes}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Mes" title="Mes"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.mes}"/>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" exportable="true">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Subsidio Pagado" title="Subsidio Pagado"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalSubsidioPagado}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" exportable="true">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="BG ISR" title="BG ISR"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalGravable}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column style="text-align: right" exportable="true">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="ISR Retenido" title="ISR Retenido"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalIsr}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                            </p:tabView>
+                        </div>
+
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
