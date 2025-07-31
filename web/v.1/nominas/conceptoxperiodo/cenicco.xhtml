@@ -1,0 +1,462 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <p:fieldset legend="Conceptos Por Periodo - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                            <p:tabView id="tabGeneral" dynamic="true" cache="false">
+                                <p:ajax event="tabChange" listener="#{conceptoxperiodoBean.onTabChange}" update="one-content,two-content" immediate="true"/>
+                                <p:tab title="Conceptos" id="tab1">
+                                    <h:panelGroup id="one-content">
+                                        <h:panelGrid columns="15">
+                                            <p:selectOneMenu id="idGrupoPago" style="width: 200px" 
+                                                             filter="true" filterMatchMode="contains" value="#{conceptoxperiodoBean.idgrupoapago}"
+                                                             required="#{conceptoxperiodoBean.validarTab1}" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            </p:selectOneMenu>
+                                            <p:message for="idGrupoPago" display="tooltip"/>
+
+                                            <p:inputText id="idPeriodoInicio" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodoinicio}" size="10" placeholder="Periodo Inicio"
+                                                         required="#{conceptoxperiodoBean.validarTab1}" requiredMessage="Favor de ingresar Periodo Inicio"/>
+                                            <p:message for="idPeriodoInicio" display="tooltip"/>
+
+                                            <p:inputText id="idPeriodoFin" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodofin}" size="10" placeholder="Periodo Fin"
+                                                         required="#{conceptoxperiodoBean.validarTab1}" requiredMessage="Favor de ingresar Periodo Fin"/>
+                                            <p:message for="idPeriodoFin" display="tooltip"/>
+
+                                            <p:inputText id="idAnio" style="text-align: center" 
+                                                         value="#{conceptoxperiodoBean.anio}" size="10" placeholder="Año"
+                                                         required="#{conceptoxperiodoBean.validarTab1}" requiredMessage="Favor de ingresar Año"/>
+                                            <p:message for="idAnio" display="tooltip"/>
+
+                                            <p:selectCheckboxMenu id="idConceptos" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                                  value="#{conceptoxperiodoBean.selectedConceptos}" label="Concepto(s)"
+                                                                  required="#{conceptoxperiodoBean.validarTab1}" requiredMessage="Favor de seleccionar al menos un Concepto">
+                                                <f:selectItems value="#{conceptoxperiodoBean.conceptos}"/> 
+                                            </p:selectCheckboxMenu>
+                                            <p:message for="idConceptos" display="tooltip"/>
+
+                                            <p:commandButton value="Consultar" icon="icon-search"
+                                                             styleClass="style_botones" update="displayConceptos, :msgs"
+                                                             actionListener="#{conceptoxperiodoBean.consultar(event)}"
+                                                             onclick="statusDialog.show();"/> 
+
+                                        </h:panelGrid>
+                                        <p:panelGrid id="displayConceptos">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{conceptoxperiodoBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTable" var="vista"
+                                                                 value="#{conceptoxperiodoBean.reporte}"
+                                                                 filteredValue="#{conceptoxperiodoBean.filteredReporte}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 scrollHeight="300" style="font-size: .8em"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTable"
+                                                                 rowKey="#{vista.idconceptonomina}">
+
+                                                        <f:facet name="header">
+                                                            <p:outputPanel>  
+                                                                <h:outputText value="Buscador:" />  
+                                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                                <div class="datableImagenes" id="csv">
+                                                                    <h:commandLink id="csv">  
+                                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                        <p:dataExporter type="csv" target="dataTable" fileName="ReporteXConcepto" />  
+                                                                    </h:commandLink>
+                                                                </div>
+                                                            </p:outputPanel>
+                                                        </f:facet>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreempleado}"  sortBy="#{vista.nombreempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Nombre" title="Nombre"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreempleado}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroconcepto}"  sortBy="#{vista.numeroconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Concepto" title="Concepto"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreconcepto}"  sortBy="#{vista.nombreconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Descripción" title="Descripción"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.importe}"  sortBy="#{vista.importe}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Importe" title="Importe"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.tiempo}"  sortBy="#{vista.tiempo}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Tiempo" title="Tiempo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.tiempo}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.periodo}"  sortBy="#{vista.periodo}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Periodo" title="Periodo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.periodo}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.mes}"  sortBy="#{vista.mes}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Mes" title="Mes"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.mes}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                                  filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Año" title="Año"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                                <p:tab title="Comparativa" id="tab2">
+                                    <h:panelGroup id="two-content">
+                                        <h:panelGrid columns="15">
+                                            <p:selectOneMenu id="idGrupoPagoCom" style="width: 200px" 
+                                                             filter="true" filterMatchMode="contains" value="#{conceptoxperiodoBean.grupoapagoComparar}"
+                                                             required="#{conceptoxperiodoBean.validarTab2}" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            </p:selectOneMenu>
+                                            <p:message for="idGrupoPagoCom" display="tooltip"/>
+
+                                            <p:inputText id="idPeriodo1" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodo1Comparar}" size="10" placeholder="Periodo"
+                                                         required="#{conceptoxperiodoBean.validarTab2}" requiredMessage="Favor de ingresar Periodo"/>
+                                            <p:message for="idPeriodo1" display="tooltip"/>
+
+                                            <p:inputText id="idAnio1" style="text-align: center" 
+                                                         value="#{conceptoxperiodoBean.anio1Comparar}" size="10" placeholder="Año"
+                                                         required="#{conceptoxperiodoBean.validarTab2}" requiredMessage="Favor de ingresar Año"/>
+                                            <p:message for="idAnio2" display="tooltip"/>
+
+                                            <p:inputText id="idPeriodo2" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodo2Comparar}" size="10" placeholder="Periodo 2"
+                                                         required="#{conceptoxperiodoBean.validarTab2}" requiredMessage="Favor de ingresar Periodo Comparar"/>
+                                            <p:message for="idPeriodo2" display="tooltip"/>
+
+                                            <p:inputText id="idAnio2" style="text-align: center" 
+                                                         value="#{conceptoxperiodoBean.anio2Comparar}" size="10" placeholder="Año 2"
+                                                         required="#{conceptoxperiodoBean.validarTab2}" requiredMessage="Favor de ingresar Año 2"/>
+                                            <p:message for="idAnio2" display="tooltip"/>
+
+                                            <p:selectCheckboxMenu id="tipoConceptosCom" label="Concepto(s)" panelStyle="width:450px" style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                                  filter="true" 
+                                                                  filterMatchMode="contains" 
+                                                                  required="#{conceptoxperiodoBean.validarTab2}"
+                                                                  requiredMessage="Favor de seleccionar al menos un Concepto"
+                                                                  value="#{conceptoxperiodoBean.selectedListConceptos}">  
+                                                <f:selectItems value="#{conceptoxperiodoBean.listConceptos}"
+                                                               var="concepto" itemValue="#{concepto.concepto}" itemLabel="#{concepto.concepto} - (#{concepto.nombre})"/>  
+                                            </p:selectCheckboxMenu>
+                                            <p:message for="idConceptos" display="tooltip"/>
+
+                                            <p:commandButton value="Consultar" icon="icon-search"
+                                                             styleClass="style_botones" update="displayComparativa, :msgs"
+                                                             actionListener="#{conceptoxperiodoBean.consultarComparativa(event)}"
+                                                             onclick="statusDialog.show();"/> 
+                                        </h:panelGrid>
+                                        <p:panelGrid id="displayComparativa">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{conceptoxperiodoBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTableComparativa" var="vista"
+                                                                 value="#{conceptoxperiodoBean.nominas}"
+                                                                 filteredValue="#{conceptoxperiodoBean.filteredNominas}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 scrollHeight="300" style="font-size: .8em"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTable"
+                                                                 rowKey="#{vista.idconceptonomina}">
+
+                                                        <f:facet name="header">
+                                                            <p:outputPanel>  
+                                                                <h:outputText value="Buscador:" />  
+                                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                                <div class="datableImagenes" id="pdf">
+                                                                    <p:commandLink id="pdf" actionListener="#{conceptoxperiodoBean.descargarPdfReporteNominaComparativaByConceptoConcentrado()}" oncomplete="handleLShow(args)" onstart="statusDialog.show()">  
+                                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                    </p:commandLink>
+                                                                </div>
+                                                                <div class="datableImagenes" id="csv">
+                                                                    <p:commandLink id="csv" actionListener="#{conceptoxperiodoBean.descargarExcelReporteNominaComparativaByConceptoConcentrado()}" oncomplete="handleLShow(args)" onstart="statusDialog.show()">  
+                                                                        <p:graphicImage value="/resources/images/icons/xls_table.png" />  
+                                                                    </p:commandLink>
+                                                                </div>
+                                                            </p:outputPanel>
+                                                        </f:facet>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroconcepto}"  sortBy="#{vista.numeroconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Concepto" title="Concepto"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreconcepto}"  sortBy="#{vista.nombreconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Descripción" title="Descripción"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.importe}"  sortBy="#{vista.importe}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Importe" title="Importe"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.periodo}"  sortBy="#{vista.periodo}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Periodo" title="Periodo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.periodo}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                                  filterBy="#{vista.mes}"  sortBy="#{vista.mes}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Mes" title="Mes"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.mes}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                                  filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Año" title="Año"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                                <p:tab title="Comparativa por Empleados" id="tab3">
+                                    <h:panelGroup id="contentComparativaEmpleados">
+                                        <h:panelGrid columns="15">
+                                            <p:selectOneMenu id="idTipoProceso" style="width: 200px" 
+                                                             filter="true" filterMatchMode="contains" value="#{conceptoxperiodoBean.tipoProcesoComparar}" required="#{conceptoxperiodoBean.validarTab3}"
+                                                             requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                                <f:selectItem itemValue="" itemLabel="Tipo de Proceso"/>
+                                                <f:selectItems value="#{tipoprocesoBean.tiposProceso}"
+                                                               var="tipoProceso" itemValue="#{tipoProceso.idtipoproceso}" itemLabel="#{tipoProceso.nombre}"/>  
+                                            </p:selectOneMenu>
+
+                                            <p:inputText id="idPeriodouno" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodo1Comparar}" size="10" placeholder="Periodo"
+                                                         required="#{conceptoxperiodoBean.validarTab3}" />
+                                            <p:message for="idPeriodouno" display="tooltip"/>
+
+
+                                            <p:inputText id="idAniouno" style="text-align: center" 
+                                                         value="#{conceptoxperiodoBean.anio1Comparar}" size="10" placeholder="Año"
+                                                         required="#{conceptoxperiodoBean.validarTab3}" />
+                                            <p:message for="idAniouno" display="tooltip"/>
+
+                                            <p:inputText id="idPeriododos" style="text-align: center"
+                                                         value="#{conceptoxperiodoBean.periodo2Comparar}" size="10" placeholder="Periodo 2"
+                                                         required="#{conceptoxperiodoBean.validarTab3}" />
+                                            <p:message for="idPeriododos" display="tooltip"/>
+
+
+                                            <p:inputText id="idAniodos" style="text-align: center" 
+                                                         value="#{conceptoxperiodoBean.anio2Comparar}" size="10" placeholder="Año 2"
+                                                         required="#{conceptoxperiodoBean.validarTab3}" />
+                                            <p:message for="idAniodos" display="tooltip"/>
+
+                                            <p:commandButton value="Consultar" icon="icon-search" styleClass="style_botones" 
+                                                             update="displayComparativaEmpleados, :msgs"
+                                                             actionListener="#{conceptoxperiodoBean.consultarComparativaEmpleado(event)}"
+                                                             onclick="statusDialog.show();"/>
+                                        </h:panelGrid>
+
+                                        <p:panelGrid id="displayComparativaEmpleados">
+                                            <f:facet name="header">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="center">
+                                                            <p:outputLabel value="#{comparativaBean.informacion}" style="color: white;"/>    
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                            <p:row>
+                                                <p:column>
+                                                    <p:dataTable id="dataTableComparativaEmpleado" var="vista"
+                                                                 value="#{conceptoxperiodoBean.nominas}"
+                                                                 filteredValue="#{conceptoxperiodoBean.filteredNominas}"
+                                                                 resizableColumns="true" scrollable="true"
+                                                                 scrollHeight="300" style="font-size: .8em"
+                                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                                 widgetVar="registrosTable"
+                                                                 rowKey="#{vista.idconceptonomina}" 
+                                                                 paginator="true" rows="50" rowsPerPageTemplate="50,100,200,300" paginatorPosition="bottom" paginatorAlwaysVisible="false">
+
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="No. Empleado" title="No. Empleado"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreempleado}"  sortBy="#{vista.nombreempleado}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Nombre" title="Nombre"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreempleado}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.numeroconcepto}"  sortBy="#{vista.numeroconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Concepto" title="Concepto"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.nombreconcepto}"  sortBy="#{vista.nombreconcepto}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Nombre" title="Nombre"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.importe}"  sortBy="#{vista.importe}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Valor" title="Valor"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.importe}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.periodo}"  sortBy="#{vista.periodo}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Periodo" title="Periodo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.periodo}"/>
+                                                        </p:column>
+                                                        <p:column filterMatchMode="contains" exportable="true"
+                                                                  filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Anio" title="Anio"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{vista.anio}"/>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:column>
+                                            </p:row>
+                                            <f:facet name="footer">
+                                                <p:row>
+                                                    <p:column>
+                                                        <div align="right">
+                                                            <p:commandButton value="Comparativa por empleados" icon="icon-down" styleClass="style_botones"
+                                                                             oncomplete="handleLShow(args)"
+                                                                             actionListener="#{conceptoxperiodoBean.descargarExcelReporteNominaComparativaByConceptoConcentradoEmpleado()}"
+                                                                             onstart="statusDialog.show()"
+                                                                             update=":form, :msgs"/>&nbsp;
+                                                        </div>
+                                                    </p:column>
+                                                </p:row>
+                                            </f:facet>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                </p:tab>
+                            </p:tabView>
+                        </p:fieldset>
+                    </div>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
