@@ -1,0 +1,189 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateFiscal.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="true" life="25000"/>
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="7" style="margin-top: 20px">
+                            <p:inputMask id="idFechaInicio" value="#{sueldoidseBean.fechaInicio}" mask="99/99/9999"
+                                         title="Fecha Inicio" placeholder="Fecha Inicio" required="true" 
+                                         requiredMessage="#{appBean.mensajeErrorFechaInicio}"/>
+                            <p:message for="idFechaInicio" display="tooltip"/>
+
+                            <p:inputMask id="idFechaFin" value="#{sueldoidseBean.fechaFin}" mask="99/99/9999"
+                                         title="Fecha Fin" placeholder="Fecha Fin" required="true" 
+                                         requiredMessage="#{appBean.mensajeErrorFechaFin}"/>
+                            <p:message for="idFechaFin" display="tooltip"/>
+
+                            <p:selectOneMenu id="registroPatronalRelacionLaboral" value="#{sueldoidseBean.vista.idregistropatronal}"
+                                             style="width: 150px" filter="true" 
+                                             required="true" requiredMessage="#{appBean.mensajeErrorRegistroPatronal}">  
+                                <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+                                <f:selectItems value="#{registropatronalBean.registros}" 
+                                               var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}"
+                                               itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                            </p:selectOneMenu>                                                                                  
+                            <p:message for="registroPatronalRelacionLaboral" display="tooltip"/>
+
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{sueldoidseBean.consultar(event)}"
+                                             onclick="statusDialog.show();"
+                                             update=":form,:msgs"/> 
+                        </h:panelGrid>
+
+                    </div>
+                    <p:fieldset legend="Modificación Salario (IDSE) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="center">
+                            <p:panelGrid id="display" style="margin-top: 5px">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{sueldoidseBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTable" var="rellab"
+                                                     value="#{sueldoidseBean.relacionesLaborales}"
+                                                     filteredValue="#{sueldoidseBean.filteredRelacionesLaborales}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     selection="#{sueldoidseBean.selectedRelacionesLaborales}"
+                                                     rowKey="#{rellab.idrelacionlaboral}"
+                                                     widgetVar="registrosTable">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target="dataTable" fileName="AltasIdse" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.numeroempleado}" sortBy="#{rellab.numeroempleado}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="No. Empleado"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.numeroempleado}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.nombreempleado}" sortBy="#{rellab.nombreempleado}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.nombreempleado}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.registropatronal}" sortBy="#{rellab.registropatronal}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="R. Patronal"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.registropatronal}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.nss}" sortBy="#{rellab.nss}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="N.S.S."/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.nss}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.curp}" sortBy="#{rellab.curp}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="C.U.R.P"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.curp}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.sdi}" sortBy="#{rellab.sdi}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="S.D.I"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.sdi}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.fechaingresoStr}" sortBy="#{rellab.fechaingresoStr}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="F. Ingreso"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.fechaingresoStr}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{rellab.fechasdiStr}" sortBy="#{rellab.fechasdiStr}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="F. Modificación"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{rellab.fechasdiStr}"/>
+                                            </p:column>
+
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                                <f:facet name="footer">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="right">
+                                                <p:commandButton value="Crear IDSE" icon="icon-exec"
+                                                                 actionListener="#{sueldoidseBean.create(event)}"
+                                                                 oncomplete="handleLShow(args)"
+                                                                 onclick="statusDialog.show();"
+                                                                 styleClass="style_botones"/> 
+                                                &nbsp;
+                                                <p:commandButton value="Sincronizar TemaWeb" styleClass="style_botones" icon="icon-exec"
+                                                                 actionListener="#{sueldoidseBean.sincronizarTemaWeb(event)}" onstart="statusDialog.show()"
+                                                                 update=":form,:msgs"/>
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                            </p:panelGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
