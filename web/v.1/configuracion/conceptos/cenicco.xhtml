@@ -1,0 +1,910 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:fieldset legend="Catálogo Conceptos- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="right">
+                            <h:panelGrid columns="2">
+                                <p:commandButton id="btnCreate" icon="icon-add" 
+                                                 title="Alta" value="Alta" 
+                                                 actionListener="#{conceptosBean.limpiar(event)}"
+                                                 update=":formCreate:display"
+                                                 onclick="createDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnSearch" icon="icon-search" 
+                                                 title="Consultar" value="Consultar"
+                                                 actionListener="#{conceptosBean.limpiar(event)}"
+                                                 update=":formSearch:display"
+                                                 onclick="searchDialog.show();"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </div>
+                        <div align="center">
+                            <p:panelGrid id="display" columns="1">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{conceptosBean.informacion}" style="color: white"/>             
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:dataTable id="dataTable" var="concepto" value="#{conceptosBean.conceptos}" 
+                                             resizableColumns="true"
+                                             style="font-size: .8em" 
+                                             scrollable="true" scrollHeight="250"
+                                             rowKey="#{concepto.idconcepto}"
+                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                             filteredValue="#{conceptosBean.filteredConceptos}"
+                                             widgetVar="registrosTable"
+                                             selection="#{conceptosBean.selectedConcepto}" selectionMode="single">  
+
+                                    <p:ajax event="rowSelect" update=":formUpdate" oncomplete="updateDialog.show()" listener="#{conceptosBean.listenerSelected()}"/>
+
+                                    <f:facet name="header">  
+                                        <p:outputPanel>  
+                                            <h:outputText value="Buscador:" />  
+                                            <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            <div class="datableImagenes" id="pdf">
+                                                <h:commandLink id="pdf">  
+                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    <p:dataExporter type="pdf" target=":form:dataTable" fileName="conceptos" />  
+                                                </h:commandLink>
+                                            </div>
+                                            <div class="datableImagenes" id="csv">
+                                                <p:commandLink id="csv" actionListener="#{conceptosBean.descargarConceptos()}" oncomplete="handleLShow(args)">  
+                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                </p:commandLink>
+                                            </div>
+                                        </p:outputPanel>
+                                    </f:facet>
+
+                                    <p:column width="4%">
+                                        <p:rowToggler />
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.idconcepto}" filterBy="#{concepto.idconcepto}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="ID Concepto"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.idconcepto}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.concepto}" filterBy="#{concepto.concepto}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Concepto"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.concepto}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.nombre}" filterBy="#{concepto.nombre}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Nombre"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.nombre}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.nombrecorto}" filterBy="#{concepto.nombrecorto}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Etiqueta"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.nombrecorto}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.auxiliar}" filterBy="#{concepto.auxiliar}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Auxiliar"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.auxiliar}"/>  
+                                    </p:column>
+                                    <p:column sortBy="#{concepto.cuentacontable}" filterBy="#{concepto.cuentacontable}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Cta. Contable" title="Cuenta Contable"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.cuentacontable}"/>  
+                                    </p:column>
+                                    <p:column sortBy="#{concepto.auxcuentacontable}" filterBy="#{concepto.auxcuentacontable}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Acum. Cta. Contable" title="Acum. Cta. Contable"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.auxcuentacontable}"/>  
+                                    </p:column>
+                                    <p:column sortBy="#{concepto.formula}" filterBy="#{concepto.formula}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Formula"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.formula}" title="#{concepto.formula}" style="font-size: .7em"/>  
+                                    </p:column>
+
+                                    <p:column id="tipoConceptoColumn" sortBy="#{concepto.conceptoDescripcion}"
+                                              filterBy="#{concepto.conceptoDescripcion}" filterMatchMode="contains" exportable="true">  
+                                        <f:facet name="header">
+                                            <h:outputText value="Tipo Concepto"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.conceptoDescripcion}"/>   
+                                    </p:column> 
+
+                                    <p:column sortBy="#{concepto.unidadDescripcion}" filterBy="#{concepto.unidadDescripcion}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Unidad"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.unidadDescripcion}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.naturalezaDescripcion}" filterBy="#{concepto.naturalezaDescripcion}" 
+                                              filterMatchMode="contains" exportable="true">
+                                        <f:facet name="header">
+                                            <h:outputText value="Naturaleza"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.naturalezaDescripcion}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.prioridad}" filterBy="#{concepto.prioridad}" 
+                                              filterMatchMode="contains" exportable="true" style="text-align: center">
+                                        <f:facet name="header">
+                                            <h:outputText value="Prioridad (Cálculo)"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.prioridad}"/>  
+                                    </p:column>
+
+                                    <p:column sortBy="#{concepto.prioridaddescuento}" filterBy="#{concepto.prioridaddescuento}" 
+                                              filterMatchMode="contains" exportable="true" style="text-align: center">
+                                        <f:facet name="header">
+                                            <h:outputText value="Prioridad (Sobregiro)"/>
+                                        </f:facet>
+                                        <h:outputText value="#{concepto.prioridaddescuento}"/>  
+                                    </p:column>
+
+                                    <p:rowExpansion>
+                                        <p:panelGrid columns="1" style="width:600px">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Aplica a:"/>
+                                            </f:facet>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Fórmula: #{concepto.formula}"/>
+                                            </f:facet>
+                                            <p:panelGrid columns="2">
+
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Creditos:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaCreditos}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaCreditos}"/>
+
+                                                    <p:outputLabel value="Finiquito:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaFiniquito}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaFiniquito}"/>
+
+                                                    <p:outputLabel value="Variabilidad:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaImss}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaImss}"/>
+
+                                                    <p:outputLabel value="Cta. Contable:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaPolizaContable}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaPolizaContable}"/>
+
+                                                    <p:outputLabel value="Incapacidad:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaIncapacidad}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaIncapacidad}"/>
+                                                </p:panelGrid>
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Sistema:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaSistema}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaSistema}"/>
+
+                                                    <p:outputLabel value="Totaliza:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaSuma}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaSuma}"/>
+
+                                                    <p:outputLabel value="Reportado:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaReportado}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaReportado}"/>
+
+                                                    <p:outputLabel value="Incidencia:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaIncidencia}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaIncidencia}"/>
+
+                                                    <p:outputLabel value="Pensión:" />
+                                                    <h:graphicImage url="#{appBean.urlEstadoActivo}" rendered="#{concepto.aplicaPension}"/>
+                                                    <h:graphicImage url="#{appBean.urlEstadoInactivo}" rendered="#{!concepto.aplicaPension}"/>
+                                                </p:panelGrid>
+                                            </p:panelGrid>
+                                        </p:panelGrid>
+                                    </p:rowExpansion>
+                                </p:dataTable>
+                            </p:panelGrid>
+                        </div>
+
+                    </p:fieldset>
+                </h:form>
+                <!--FORM CREATE-->
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Concepto" 
+                              widgetVar="createDialog" resizable="false" id="createDlg" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" maximizable="true">  
+                        <p:panelGrid id="display">
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Concepto: *"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.concepto.concepto}" title="Concepto"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorConcepto}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Nombre: *"/>    
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idNombre" value="#{conceptosBean.concepto.nombre}" title="#{conceptosBean.concepto.nombre}"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreConcepto}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Auxiliar (Cálculo):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.concepto.auxiliar}" title="#{conceptosBean.concepto.auxiliar}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Etiqueta: (Cálculo)"/>    
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.concepto.nombrecorto}" title="#{conceptosBean.concepto.nombrecorto}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Tipo Concepto: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idTipoConcepto" value="#{conceptosBean.concepto.tipoconcepto}" style="width: 180px" filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorTipoConcepto}">  
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.tiposConcepto}"
+                                                       var="tipo" itemValue="#{tipo.valor}" itemLabel="#{tipo.nombre}"/>  
+                                    </p:selectOneMenu>        
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Unidad: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idUnidad" value="#{conceptosBean.concepto.unidad}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorUnidadConcepto}">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.unidades}"
+                                                       var="unidad" itemValue="#{unidad.valor}" itemLabel="#{unidad.nombre}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Naturaleza: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idNaturaleza" value="#{conceptosBean.concepto.naturaleza}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorNaturalezaConcepto}">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.naturalezaConceptos}"
+                                                       var="naturaleza" itemValue="#{naturaleza.valor}" itemLabel="#{naturaleza.nombre}"/>
+                                        <p:ajax event="change" update="formCreate:leyReglamento" listener="#{conceptosBean.doToLeyReglamentoCreate()}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Constancia:" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idConstanciaSat" value="#{conceptosBean.concepto.idconstancia}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{constanciasatBean.constancias}"
+                                                       var="constancia" itemValue="#{constancia.idConstancia}" itemLabel="#{constancia.clave} - #{constancia.detalle}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Prioridad (Cálculo):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idPrioridad" value="#{conceptosBean.concepto.prioridad}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Prioridad (Sobregiro):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idSobregiro" value="#{conceptosBean.concepto.prioridaddescuento}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Redondeo:"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu value="#{conceptosBean.concepto.redondeo}" style="width: 180px">  
+                                        <f:selectItems value="#{appBean.comboRedondeo}"/>  
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Estados ISN:"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.concepto.estadosIsn}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Formula:"/>        
+                                </p:column>
+                                <p:column colspan="4">
+                                    <p:inputText id="idFormula" value="#{conceptosBean.concepto.formula}" style="width: 745px"/>
+                                </p:column>
+                            </p:row>
+
+                            <f:facet name="footer">
+                                <div align="center">
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idSat" style="font-size: .8em" toggleable="true" header="SAT:">
+                                                <p:panelGrid columns="6">
+                                                    <p:outputLabel value="Atributo:"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.atributo}" size="16"/>
+                                                    <p:outputLabel value="Nodo:"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.tiponodo}" size="16"/>
+                                                    <p:outputLabel value="Recibo Nómina:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaRecibonomina}"/>
+                                                    <p:outputLabel value="Concepto Gravado (Hijo):"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.concepto.conceptogravado}" style="width:130px" filter="true" filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{conceptosBean.comboConceptos}" var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - #{concepto.nombre}"/>
+                                                    </p:selectOneMenu>
+                                                    <p:outputLabel value="Concepto Exento (Hijo):"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.concepto.conceptoexento}" style="width:130px" filter="true" filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{conceptosBean.comboConceptos}" var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - #{concepto.nombre}"/>
+                                                    </p:selectOneMenu>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idImpuesto" style="font-size: .8em" toggleable="true" header="Aplica a:">
+                                                <p:panelGrid columns="12">
+                                                    <p:outputLabel value="Créditos:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaCreditos}"/>
+                                                    <p:outputLabel value="Finiquitos:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaFiniquito}"/>
+                                                    <p:outputLabel value="Sistema:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaSistema}"/>
+                                                    <p:outputLabel value="Totaliza:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaSuma}"/>
+                                                    <p:outputLabel value="Variabilidad(IMSS):"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaImss}"/>
+                                                    <p:outputLabel value="Unidad Variabilidad:"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.concepto.unidadvariabilidad}" style="width:100px" filter="true"
+                                                                     filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{catalogoGeneralBean.unidades}"
+                                                                       var="unidad" itemValue="#{unidad.valor}" itemLabel="#{unidad.nombre}"/>
+                                                    </p:selectOneMenu>
+
+                                                    <p:outputLabel value="Reportado:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaReportado}"/>
+                                                    <p:outputLabel value="Incidencia:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaIncidencia}"/>
+                                                    <p:outputLabel value="Incapacidad:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaIncapacidad}"/>
+                                                    <p:outputLabel value="Pensión:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaPension}"/>
+                                                    <p:outputLabel value="Póliza:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaPolizaContable}"/>
+                                                    <p:outputLabel value="Tipo Cuenta (Póliza):"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.concepto.cargoabono}" 
+                                                                     style="width: 100px" filter="true" filterMatchMode="contains">  
+                                                        <f:selectItems value="#{appBean.comboCargoAbono}"/>
+                                                    </p:selectOneMenu> 
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idAjusteAnual" style="font-size: .8em" toggleable="true" header="Ajuste Anual:">
+                                                <p:panelGrid columns="4">
+                                                    <p:outputLabel value="Previsión Social:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.concepto.aplicaPrevisionSocial}"/>
+                                                    <p:outputLabel value="Prioridad Cálculo:"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.prioridadprevisionsocial}" size="5"/>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idCtaContables" style="font-size: .8em" toggleable="true" header="Cuenta Contable:">
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Cuenta Contable"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.cuentacontable}" size="120"/>
+                                                    <p:outputLabel value="Acum. Cta. Contable"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.auxcuentacontable}" size="120"/>
+                                                    <p:outputLabel value="Asociar Cta. Contable"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.asociarcuentacontable}" size="120"/>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="leyReglamento" style="font-size: .8em" toggleable="true" header="Propiedades:" collapsed="true">
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Reporteria: *"/>
+                                                    <p:inputText value="#{conceptosBean.concepto.reporteria}" size="135"/>
+                                                </p:panelGrid>
+                                                <br></br>
+                                                <p:panelGrid columns="6" rendered="#{conceptosBean.leyReglamento}">
+                                                    <p:row>
+                                                        <p:column>
+                                                            <p:outputLabel value="Tipo calculo ISR: *" />          
+                                                        </p:column>
+                                                        <p:column colspan="3">
+                                                            <p:selectOneRadio value="#{conceptosBean.concepto.leyReglamento}">  
+                                                                <f:selectItem itemLabel="Por ley" itemValue="0" />  
+                                                                <f:selectItem itemLabel="Por reglamento" itemValue="1" />
+                                                            </p:selectOneRadio>
+                                                        </p:column>
+                                                    </p:row>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                </div>
+
+
+                            </f:facet>
+                        </p:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{conceptosBean.create(event)}"
+                                             update=":formCreate:display, :msgs"
+                                             oncomplete="handleCreate(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+                <!--FORM UPDATE-->
+                <h:form id="formUpdate">
+                    <p:dialog header="Editar Concepto" 
+                              widgetVar="updateDialog" resizable="false" id="updateDlg" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" maximizable="true">  
+
+                        <p:panelGrid id="display">
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Concepto (#{conceptosBean.selectedConcepto.idconcepto}) : *"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.selectedConcepto.concepto}" title="Concepto"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorConcepto}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Nombre: *"/>    
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idNombre" value="#{conceptosBean.selectedConcepto.nombre}" title="#{conceptosBean.selectedConcepto.nombre}"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreConcepto}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Auxiliar (Cálculo):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.selectedConcepto.auxiliar}" title="#{conceptosBean.selectedConcepto.auxiliar}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Etiqueta: (Cálculo)"/>    
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.selectedConcepto.nombrecorto}" title="#{conceptosBean.selectedConcepto.nombrecorto}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Tipo Concepto: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idTipoConcepto" value="#{conceptosBean.selectedConcepto.tipoconcepto}" style="width: 180px" filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorTipoConcepto}">  
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.tiposConcepto}"
+                                                       var="tipo" itemValue="#{tipo.valor}" itemLabel="#{tipo.nombre}"/>  
+                                    </p:selectOneMenu>        
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Unidad: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idUnidad" value="#{conceptosBean.selectedConcepto.unidad}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorUnidadConcepto}">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.unidades}"
+                                                       var="unidad" itemValue="#{unidad.valor}" itemLabel="#{unidad.nombre}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Naturaleza: *" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idNaturaleza" value="#{conceptosBean.selectedConcepto.naturaleza}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorNaturalezaConcepto}">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{catalogoGeneralBean.naturalezaConceptos}"
+                                                       var="naturaleza" itemValue="#{naturaleza.valor}" itemLabel="#{naturaleza.nombre}"/>
+                                        <p:ajax event="change" update="formUpdate:leyReglamento" listener="#{conceptosBean.doToLeyReglamento()}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Constancia:" />          
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="idConstanciaSat" value="#{conceptosBean.selectedConcepto.idconstancia}" style="width:180px" filter="true"
+                                                     filterMatchMode="contains">
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{constanciasatBean.constancias}"
+                                                       var="constancia" itemValue="#{constancia.idConstancia}" itemLabel="#{constancia.clave} - #{constancia.detalle}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Prioridad (Cálculo):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idPrioridad" value="#{conceptosBean.selectedConcepto.prioridad}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Prioridad (Sobregiro):"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText id="idSobregiro" value="#{conceptosBean.selectedConcepto.prioridaddescuento}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Redondeo:"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu value="#{conceptosBean.selectedConcepto.redondeo}" style="width: 180px">  
+                                        <f:selectItems value="#{appBean.comboRedondeo}"/>  
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column>
+                                    <p:outputLabel value="Estados ISN:"/>        
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{conceptosBean.selectedConcepto.estadosIsn}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="Formula:"/>        
+                                </p:column>
+                                <p:column colspan="4">
+                                    <p:inputText id="idFormula" value="#{conceptosBean.selectedConcepto.formula}" style="width: 745px"/>
+                                </p:column>
+                            </p:row>
+
+                            <f:facet name="footer">
+                                <div align="center">
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idSat" style="font-size: .8em" toggleable="true" header="SAT:" collapsed="true">
+                                                <p:panelGrid columns="6">
+                                                    <p:outputLabel value="Atributo:"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.atributo}" size="16"/>
+                                                    <p:outputLabel value="Nodo:"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.tiponodo}" size="16"/>
+                                                    <p:outputLabel value="Recibo Nómina:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaRecibonomina}"/>
+                                                    <p:outputLabel value="Concepto Gravado (Hijo):"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.selectedConcepto.conceptogravado}" style="width:130px" filter="true" filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{conceptosBean.comboConceptos}" var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - #{concepto.nombre}"/>
+                                                    </p:selectOneMenu>
+                                                    <p:outputLabel value="Concepto Exento (Hijo):"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.selectedConcepto.conceptoexento}" style="width:130px" filter="true" filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{conceptosBean.comboConceptos}" var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - #{concepto.nombre}"/>
+                                                    </p:selectOneMenu>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idImpuesto" style="font-size: .8em" toggleable="true" header="Aplica a:">
+                                                <p:panelGrid columns="12">
+                                                    <p:outputLabel value="Créditos:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaCreditos}"/>
+                                                    <p:outputLabel value="Finiquitos:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaFiniquito}"/>
+                                                    <p:outputLabel value="Sistema:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaSistema}"/>
+                                                    <p:outputLabel value="Totaliza:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaSuma}"/>
+                                                    <p:outputLabel value="Variabilidad(IMSS)"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaImss}"/>
+                                                    <p:outputLabel value="Unidad Variabilidad:"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.selectedConcepto.unidadvariabilidad}" style="width:100px" filter="true"
+                                                                     filterMatchMode="contains">
+                                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                                        <f:selectItems value="#{catalogoGeneralBean.unidades}"
+                                                                       var="unidad" itemValue="#{unidad.valor}" itemLabel="#{unidad.nombre}"/>
+                                                    </p:selectOneMenu>
+
+                                                    <p:outputLabel value="Reportado:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaReportado}"/>
+                                                    <p:outputLabel value="Incidencia:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaIncidencia}"/>
+                                                    <p:outputLabel value="Incapacidad:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaIncapacidad}"/>
+                                                    <p:outputLabel value="Pensión:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaPension}"/>
+                                                    <p:outputLabel value="Póliza:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaPolizaContable}"/>
+                                                    <p:outputLabel value="Tipo Cuenta"/>
+                                                    <p:selectOneMenu value="#{conceptosBean.selectedConcepto.cargoabono}" 
+                                                                     style="width: 100px" filter="true" filterMatchMode="contains">  
+                                                        <f:selectItems value="#{appBean.comboCargoAbono}"/>
+                                                    </p:selectOneMenu> 
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>                                    
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idAjusteAnual" style="font-size: .8em" toggleable="true" header="Ajuste Anual:" collapsed="true">
+                                                <p:panelGrid columns="4">
+                                                    <p:outputLabel value="Previsión Social:"/>
+                                                    <p:selectBooleanCheckbox value="#{conceptosBean.selectedConcepto.aplicaPrevisionSocial}"/>
+                                                    <p:outputLabel value="Prioridad Cálculo:"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.prioridadprevisionsocial}" size="5"/>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="idCtaContables" style="font-size: .8em" toggleable="true" header="Cuenta Contable:" collapsed="true">
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Cuenta Contable"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.cuentacontable}" size="100"/>
+                                                    <p:outputLabel value="Acum. Cta. Contable"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.auxcuentacontable}" size="100"/>
+                                                    <p:outputLabel value="Asociar Cta. Contable"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.asociarcuentacontable}" size="100"/>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column colspan="4">
+                                            <p:panel id="leyReglamento" style="font-size: .8em" toggleable="true" header="Propiedades:" collapsed="true">
+                                                <p:panelGrid columns="2">
+                                                    <p:outputLabel value="Reporteria: *"/>
+                                                    <p:inputText value="#{conceptosBean.selectedConcepto.reporteria}" size="135"/>
+                                                </p:panelGrid>
+                                                <br></br>
+                                                <p:panelGrid columns="6" rendered="#{conceptosBean.leyReglamento}">
+                                                    <p:row>
+                                                        <p:column>
+                                                            <p:outputLabel value="Tipo calculo ISR: *" />          
+                                                        </p:column>
+                                                        <p:column colspan="3">
+                                                            <p:selectOneRadio value="#{conceptosBean.selectedConcepto.leyReglamento}">  
+                                                                <f:selectItem itemLabel="Por ley" itemValue="0" />  
+                                                                <f:selectItem itemLabel="Por reglamento" itemValue="1" />
+                                                            </p:selectOneRadio>
+                                                        </p:column>
+                                                    </p:row>
+                                                </p:panelGrid>
+                                            </p:panel>
+                                        </p:column>
+                                    </p:row>
+                                </div>                                
+                            </f:facet>
+                        </p:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-save" 
+                                             title="Aceptar" value="Guardar"
+                                             actionListener="#{conceptosBean.edit(event)}"
+                                             update=":formUpdate:display, :msgs"
+                                             oncomplete="handleUpdate(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="updateDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH-->
+                <h:form id="formSearch">
+                    <p:dialog header="Consultar Concepto(s)" 
+                              widgetVar="searchDialog" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="4" cellpadding="3">
+                            <p:outputLabel value="Concepto: *"/>
+                            <p:inputText id="idConcepto" value="#{conceptosBean.concepto.concepto}"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{conceptosBean.concepto.nombre}" title="#{conceptosBean.concepto.nombre}"/>
+
+                            <p:outputLabel value="Etiqueta (Cálculo):"/>
+                            <p:inputText id="idEtiqueta" value="#{conceptosBean.concepto.nombrecorto}"/>
+
+                            <p:outputLabel value="Tipo Concepto: *" />  
+                            <p:selectOneMenu id="idTipoConcepto" value="#{conceptosBean.concepto.tipoconcepto}" style="width: 180px" filter="true"
+                                             filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{catalogoGeneralBean.tiposConcepto}"
+                                               var="tipo" itemValue="#{tipo.valor}" itemLabel="#{tipo.nombre}"/>  
+                            </p:selectOneMenu> 
+
+                            <p:outputLabel value="Unidad: *" />  
+                            <p:selectOneMenu id="idUnidad" value="#{conceptosBean.concepto.unidad}" style="width:180px" filter="true"
+                                             filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{catalogoGeneralBean.unidades}"
+                                               var="unidad" itemValue="#{unidad.valor}" itemLabel="#{unidad.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Naturaleza: *" />  
+                            <p:selectOneMenu id="idNaturaleza" value="#{conceptosBean.concepto.naturaleza}" style="width:180px" filter="true">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{catalogoGeneralBean.naturalezaConceptos}"
+                                               var="naturaleza" itemValue="#{naturaleza.valor}" itemLabel="#{naturaleza.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Constancia:" />  
+                            <p:selectOneMenu id="idConstanciaSat" value="#{conceptosBean.concepto.idconstancia}" style="width:180px" filter="true"
+                                             filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{constanciasatBean.constancias}"
+                                               var="constancia" itemValue="#{constancia.idConstancia}" itemLabel="#{constancia.clave} - #{constancia.detalle}"/>
+                            </p:selectOneMenu>
+
+                            <f:facet name="footer">
+                                <div align="center">
+                                    <p:outputLabel value="Aplica a:"/>
+                                    <p:panel id="idImpuesto" style="font-size: .8em">
+                                        <h:panelGrid columns="5" cellpadding="5">
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.credito}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Crédito"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.finiquito}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Finiquitos"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.imss}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Variabilidad"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.sistema}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Sistema"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.suma}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Totaliza"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.reportado}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Reportado"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.incidencia}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Incidencia"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.pension}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Pension"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                            <p:selectOneMenu value="#{conceptosBean.concepto.polizacontable}" style="width: 100px" filter="true"
+                                                             filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="Póliza Contable"/>
+                                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                                            </p:selectOneMenu>
+                                        </h:panelGrid>
+                                    </p:panel>
+                                </div>
+                            </f:facet>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-search" 
+                                             title="Consultar" value="Consultar"
+                                             actionListener="#{conceptosBean.consultar(event)}"
+                                             update=":form"
+                                             onclick="statusDialog.show();
+                                                         searchDialog.hide();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="searchDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <h:form id="formIncidencia"  enctype="multipart/form-data">
+                    <p:dialog header="Alta Conceptos" widgetVar="incidenciasDialog" resizable="false" id="incidenciaDlg"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{conceptosBean.archivo}" mode="advanced" oncomplete="incidenciasDialog.hide();handleLShow(args)"
+                                           fileUploadListener="#{conceptosBean.fileUploadListener}"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs, :form"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
