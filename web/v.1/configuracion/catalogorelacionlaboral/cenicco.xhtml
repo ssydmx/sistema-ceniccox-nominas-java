@@ -1,0 +1,376 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <div align="center">
+                    <h:panelGrid columns="2" style="width: 97.5%">
+                        <p:fieldset legend="Grupo(s) de Pago(s) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                            <div align="right">
+                                <h:form>
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearchGrupo:display"
+                                                         onclick="searchDialogGrupo.show();"
+                                                         actionListener="#{grupopagoBean.limpiar(event)}"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add"
+                                                         actionListener="#{grupopagoBean.limpiar(event)}"
+                                                         update=":formCreateGrupo:display"
+                                                         title="Alta" value="Alta"
+                                                         onclick="createDialogGrupo.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </h:form>    
+                            </div>
+                            <div align="center">
+                                <h:form id="formGrupoPagos">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="#{grupopagoBean.informacion}"/>    
+                                        </f:facet>   
+                                        <p:dataTable id="dataTableGrupoPago" var="grupoPago" value="#{grupopagoBean.gruposPago}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     scrollable="true" scrollHeight="250"
+                                                     rowKey="#{grupoPago.idgrupopago}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{grupopagoBean.filteredGruposPago}"
+                                                     selection="#{grupopagoBean.grupoPago}" selectionMode="single"
+                                                     widgetVar="registrosTableGrupoPago">  
+
+                                            <p:ajax event="rowSelect" update=":formUpdateGrupo:display" oncomplete="updateDialogGrupo.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableGrupoPago.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{grupopagoBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formGrupoPagos:dataTableGrupoPago" fileName="grupos de pagos" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{grupoPago.idcompania.nombre}"
+                                                      sortBy="#{grupoPago.idcompania.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Compañia"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupoPago.idcompania.nombre}"/>  
+                                            </p:column>
+
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{grupoPago.grupopago}"
+                                                      sortBy="#{grupoPago.grupopago}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Grupo de pago"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupoPago.grupopago}"/>  
+                                            </p:column>
+
+                                            <p:column width="33%" filterMatchMode="contains"
+                                                      exportable="true" filterBy="#{grupoPago.nombre}"
+                                                      sortBy="#{grupoPago.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupoPago.nombre}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>    
+                            </div>
+                        </p:fieldset>  
+                        <p:fieldset legend="Tipo de Relación(es) Laboral(es) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                            <div align="right">
+                                <h:form>
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearchLaboral:display"
+                                                         onclick="searchDialogLaboral.show();"
+                                                         actionListener="#{tiporelacionlaboralBean.limpiar(event)}"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add" 
+                                                         title="Alta" value="Alta" 
+                                                         actionListener="#{tiporelacionlaboralBean.limpiar(event)}"
+                                                         update=":formCreateLaboral:display"
+                                                         onclick="createDialogLaboral.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </h:form>    
+                            </div>
+                            <div align="center">
+                                <h:form id="formLaboral">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="#{tiporelacionlaboralBean.informacion}"/>    
+                                        </f:facet>   
+                                        <p:dataTable id="dataTable" var="tipoRelacionLaboral" value="#{tiporelacionlaboralBean.tipoRelacionesLaborales}" 
+                                                     style="font-size: 1em" 
+                                                     scrollable="true" scrollHeight="250"
+                                                     rowKey="#{tipoRelacionLaboral.idtiporelacionlaboral}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{tiporelacionlaboralBean.filteredTipoRelacionesLaborales}"
+                                                     widgetVar="registrosTable"
+                                                     selection="#{tiporelacionlaboralBean.tipoRelacionLaboral}" selectionMode="single">  
+
+                                            <p:ajax event="rowSelect" update=":formUpdateLaboral" oncomplete="updateDialogLaboral.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{tiporelacionlaboralBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formLaboral:dataTable" fileName="Tipo de Relacion Laborals" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column filterMatchMode="contains" width="100%" exportable="true"
+                                                      sortBy="#{tipoRelacionLaboral.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Tipo relación laboral"/>
+                                                </f:facet>
+                                                <h:outputText value="#{tipoRelacionLaboral.nombre}"/> 
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>   
+                            </div>
+                        </p:fieldset>
+                    </h:panelGrid>    
+                </div>
+
+                <!--DIALOGOS DE GRUPO PAGOS-->
+                <!--FORM CREATE-->
+                <h:form id="formCreateGrupo">
+                    <p:dialog header="Alta Grupos de Pagos"  
+                              widgetVar="createDialogGrupo" resizable="false" id="createDlgGrupodepago"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+
+                            <p:outputLabel value="Compañia: *"/>
+                            <p:selectOneMenu id="idCompañia" value="#{grupopagoBean.grupoPago.idcompania.idcompania}" style="width: 180px" filter="true"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorCompania}">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{companiaBean.companias}" var="compania" itemValue="#{compania.idcompania}" itemLabel="#{compania.nombre}"/>
+                            </p:selectOneMenu> 
+                            <p:message for="idCompañia" display="icon"/>
+
+                            <p:outputLabel value="Grupo de Pago: *"/>
+                            <p:inputText id="idGrupodepago" value="#{grupopagoBean.grupoPago.grupopago}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorGrupoPago}"/>
+                            <p:message for="idGrupodepago" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{grupopagoBean.grupoPago.nombre}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                            <p:message for="idNombre" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{grupopagoBean.create(event)}"
+                                                 update=":formGrupoPagos:display , formCreateGrupo:display, :msgs"
+                                                 oncomplete="handleCreateGrupoPago(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialogGrupo.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO DE UPDATE-->
+                <h:form id="formUpdateGrupo">
+                    <p:dialog header="Editar Grupos de Pagos"
+                              widgetVar="updateDialogGrupo" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Compañia: *"/>
+                            <p:selectOneMenu id="idCompañia" value="#{grupopagoBean.grupoPago.idcompania.idcompania}" style="width: 180px" filter="true"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorCompania}">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{companiaBean.companias}" var="compania" itemValue="#{compania.idcompania}" itemLabel="#{compania.nombre}"/>
+                            </p:selectOneMenu> 
+                            <p:message for="idCompañia" display="icon"/>
+
+                            <p:outputLabel value="Grupo de Pago: *"/>
+                            <p:inputText id="idGrupodepago" value="#{grupopagoBean.grupoPago.grupopago}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorGrupoPago}"/>
+                            <p:message for="idGrupodepago" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{grupopagoBean.grupoPago.nombre}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                            <p:message for="idNombre" display="icon"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{grupopagoBean.edit(event)}"
+                                                 update=":formGrupoPagos:display ,:formUpdateGrupo:display, :msgs"
+                                                 oncomplete="handleUpdateGrupo(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialogGrupo.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO SEARCH-->
+                <h:form id="formSearchGrupo">
+                    <p:dialog header="Consultar Grupo Pago(s)"
+                              widgetVar="searchDialogGrupo" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+
+                            <p:outputLabel value="Compañia: "/>
+                            <p:selectOneMenu id="idCompañia" value="#{grupopagoBean.grupoPago.idcompania.idcompania}" style="width: 180px" filter="true">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{companiaBean.companias}" var="compania" itemValue="#{compania.idcompania}" itemLabel="#{compania.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Grupo de Pago:"/>
+                            <p:inputText value="#{grupopagoBean.grupoPago.grupopago}"/>
+
+                            <p:outputLabel value="Nombre:"/>
+                            <p:inputText value="#{grupopagoBean.grupoPago.nombre}"/>
+
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{grupopagoBean.consultar(event)}"
+                                                 update=":formGrupoPagos:display"
+                                                 onclick="searchDialogGrupo.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="searchDialogGrupo.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGOS DE TIPO RELACIÓN LABORAL-->
+                <!--FORM CREATE-->
+                <h:form id="formCreateLaboral">
+                    <p:dialog header="Alta Tipo de Relación Laboral" 
+                              widgetVar="createDialogLaboral" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{tiporelacionlaboralBean.tipoRelacionLaboral.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreTipoRelacionLaboral}"/>
+                            <p:message for="idNombre" display="icon"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tiporelacionlaboralBean.create(event)}"
+                                                 update=":formLaboral:display ,:formCreateLaboral:display, :msgs"
+                                                 oncomplete="handleCreateLaboral(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialogLaboral.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO DE UPATE-->
+                <h:form id="formUpdateLaboral">
+                    <p:dialog header="Editar Tipo de Relación Laboral" 
+                              widgetVar="updateDialogLaboral" resizable="false" id="updateDlgLaboral"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{tiporelacionlaboralBean.tipoRelacionLaboral.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreTipoRelacionLaboral}"/>
+                            <p:message for="idNombre" display="icon"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tiporelacionlaboralBean.edit(event)}"
+                                                 update=":formLaboral:display ,:formUpdateLaboral:display, :msgs"
+                                                 oncomplete="handleUpdateLaboral(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialogLaboral.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH-->
+                <h:form id="formSearchLaboral">
+                    <p:dialog header="Consultar Tipo de Relación Laboral"
+                              widgetVar="searchDialogLaboral" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+
+                            <p:outputLabel value="Nombre: "/>
+                            <p:inputText id="idNombre" value="#{tiporelacionlaboralBean.tipoRelacionLaboral.nombre}"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tiporelacionlaboralBean.consultar(event)}"
+                                                 update=":formLaboral:display"
+                                                 onclick="searchDialogLaboral.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="searchDialogLaboral.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
