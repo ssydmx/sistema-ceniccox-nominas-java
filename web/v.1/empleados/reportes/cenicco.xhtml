@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Reporte Maestro - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="1">
+                                <p:commandButton id="btnSearch" icon="icon-search" 
+                                                 title="Consultar" value="Consultar"
+                                                 actionListener="#{maestroBean.limpiar(event)}"
+                                                 onclick="createDialog.show();"
+                                                 update=":formSearch:display"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{maestroBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:selectCheckboxMenu id="idOpciones" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                                  style="width: 200px; text-align: center" 
+                                                                  value="#{maestroBean.selectedOpciones}" label="Opciones">
+                                                <f:selectItems value="#{maestroBean.opciones}"/> 
+                                            </p:selectCheckboxMenu>
+                                            <p:commandButton update="dataTable" actionListener="#{maestroBean.updateColumns()}" value="Update" icon="ui-icon-refresh" oncomplete="registrosRelaciones.clearFilters()"/>
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="rellab" value="#{maestroBean.relaciones}" 
+                                                 resizableColumns="true" style="font-size: .8em"
+                                                 scrollable="true" scrollHeight="250"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{maestroBean.filteredRelaciones}"
+                                                 widgetVar="registrosRelaciones" scrollWidth="1150">
+                                        <f:facet name="header">  
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosRelaciones.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <p:commandLink id="csv" actionListener="#{maestroBean.descargarReporteCsv()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:columns value="#{maestroBean.columns}" var="column" columnIndexVar="colIndex" 
+                                                   sortBy="#{rellab[column.property]}" filterBy="#{rellab[column.property]}"
+                                                   filterMatchMode="contains"
+                                                   width="100">
+                                            <f:facet name="header">
+                                                <h:outputText value="#{column.header}" />
+                                            </f:facet>
+                                            <h:outputText value="#{rellab[column.property]}" />
+                                        </p:columns>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <h:form id="formSearch">
+                    <p:dialog header="Consultar Relaciones Laborales(s)" widgetVar="createDialog" resizable="false" id="searchDlg"
+                              hideEffect="explode" showEffect="fade" closeOnEscape="true"
+                              modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="4" style="margin:0 auto;">  
+
+                            <p:outputLabel value="Grupo Pago:" title="Grupo Pago" rendered="#{!permisosBean.empleadosFiltroDepartamento}"/>  
+                            <p:selectOneMenu id="idGP" value="#{maestroBean.reporte.idgrupopago}" style="width: 175px" filter="true" filterMatchMode="contains" rendered="#{!permisosBean.empleadosFiltroDepartamento}">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" 
+                                               var="gp" itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                            </p:selectOneMenu>  
+                            <p:message for="idGP" display="icon" rendered="#{!permisosBean.empleadosFiltroDepartamento}"/>
+
+                            <p:outputLabel value="Departamento:" title="Departamento" rendered="#{permisosBean.empleadosFiltroDepartamento}"/>
+                            <p:selectOneMenu id="idDE" value="#{maestroBean.reporte.iddepartamento}" style="width: 175px" filter="true" filterMatchMode="contains" rendered="#{permisosBean.empleadosFiltroDepartamento}">
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{departamentoBean.departamentosUsuario}" var="depto"
+                                               itemValue="#{depto.iddepartamento}" itemLabel="#{depto.departamento} - #{depto.nombre}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idDE" display="icon" rendered="#{permisosBean.empleadosFiltroDepartamento}"/>
+
+                            <p:outputLabel value="Estatus:" />
+                            <p:selectOneMenu id="idEstatus" value="#{maestroBean.reporte.idestatus}" style="width: 175px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{appBean.comboEstatusEmpleado}"/> 
+                            </p:selectOneMenu>  
+                            <p:message for="idEstatus" display="icon"/>
+
+                            <p:outputLabel value="Registro Patronal:" />
+                            <p:selectOneMenu id="idRP" value="#{maestroBean.reporte.idregistropatronal}" style="width: 175px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{registropatronalBean.registros}" var="rp" itemValue="#{rp.idregistropatronal}" itemLabel="#{rp.registropatronal}"/> 
+                            </p:selectOneMenu> 
+                            <p:message for="idRP" display="icon"/>
+
+                            <p:outputLabel value="Fecha Ingreso:" />  
+                            <p:calendar id="fIncioIngreso" value="#{maestroBean.fechaInicioAlta}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+                            <p:message for="fIncioIngreso" display="icon"/>
+
+                            <p:outputLabel value="a:" />  
+                            <p:calendar id="fFinIngreso" value="#{maestroBean.fechaFinAlta}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+                            <p:message for="fFinIngreso" display="icon"/>
+
+                            <p:outputLabel value="Fecha Baja:" />  
+                            <p:calendar id="fInicioBaja" value="#{maestroBean.fechaInicioBaja}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+                            <p:message for="fInicioBaja" display="icon"/>
+
+                            <p:outputLabel value="a:" />  
+                            <p:calendar id="fFinBaja" value="#{maestroBean.fechaFinBaja}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>
+                            <p:message for="fFinBaja" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnSearchAceptar" 
+                                                 icon="icon-search" title="Consultar" value="Consultar"
+                                                 actionListener="#{maestroBean.consultar(event)}"
+                                                 update=":form:display, :msgs"
+                                                 oncomplete="handleCreate(args)"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnSearchCancelar" 
+                                                 onclick="createDialog.hide();"
+                                                 icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar" 
+                                                 immediate="true"
+                                                 styleClass="style_botones"/>  
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog> 
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
