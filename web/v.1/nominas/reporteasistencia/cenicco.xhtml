@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="12" style="margin-top: 25px">
+
+                            <p:inputText id="idEmpleado" value="#{reporteAsistenciaBean.numeroempleado}" placeholder="Numero Empleado" size="10"  style="text-align: center"/> 
+                            <p:inputMask id="idFechaInicio" value="#{reporteAsistenciaBean.fechaInicio}" mask="99/99/9999" title="Fecha" placeholder="Fecha Inicio" />
+                            <p:inputText id="idPeriodo" value="#{reporteAsistenciaBean.periodo}" placeholder="Periodo" size="5"  style="text-align: center"/>
+                            <p:inputText id="idRancho" value="#{reporteAsistenciaBean.rancho}" placeholder="Rancho"  style="text-align: center"/>
+                            <p:inputText id="idLocalidad" value="#{reporteAsistenciaBean.localidad}" placeholder="Localidad"  style="text-align: center"/>
+                            <p:inputText id="idLote" value="#{reporteAsistenciaBean.lote}" placeholder="Lote"  style="text-align: center"/>
+                            <p:commandButton value="Consultar" icon="icon-search" styleClass="style_botones"
+                                             actionListener="#{reporteAsistenciaBean.consultar(event)}"
+                                             onclick="statusDialog.show();"
+                                             update=":form, :msgs"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Reporte Asistencias - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{reporteAsistenciaBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="incidencia"
+                                                 value="#{reporteAsistenciaBean.vista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{incidencia.numeroEmpleado}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.numeroEmpleado}" sortBy="#{incidencia.numeroEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Numero Empleado" title="Numero Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.numeroEmpleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.nombreEmpleado}" sortBy="#{incidencia.nombreEmpleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre Empleado" title="Nombre Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.nombreEmpleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.horaEntrada}" sortBy="#{incidencia.horaEntrada}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Hora Entrada" title="Hora Entrada"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.horaEntrada}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.horaSalida}" sortBy="#{incidencia.horaSalida}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Hora Salida" title="Hora Salida"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.horaSalida}"/>
+                                        </p:column> 
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.horasLaboradas}" sortBy="#{incidencia.horasLaboradas}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Horas Laboradas" title="Horas Laboradas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.horasLaboradas}"/>
+                                        </p:column> 
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.periodo}" sortBy="#{incidencia.periodo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.periodo}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.concepto}" sortBy="#{incidencia.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.concepto}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.rancho}" sortBy="#{incidencia.rancho}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Rancho" title="Rancho"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.rancho}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.localidad}" sortBy="#{incidencia.localidad}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Localidad" title="Localidad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.localidad}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.llave}" sortBy="#{incidencia.lote}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Llave" title="Llave"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.llave}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.fechaRegistro}" sortBy="#{incidencia.fechaRegistro}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Registro" title="Fecha Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.fechaRegistro}"/>
+                                        </p:column> 
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incidencia.alias}" sortBy="#{incidencia.alias}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Alias" title="Alias"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incidencia.alias}"/>
+                                        </p:column> 
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Archivo" styleClass="style_botones" icon="icon-down"
+                                                             oncomplete="handleLShow(args)"
+                                                             actionListener="#{reporteAsistenciaBean.listenerSelected()}"
+                                                             onstart="statusDialog.show()"
+                                                             title="Descarga archivo csv"/>
+                                            <p:commandButton value="Reporte Asistencia Imss" title="Reporte Asistencia Imss" icon="icon-down"
+                                                             styleClass="style_botones" actionListener="#{reporteAsistenciaBean.openModalReporteAsistenciaImss(event)}"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="fomrReporteAsistenciaImss">
+                    <p:dialog header="Generar y Descargar Reporte" widgetVar="ReporteAsistenciaImss" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="600px" height="50px" style="text-align: center"> 
+                        <h:panelGrid columns="6" style="margin-top: 5px">
+                            <p:inputText id="numeroPeriodo" value="#{reporteAsistenciaBean.numeroPeriodoInicial}" placeholder="No. Periodo Inicial" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoAsistenciaImss" />
+                            </p:inputText>
+
+                            <p:inputText id="tipoCambioUSD" value="#{reporteAsistenciaBean.numeroPeriodoFinal}" placeholder="No. Periodo Final" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoAsistenciaImss" />
+                            </p:inputText> 
+
+                            <p:inputText id="anioPeriodo" value="#{reporteAsistenciaBean.anioPeriodo}" placeholder="Anio" required="true" requiredMessage="#{appBean.mensajeErrorValor}" style="text-align: center">
+                                <p:ajax event="keyup" update="gnrRepoAsistenciaImss" />
+                            </p:inputText> 
+
+                        </h:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton id="gnrRepoAsistenciaImss" value="Generar" icon="icon-down" disabled="#{empty reporteAsistenciaBean.numeroPeriodoInicial || empty reporteAsistenciaBean.numeroPeriodoFinal || empty reporteAsistenciaBean.anioPeriodo}"
+                                             actionListener="#{reporteAsistenciaBean.generarReporteAsistenciaImss()}"
+                                             onclick="ReporteAsistenciaImss.hide();
+                                                     statusDialog.show();"
+                                             oncomplete="handleLShow(args)" update=":msgs"
+                                             styleClass="style_botones"/> &nbsp;&nbsp;&nbsp;
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="ReporteAsistenciaImss.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
