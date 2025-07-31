@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="5" style="margin-top: 25px">
+                            <p:selectOneMenu id="grupoPago" style="width: 200px" value="#{sueldosBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="grupoPago" display="tooltip"/>
+
+                            <p:selectOneMenu id="idEstatus" style="width: 200px" value="#{sueldosBean.estatus}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorEstatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatus}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idEstatus" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                             actionListener="#{sueldosBean.consultar(event)}" onstart="statusDialog.show()"
+                                             update=":msgs, :form"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Histórico Sueldos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{sueldosBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="vista"
+                                                 value="#{sueldosBean.historico}"
+                                                 filteredValue="#{sueldosBean.filteredHistorico}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{vista.idsueldo}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="HistoricoSueldos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nombreempleado}"  sortBy="#{vista.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreempleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{vista.fechasd}"  sortBy="#{vista.fechasd}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha S.D." title="Fecha Salario Diario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fechasd}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{vista.fechasdi}"  sortBy="#{vista.fechasdi}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha S.D.I." title="Fecha Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fechasdi}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  filterBy="#{vista.salariodiario}"  sortBy="#{vista.salariodiario}">
+                                            <f:facet name="header">
+                                                <h:outputText value="S.D." title="Salario Diario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.salariodiario}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  filterBy="#{vista.salariodiariointegrado}"  sortBy="#{vista.salariodiariointegrado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="S.D.I." title="Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.salariodiariointegrado}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
