@@ -1,0 +1,288 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+
+                    <p:fieldset legend="Filtros" styleClass="bg_color" toggleable="true">
+                        <div align="center">
+                            <p:panelGrid style="margin-top: 5px;">
+                                <p:row>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:selectOneMenu id="grupoPago" style="width: 200px" 
+                                                         filter="true" filterMatchMode="contains" valueChangeListener="#{incapacidadBean.changeGrupoPago}"
+                                                         required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                            <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="idEmpleados"/>
+                                        </p:selectOneMenu>
+                                        <p:message for="grupoPago" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:selectOneMenu id="idEmpleados" style="width: 200px" value="#{incapacidadBean.selectedRelacionLaboral}"
+                                                         filter="true" filterMatchMode="contains"
+                                                         required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                            <f:selectItem itemValue="" itemLabel="Empleado(s)"/>
+                                            <f:selectItems value="#{incapacidadBean.relaciones}"
+                                                           var="rellab" itemValue="#{rellab.idrellab}" itemLabel="#{rellab.numeroempleado} - #{rellab.idempleado.nombre} #{rellab.idempleado.apellidopaterno} #{rellab.idempleado.apellidomaterno}"/>  
+                                        </p:selectOneMenu>
+                                        <p:message for="idEmpleados" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:inputText id="idDias" value="#{incapacidadBean.dias}" placeholder="Días" size="12"
+                                                     required="true" requiredMessage="Favor de ingresar días"/>
+                                        <p:message for="idDias" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:inputMask id="idFechaPago" value="#{incapacidadBean.fechainicioIncidencia}" mask="99/99/9999"
+                                                     title="dd/mm/yyyy" placeholder="Fecha Incio Nómina" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                                        <p:message for="idFechaPago" display="tooltip"/>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:selectOneMenu id="tipoCredito" style="width: 200px" valueChangeListener="#{incapacidadBean.changeIncapacidad}"
+                                                         filter="true" filterMatchMode="contains" 
+                                                         required="true" requiredMessage="#{appBean.mensajeErrorTipoCredito}">  
+                                            <f:selectItem itemValue="" itemLabel="Incapacidad"/>
+                                            <f:selectItems value="#{incapacidadBean.conceptos}"
+                                                           var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - (#{concepto.nombre})"/>  
+                                            <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="idReferencia"/>
+                                        </p:selectOneMenu>
+                                        <p:message for="tipoCredito" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:selectOneMenu id="idReferencia" style="width: 200px" value="#{incapacidadBean.selectedReferencia}"
+                                                         filter="true" filterMatchMode="contains" 
+                                                         required="true" requiredMessage="Favor de seleccionar referencia">  
+                                            <f:selectItem itemValue="" itemLabel="Referencia"/>
+                                            <f:selectItems value="#{incapacidadBean.referencias}"/>  
+                                        </p:selectOneMenu>
+                                        <p:message for="idReferencia" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:inputText id="idFolio" value="#{incapacidadBean.folio}" placeholder="Folio" size="12"
+                                                     required="true" requiredMessage="Favor de ingresar folio">
+                                            <f:validateLength minimum="8" maximum="8"/> 
+                                        </p:inputText>
+                                        <p:message for="idFolio" display="tooltip"/>
+                                    </p:column>
+                                    <p:column style="background-color : rgb(126,126,126)">
+                                        <p:inputMask id="idFechaPagoImss" value="#{incapacidadBean.fechainicioImss}" mask="99/99/9999"
+                                                     title="dd/mm/yyyy" placeholder="Fecha Incio IMSS" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                                        <p:message for="idFechaPagoImss" display="tooltip"/>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column colspan="4" style="background-color : rgb(126,126,126)">
+                                        <p:inputText value="#{incapacidadBean.observaciones}" size="105" placeholder="Observaciones"/>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </div>
+                    </p:fieldset>
+
+                    <p:fieldset legend="Registro Incapacidades - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{incapacidadBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="incapacidad"
+                                                 value="#{incapacidadBean.incapacidades}"
+                                                 filteredValue="#{incapacidadBean.filteredIncapacidades}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{incapacidad.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Incapacidades" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incapacidad.numeroempleado} - #{incapacidad.idempleado.nombre} #{incapacidad.idempleado.apellidopaterno} #{incapacidad.idempleado.apellidomaterno}" 
+                                                  sortBy="#{incapacidad.numeroempleado} - #{incapacidad.idempleado.nombre} #{incapacidad.idempleado.apellidopaterno} #{incapacidad.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.numeroempleado} - #{incapacidad.idempleado.nombre} #{incapacidad.idempleado.apellidopaterno} #{incapacidad.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{incapacidad.noperiodos}" sortBy="#{incapacidad.noperiodos}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="No. Periodos" title="Número Periodos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.noperiodos}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incapacidad.concepto.concepto} - #{incapacidad.concepto.nombre}"
+                                                  sortBy="#{incapacidad.concepto.concepto} - #{incapacidad.concepto.nombre}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="T. Incapacidad" title="Tipo Incapacidad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.concepto.concepto} - #{incapacidad.concepto.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{incapacidad.incapacidades}" sortBy="#{incapacidad.incapacidades}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Días" title="Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.incapacidades}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechaInicioIncidencia}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="F. I. Incidencias" title="Fecha Inicio Incidencas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaInicioIncidencia}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechaFinIncidencia}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="F. F. Incidencias" title="Fecha Fin Incidencas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaFinIncidencia}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechaInicioImss}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="F. I. IMSS" title="Fecha Inicio IMSS"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaInicioImss}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true" 
+                                                   filterBy="#{incapacidad.fechaFinImss}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="F. F. IMSS" title="Fecha Fin IMSS"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaFinImss}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                   sortBy="#{incapacidad.referencia1}"
+                                                   filterBy="#{incapacidad.referencia1}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.referencia1}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   style="text-align: center" sortBy="#{incapacidad.referencia2}" 
+                                                   filterBy="#{incapacidad.referencia2}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.referencia2}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   sortBy="#{incapacidad.observaciones}"
+                                                   style="text-align: center" filterBy="#{incapacidad.observaciones}">
+                                            <f:facet name="header">
+                                                <p:outputLabel value="Observaciones" title="Observaciones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.observaciones}"/>
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 600px">
+                                                <p:panel header="Periodos">
+                                                    <p:dataTable  value="#{incapacidad.incidencias}" var="incidencia"
+                                                                  style="font-size: 1em;">
+                                                        <p:column headerText="Periodo">
+                                                            <p:outputLabel value="#{incidencia.idperiodo.periodo}" title="#{incidencia.idperiodo.periodo}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Fecha Inicio" style="text-align: center">
+                                                            <p:outputLabel value="#{incidencia.idperiodo.fechaInicioStr}" title="#{incidencia.idperiodo.fechaInicioStr}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Fecha Fin" style="text-align: center">
+                                                            <p:outputLabel value="#{incidencia.idperiodo.fechaFinStr}" title="#{incidencia.idperiodo.fechaFinStr}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Días" style="text-align: center">
+                                                            <p:outputLabel value="#{incidencia.idperiodo.dias}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Calcular" icon="ui-icon-play"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{incapacidadBean.consultar(event)}"
+                                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Guardar" icon="icon-save" styleClass="style_botones"
+                                                             actionListener="#{incapacidadBean.create(event)}"
+                                                             onclick="statusDialog.show();"
+                                                             update=":form, :msgs"/> 
+                                        </div>
+
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
