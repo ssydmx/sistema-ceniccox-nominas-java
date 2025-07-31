@@ -1,0 +1,427 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:fieldset legend="Grupo(s) Conceptos- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="right">
+                            <h:panelGrid columns="2">
+                                <p:commandButton id="btnCreate" icon="icon-add" 
+                                                 title="Alta" value="Alta" 
+                                                 actionListener="#{gruposconceptoBean.limpiarAlta(event)}"
+                                                 update=":formCreate:display"
+                                                 onclick="createDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnActualizar" icon="ui-icon-refresh" 
+                                                 title="Actualizar" value="Actualizar" 
+                                                 actionListener="#{gruposconceptoBean.consultar(event)}"
+                                                 update=":form:display"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </div>
+                        <div align="center">
+                            <p:panelGrid id="display">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{gruposconceptoBean.informacion}" style="color: white"/>         
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTable" var="grupo" value="#{gruposconceptoBean.gruposConceptos}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     scrollable="true" scrollHeight="250"
+                                                     rowKey="#{grupo.idgrupoconcepto}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{gruposconceptoBean.filteredGruposConceptos}"
+                                                     selection="#{gruposconceptoBean.selectedGrupoConcepto}" selectionMode="single"
+                                                     widgetVar="registrosTableGrupo">  
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableGrupo.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <h:commandLink id="pdf">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                            <p:dataExporter type="pdf" target=":form:dataTable" fileName="gruposconceptos" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":form:dataTable" fileName="gruposconceptos" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:ajax event="rowSelect" listener="#{gruposconceptoBean.listenerSelected()}" update=":formUpdate:display" oncomplete="updateDialog.show()"/>
+
+                                            <p:column width="5%">
+                                                <p:rowToggler />
+                                            </p:column>
+
+                                            <p:column sortBy="#{grupo.grupoconcepto}" filterBy="#{grupo.grupoconcepto}" 
+                                                      filterMatchMode="contains" exportable="true" width="50%">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Grupo Concepto"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupo.grupoconcepto}"/>  
+                                            </p:column>
+
+                                            <p:column sortBy="#{grupo.nombre}" filterBy="#{grupo.nombre}" 
+                                                      filterMatchMode="contains" width="50%"
+                                                      exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupo.nombre}"/>  
+                                            </p:column>
+
+                                            <p:column width="5%" exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Detalles"/>
+                                                </f:facet>
+                                                <h:outputText value="#{grupo.nombre}"/>  
+                                            </p:column>
+
+                                            <p:rowExpansion>
+                                                <p:panelGrid columns="1" style="width:1000px">
+                                                    <p:dataTable  value="#{grupo.catalogoGrupoConceptoList}" var="catalogo" style="font-size: .7em"
+                                                                  rowKey="#{catalogo.idcatgrupo}" emptyMessage="#{appBean.mensajeTablaVacia}">
+
+                                                        <p:column sortBy="#{catalogo.idconcepto.concepto}" filterBy="#{catalogo.idconcepto.concepto}" 
+                                                                  filterMatchMode="contains" exportable="true" width="15%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Concepto"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.concepto}"/>  
+                                                        </p:column>
+
+                                                        <p:column sortBy="#{catalogo.idconcepto.nombre}" filterBy="#{catalogo.idconcepto.nombre}" 
+                                                                  filterMatchMode="contains" exportable="true" width="29%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Nombre"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.nombre}"/>  
+                                                        </p:column>
+
+                                                        <p:column sortBy="#{catalogo.idconcepto.nombrecorto}" filterBy="#{catalogo.idconcepto.nombrecorto}" 
+                                                                  filterMatchMode="contains" exportable="true" width="29%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Etiqueta"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.nombrecorto}"/>  
+                                                        </p:column>
+
+
+                                                        <p:column id="tipoConceptoColumn" sortBy="#{catalogo.idconcepto.conceptoDescripcion}"
+                                                                  filterBy="#{catalogo.idconcepto.conceptoDescripcion}" filterMatchMode="contains" exportable="true" width="15%">  
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Tipo Concepto"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.conceptoDescripcion}"/>   
+                                                        </p:column> 
+
+                                                        <p:column sortBy="#{catalogo.idconcepto.unidadDescripcion}" filterBy="#{catalogo.idconcepto.unidadDescripcion}" 
+                                                                  filterMatchMode="contains" exportable="true" width="15%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Unidad"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.unidadDescripcion}"/>  
+                                                        </p:column>
+
+                                                        <p:column sortBy="#{catalogo.idconcepto.naturalezaDescripcion}" filterBy="#{catalogo.idconcepto.naturalezaDescripcion}" 
+                                                                  filterMatchMode="contains" exportable="true" width="15%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Naturaleza"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.naturalezaDescripcion}"/>  
+                                                        </p:column>
+                                                        <p:column sortBy="#{catalogo.idconcepto.prioridad}" filterBy="#{catalogo.idconcepto.prioridad}" 
+                                                                  filterMatchMode="contains" exportable="true" width="15%">
+                                                            <f:facet name="header">
+                                                                <h:outputText value="Prioridad"/>
+                                                            </f:facet>
+                                                            <h:outputText value="#{catalogo.idconcepto.prioridad}"/>  
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panelGrid>
+                                            </p:rowExpansion>
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Grupo de Conceptos"  width="60%" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="1">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <h:panelGrid columns="3">
+                                        <p:outputLabel value="Grupo Concepto: *"/>
+                                        <p:inputText id="idGrupo" value="#{gruposconceptoBean.grupoConcepto.grupoconcepto}"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorGrupoConcepto}"/>
+                                        <p:message for="idGrupo" display="tooltip"/>
+
+                                        <p:outputLabel value="Nombre: *"/>
+                                        <p:inputText id="idNombre" value="#{gruposconceptoBean.grupoConcepto.nombre}"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                                        <p:message for="idNombre" display="tooltip"/>
+                                    </h:panelGrid>
+                                </div>
+                            </f:facet>
+                            <p:fieldset id="availableConceptos" legend="Conceptos" toggleable="true">
+                                <h:outputText value="#{appBean.mensajeTablaVacia}" rendered="#{empty gruposconceptoBean.conceptos}" style="font-size:1em;" />
+                                <p:dataTable id="dataTableConceptos" var="concepto" value="#{gruposconceptoBean.conceptos}" 
+                                             selection="#{gruposconceptoBean.selectedConceptos}" rowKey="#{concepto.idconcepto}" scrollHeight="300"
+                                             filteredValue="#{gruposconceptoBean.filteredConceptos}" emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                             rendered="#{not empty gruposconceptoBean.conceptos}" scrollable="true" style="font-size: .8em;"> 
+                                    <f:facet name="header">
+                                        <p:outputLabel value="#{gruposconceptoBean.informacionConceptos}"/>
+                                    </f:facet>
+
+                                    <p:column selectionMode="multiple" style="text-align:center" width="10%"/>
+
+                                    <p:column  width="20%" sortBy="#{concepto.concepto}" filterBy="#{concepto.concepto}"
+                                               headerText="Concepto" filterMatchMode="startsWith">
+                                        <h:outputText value="#{concepto.concepto}"/>  
+                                    </p:column>
+
+                                    <p:column width="30%" sortBy="#{concepto.nombre}" filterBy="#{concepto.nombre}"
+                                              headerText="Nombre" filterMatchMode="contains">
+                                        <h:outputText value="#{concepto.nombre}"/>  
+                                    </p:column>
+
+
+                                    <p:column width="20%" sortBy="#{concepto.conceptoDescripcion}" filterBy="#{concepto.conceptoDescripcion}"
+                                              headerText="Tipo Concepto" filterMatchMode="contains">  
+                                        <h:outputText value="#{concepto.conceptoDescripcion}"/>   
+                                    </p:column> 
+
+                                    <p:column width="20%" sortBy="#{concepto.unidadDescripcion}" filterBy="#{concepto.unidadDescripcion}"
+                                              headerText="Unidad">
+                                        <h:outputText value="#{concepto.unidadDescripcion}"/>  
+                                    </p:column>
+
+
+                                </p:dataTable>
+                                <div align="right">
+                                    <p:commandButton id="btnAgregar" icon="icon-add" 
+                                                     title="Agregar" value="Agregar"
+                                                     onclick="statusDialog.show();"
+                                                     actionListener="#{gruposconceptoBean.actionSelectedConcepto(event)}" 
+                                                     update=":formCreate:display, :msgs"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </p:fieldset>
+                            <p:fieldset id="selectedConceptos" legend="Conceptos Seleccionados" style="margin-top:10px" toggleable="true">
+                                <h:outputText value="#{appBean.mensajeTablaVaciaConceptos}" rendered="#{empty gruposconceptoBean.droppedConceptos}" style="font-size:1em;" />
+                                <p:dataTable id="dataTableConceptosSelected" var="concepto" value="#{gruposconceptoBean.droppedConceptos}" 
+                                             rendered="#{not empty gruposconceptoBean.droppedConceptos}" style="font-size: .8em"
+                                             filteredValue="#{gruposconceptoBean.filteredDroppedConceptos}" rowKey="#{concepto.idconcepto}"
+                                             selection="#{gruposconceptoBean.selectedDroppedConceptos}" scrollHeight="300" scrollable="true"
+                                             editable="true" editMode="cell">
+
+                                    <f:facet name="header">
+                                        <p:outputLabel value="#{gruposconceptoBean.informacionSelectedConceptos}"/>
+                                    </f:facet>
+
+                                    <p:column selectionMode="multiple" style="text-align:center" width="10%"/>
+
+                                    <p:column width="20%" headerText="Concepto" sortBy="#{concepto.concepto}"
+                                              filterBy="#{concepto.concepto}" filterMatchMode="startsWith">
+                                        <h:outputText value="#{concepto.concepto}"/>  
+                                    </p:column>
+
+                                    <p:column width="30%" headerText="Nombre" sortBy="#{concepto.nombre}"
+                                              filterBy="#{concepto.nombre}" filterMatchMode="contains">
+                                        <h:outputText value="#{concepto.nombre}"/>  
+                                    </p:column>
+
+                                    <p:column width="20%" headerText="T. Concepto" sortBy="#{concepto.conceptoDescripcion}"
+                                              filterBy="#{concepto.conceptoDescripcion}" filterMatchMode="contains">  
+                                        <h:outputText value="#{concepto.conceptoDescripcion}"/>   
+                                    </p:column> 
+
+                                    <p:column width="20%" headerText="Unidad" sortBy="#{concepto.unidadDescripcion}"
+                                              filterBy="#{concepto.unidadDescripcion}" filterMatchMode="contains">
+                                        <h:outputText value="#{concepto.unidadDescripcion}"/>  
+                                    </p:column>
+
+                                </p:dataTable>
+                                <div align="right">
+                                    <p:commandButton id="btnQuitar" icon="icon-cancel" 
+                                                     title="Quitar" value="Quitar"
+                                                     onclick="statusDialog.show();"
+                                                     actionListener="#{gruposconceptoBean.actionRemoveConcepto(event)}" 
+                                                     update=":formCreate:display, :msgs"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </p:fieldset>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptarCreateGrupo" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{gruposconceptoBean.create(event)}"
+                                                 update=":formCreate:display, :msgs"
+                                                 oncomplete="handleCreate(args)"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelarCreateGrupo" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formUpdate">
+                    <p:dialog header="Editar Grupo de Conceptos" width="90%"
+                              widgetVar="updateDialog" resizable="false" id="updateDlg" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="fade" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <h:panelGrid columns="3">
+                                        <p:outputLabel value="Grupo Concepto: *"/>
+                                        <p:inputText id="idGrupoConcepto" value="#{gruposconceptoBean.selectedGrupoConcepto.grupoconcepto}"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorGrupoConcepto}"/>
+                                        <p:message for="idGrupoConcepto" display="tooltip"/>
+
+                                        <p:outputLabel value="Nombre: *"/>
+                                        <p:inputText id="idNombre" value="#{gruposconceptoBean.selectedGrupoConcepto.nombre}"
+                                                     required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                                        <p:message for="idNombre" display="tooltip"/>
+                                    </h:panelGrid>
+                                </div>
+                            </f:facet>
+                            <p:fieldset id="selectedConceptosUpdate" legend="Conceptos en el Grupo" style="margin-top:10px" toggleable="false">
+                                <h:outputText value="#{appBean.mensajeTablaVaciaConceptos}" rendered="#{empty gruposconceptoBean.droppedConceptos}" style="font-size:1em;" />
+                                <p:dataTable id="dataTableConceptosSelected" var="concepto" value="#{gruposconceptoBean.droppedConceptos}" rowKey="#{concepto.idconcepto}"
+                                             rendered="#{not empty gruposconceptoBean.droppedConceptos}" selection="#{gruposconceptoBean.selectedDroppedConceptos}"
+                                             scrollable="true" scrollHeight="300" style="font-size: .8em" editable="true" editMode="cell"
+                                             filteredValue="#{gruposconceptoBean.filteredDroppedConceptos}">
+
+                                    <f:facet name="header">
+                                        <p:outputLabel value="#{gruposconceptoBean.informacionSelectedConceptos}"/>
+                                    </f:facet>
+
+                                    <p:column selectionMode="multiple" style="text-align:center" width="3%"/>
+
+                                    <p:column width="10%" headerText="Concepto" sortBy="#{concepto.concepto}"
+                                              filterBy="#{concepto.concepto}" filterMatchMode="startsWith">
+                                        <h:outputText value="#{concepto.concepto}"/>  
+                                    </p:column>
+
+                                    <p:column width="25%" headerText="Nombre" sortBy="#{concepto.nombre}"
+                                              filterBy="#{concepto.nombre}" filterMatchMode="contains">
+                                        <h:outputText value="#{concepto.nombre}"/>  
+                                    </p:column>
+
+                                    <p:column width="10%" headerText="T. Concepto" sortBy="#{concepto.conceptoDescripcion}"
+                                              filterBy="#{concepto.conceptoDescripcion}"  filterMatchMode="contains">  
+                                        <h:outputText value="#{concepto.conceptoDescripcion}"/>   
+                                    </p:column> 
+
+                                    <p:column width="10%" headerText="Unidad" sortBy="#{concepto.unidadDescripcion}"
+                                              filterBy="#{concepto.unidadDescripcion}" filterMatchMode="contains">
+                                        <h:outputText value="#{concepto.unidadDescripcion}"/>  
+                                    </p:column>
+
+                                </p:dataTable>
+                                <div align="right">
+                                    <p:commandButton id="btnQuitarUpdateGrupo" icon="icon-cancel" 
+                                                     title="Quitar" value="Quitar"
+                                                     onclick="statusDialog.show();"
+                                                     actionListener="#{gruposconceptoBean.actionRemoveConcepto(event)}" 
+                                                     update=":formUpdate:display"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </p:fieldset>
+                            <p:fieldset id="availableConceptos" legend="Catalogo de Conceptos" toggleable="false">
+                                <h:outputText value="#{appBean.mensajeTablaVacia}" rendered="#{empty gruposconceptoBean.conceptos}" style="font-size:1em;width: 100px"/>
+                                <p:dataTable id="dataTableConceptos" var="concepto" value="#{gruposconceptoBean.conceptos}"
+                                             filteredValue="#{gruposconceptoBean.filteredConceptos}" rowKey="#{concepto.idconcepto}" selection="#{gruposconceptoBean.selectedConceptos}"
+                                             emptyMessage="#{appBean.mensajeTablaVacia}" rendered="#{not empty gruposconceptoBean.conceptos}" 
+                                             scrollable="true" scrollHeight="300" style="font-size: .8em">
+                                    <f:facet name="header">
+                                        <p:outputLabel value="#{gruposconceptoBean.informacionConceptos}"/>
+                                    </f:facet>
+
+                                    <p:column selectionMode="multiple" style="text-align:center" width="3%"/>
+
+                                    <p:column width="10%" sortBy="#{concepto.concepto}" filterBy="#{concepto.concepto}"
+                                              filterMatchMode="startsWith" headerText="Concepto">
+                                        <h:outputText value="#{concepto.concepto}"/>  
+                                    </p:column>
+
+                                    <p:column width="20%" sortBy="#{concepto.nombre}" filterBy="#{concepto.nombre}"
+                                              filterMatchMode="contains" headerText="Nombre">
+                                        <h:outputText value="#{concepto.nombre}"/>  
+                                    </p:column>
+
+                                    <p:column width="10%" sortBy="#{concepto.conceptoDescripcion}" filterBy="#{concepto.conceptoDescripcion}"
+                                              filterMatchMode="contains" headerText="Tipo Concepto">  
+                                        <h:outputText value="#{concepto.conceptoDescripcion}"/>   
+                                    </p:column> 
+
+                                    <p:column width="10%" sortBy="#{concepto.unidadDescripcion}" filterBy="#{concepto.unidadDescripcion}"
+                                              filterMatchMode="contains" headerText="Unidad">
+                                        <h:outputText value="#{concepto.unidadDescripcion}"/>  
+                                    </p:column>
+                                </p:dataTable>
+                                <div align="right">
+                                    <p:commandButton id="btnAgregarConcepto" icon="icon-add" 
+                                                     title="Agregar" value="Agregar"
+                                                     actionListener="#{gruposconceptoBean.actionSelectedConcepto(event)}" 
+                                                     onclick="statusDialog.show();"
+                                                     update=":formUpdate:display, :msgs"
+                                                     styleClass="style_botones"/>
+                                </div>
+                            </p:fieldset>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-save" 
+                                                 title="Aceptar" value="Guardar"
+                                                 actionListener="#{gruposconceptoBean.edit(event)}"
+                                                 update=":formUpdate:display, :msgs"
+                                                 oncomplete="handleUpdate(args)"
+                                                 onclick="statusDialog.show();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
