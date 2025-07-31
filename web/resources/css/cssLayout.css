@@ -1,0 +1,97 @@
+div.datableImagenes{
+    float: right;
+    width: 20px;
+}
+div.xls{
+    margin: 0px 10px 0px 0px;
+}
+.style_botones{
+    font-variant: small-caps;
+    font-stretch: ultra-expanded;
+    font-size: 1em;
+}
+.style_dialog{
+    background-color: rgb(0,128,255);
+    opacity: 0.8;
+}
+.style_schedule_solicitada{
+    font-size: .6em;
+    background: rgb(108,107,91) !important;
+}
+.style_schedule_cancelada{
+    font-size: .6em;
+    background: red !important;
+}
+.style_schedule_autorizada{
+    font-size: .6em;
+    background: green !important;
+}
+
+#top {
+    text-align: right;
+    font-weight: normal;
+    position: relative;
+    color: black;
+    padding: 5px;
+    margin: 0px 0px 10px 0px;
+}
+
+#bottom {
+    position: relative;
+    padding: 1px;
+    font-weight: normal;
+    text-align: center;
+}
+
+#left {
+    float: left;
+    padding: 5px;
+    width: 150px;
+}
+
+#right {
+    float: right;
+    background-color: #ece3a5;
+    padding: 5px;
+    width: 150px;
+}
+
+.center_content {
+    position: relative;
+    height: 540px;
+    padding: 0px;
+}
+
+.left_content {
+    padding: 5px;
+    width: 86%;
+    margin-left: 200px;
+}
+
+.right_content {
+    background-color: #90D2E1;
+    padding: 5px;
+    margin: 0px 170px 0px 170px;
+}
+
+#top a:link, #top a:visited {
+    color: black;
+    font-weight : bold;
+    text-decoration: none;
+}
+
+#top a:link:hover, #top a:visited:hover  {
+    color: black;
+    font-weight : bold;
+    text-decoration : underline;
+}
+
+.setenta{
+    width: 70%;
+}
+
+.treinta{
+    width: 30%;
+}
+
+
