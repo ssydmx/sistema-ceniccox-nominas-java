@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+
+            <ui:define name="content">
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="4" style="margin-top: 25px">
+                            <p:inputText value="#{calendariovacacionesBean.numeroempleado}" placeholder="Número Empleado"
+                                         style="width: 190px"/>
+
+                            <p:selectOneMenu style="width: 200px" value="#{calendariovacacionesBean.selectedgrupopago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idEstatus" style="width: 200px" value="#{calendariovacacionesBean.selectedestatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatusSolicitudVacaciones}"/>  
+                            </p:selectOneMenu>
+
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                             actionListener="#{calendariovacacionesBean.consultar(event)}" onstart="statusDialog.show()"
+                                             update=":form"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Calendario Vacaciones - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <p:schedule id="schedule" value="#{calendariovacacionesBean.eventModel}" widgetVar="myschedule" timeZone="GMT-6"
+                                    locale="es" draggable="false" leftHeaderTemplate="none" rightHeaderTemplate="today,prev,next" showWeekends="false"
+                                    style="width: 100%;font-size: .8em"/>
+                    </p:fieldset>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+                <script>
+
+
+                    PrimeFaces.locales['es'] = {
+                        closeText: 'Cerrar',
+                        prevText: 'Anterior',
+                        nextText: 'Siguiente',
+                        monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                        monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                        dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                        dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+                        weekHeader: 'Semana',
+                        firstDay: 1,
+                        isRTL: false,
+                        showMonthAfterYear: false,
+                        yearSuffix: '',
+                        timeOnlyTitle: 'Sólo hora',
+                        timeText: 'Tiempo',
+                        hourText: 'Hora',
+                        minuteText: 'Minuto',
+                        secondText: 'Segundo',
+                        currentText: 'Fecha actual',
+                        ampm: false,
+                        month: 'Mes',
+                        week: 'Semana',
+                        day: 'Día',
+                        allDayText: 'Todo el día'
+                    };
+
+                </script>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
