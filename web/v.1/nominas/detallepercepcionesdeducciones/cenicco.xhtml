@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="12">
+                            <p:inputText id="idmesinicio" value="#{detalleExentosGravadosBean.mesinicio}" placeholder="Parámetro Inicio" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de ingresar Parámetro Inicio"/>
+                            <p:message for="idmesinicio" display="tooltip"/>
+
+                            <p:inputText id="idmesfin" value="#{detalleExentosGravadosBean.mesfin}" placeholder="Parámetro Fin" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de ingresar Parámetro Fin"/>
+                            <p:message for="idmesfin" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{detalleExentosGravadosBean.anio}" placeholder="Año" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Año"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:selectOneMenu value="#{detalleExentosGravadosBean.idgrupopago}" style="width: 150px"
+                                             filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" var="gp" 
+                                               itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idAgrupacion" style="width: 200px" value="#{detalleExentosGravadosBean.selectedPeriodoMes}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="Favor de seleccionar Agrupación">  
+                                <f:selectItem itemValue="" itemLabel="Agrupación"/>
+                                <f:selectItems value="#{appBean.comboPeriodoMes}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idAgrupacion" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{detalleExentosGravadosBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Reporte Exentos/Gravados - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{detalleExentosGravadosBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="cifra"
+                                                 value="#{detalleExentosGravadosBean.cifrasnomina}"
+                                                 filteredValue="#{detalleExentosGravadosBean.filteredcifrasnomina}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{cifra.idcifranomina}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv" actionListener="#{detalleExentosGravadosBean.descargarReporte()}">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </h:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf">  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <f:facet name="footer">
+                                            <div align="right">
+                                                <p:outputPanel>  
+                                                    <p:commandButton value="Descargar Reporte CSV" oncomplete="handleLShow(args)"
+                                                                     onstart="statusDialog.show()" actionListener="#{detalleExentosGravadosBean.descargarReporteSimplificado()}"/>
+                                                </p:outputPanel>
+                                            </div>
+                                        </f:facet>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cifra.numeroempleado}"  sortBy="#{cifra.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cifra.numeroempleado} - #{cifra.nombreempleado}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value=""/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cifra.numeroconcepto} #{cifra.nombreconcepto}"  sortBy="#{cifra.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cifra.numeroconcepto} - #{cifra.nombreconcepto}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Totales:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{cifra.detallePercepciones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Percepciones" title="Percepciones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cifra.detallePercepciones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{detalleExentosGravadosBean.percepciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{cifra.detalleDeducciones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Deducciones" title="Deducciones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cifra.detalleDeducciones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{detalleExentosGravadosBean.deducciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{cifra.detalleprovisiones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Provisiones" title="Provisiones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cifra.detalleprovisiones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{detalleExentosGravadosBean.provisiones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
