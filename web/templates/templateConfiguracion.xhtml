@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssHexagonos.css"/>
+        <style>
+            body{
+                background-color : rgb(32,32,32);
+            }
+        </style>
+        <title>Configuración</title>
+    </h:head>
+
+    <h:body>
+
+        <div id="menu" class="ui-widget ui-widget-header ui-corner-all">
+            <h:form>  
+                <div align="right">
+                    <h:panelGrid columns="4">
+                        <p:clock pattern="dd/MM/yyyy HH:mm:ss" mode="server"/>
+                        <p:selectOneMenu id="idComboModulo" value="#{urlsBean.selectedModulo}" style="width: 180px;text-align: left;" effect="fold"
+                                         valueChangeListener="#{urlsBean.cambiarURL}"> 
+                            <f:selectItems value="#{urlsBean.comboUrl}"/>
+                            <p:ajax partialSubmit="true"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+
+                <p:menubar>  
+                    <p:submenu label="Administración">
+                        <p:submenu label="TImbres" rendered="false">
+                            <p:menuitem value="PAC" url="#{appBean.basePath}configuracion/timbres/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoTimbresRecibos}"/>  
+                        </p:submenu>
+                        <p:submenu label="Catalogos">
+
+                            <p:menuitem value="Compañías" url="#{appBean.basePath}configuracion/companias/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosCompanias}"/>  
+                            <p:menuitem value="Recursos Humanos" url="#{appBean.basePath}configuracion/catalogorecursoshumanos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosRecursosHumanos}"/>  
+                            <p:menuitem value="Bancos" url="#{appBean.basePath}configuracion/bancos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosBancos}"/>  
+                            <p:menuitem value="Expedientes" url="#{appBean.basePath}configuracion/catalogoexpedientes/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosExpedientes}"/>
+                            <p:menuitem value="Geográfico" url="#{appBean.basePath}configuracion/catalogogeografico/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosGeografico}"/>
+                            <p:menuitem value="Constancias SAT" url="#{appBean.basePath}configuracion/catalogoconstanciassat/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosConstanciaSat}"/>
+
+                            <p:menuitem value="Procesos" url="#{appBean.basePath}configuracion/catalogoprocesos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosProcesos}"/>
+                            <p:menuitem value="Relación Laboral" url="#{appBean.basePath}configuracion/catalogorelacionlaboral/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosRelacionLaboral}"/>
+                        </p:submenu> 
+                        <p:submenu label="Acceso">
+                            <p:menuitem value="Usuarios" url="#{appBean.basePath}configuracion/usuarios/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoAdministracionUsuarios}"/>  
+                            <p:menuitem value="Perfiles" url="#{appBean.basePath}configuracion/perfiles/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoAdministracionPerfiles}"/>  
+
+                        </p:submenu>
+                    </p:submenu>  
+                    <p:submenu label="Configuración">
+                        <p:menuitem value="Parámetros-Etiquetas" url="#{appBean.basePath}configuracion/parametros/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosFormulas}"/>
+                        <p:menuitem value="Auditoría Conceptos" url="#{appBean.basePath}configuracion/auditoriaconceptos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionLogs}"/>
+                        <p:menuitem value="Calendario Procesos" url="#{appBean.basePath}configuracion/catalogoperiodos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosPeriodos}"/>
+                        <p:menuitem value="Sistemas Antiguedad" url="#{appBean.basePath}configuracion/sistemaantiguedad/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>
+                        <p:menuitem value="Tarifas-Ramas(IMSS)" url="#{appBean.basePath}configuracion/tarifas/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoOperacionesCalculoNominas}"/>
+                        <p:submenu label="Conceptos">
+                            <p:menuitem value="Catálogo" url="#{appBean.basePath}configuracion/conceptos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionConceptosCatalogo}"/>
+                            <p:menuitem value="Grupos" url="#{appBean.basePath}configuracion/grupoconceptos/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionConceptosGrupos}"/>
+                        </p:submenu>
+                        <p:menuitem value="Variables" url="#{appBean.basePath}configuracion/variablesformula/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionCatalogosFormulas}"/>
+                        <p:menuitem value="Turnos" url="#{appBean.basePath}configuracion/turnos/cenicco.xhtml" update="idComboModulo"/>
+                    </p:submenu>
+                    <p:submenu label="Soporte">
+                        <p:menuitem value="Consola Sesiones" url="#{appBean.basePath}configuracion/sesiones/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoAdministracionSesiones}"/>  
+                        <p:menuitem value="Conexiones" url="#{appBean.basePath}configuracion/conexion/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoConfiguracionLogs}"/>  
+                    </p:submenu>
+                    <p:menuitem value="Inicio" url="#{appBean.basePath}inicio/index.xhtml" icon="ui-icon-home"/> 
+                </p:menubar>
+            </h:form>
+        </div>
+
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>
