@@ -1,0 +1,300 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="14">
+                            <p:selectOneMenu id="idCompania" style="width: 300px" value="#{ptuBean.idcompania}" filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Compañía"/>
+                                <f:selectItems value="#{companiasBean.companias}"
+                                               var="cia" itemValue="#{cia.idcompania}" itemLabel="#{cia.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:inputText id="idimporte" value="#{ptuBean.importerepartir}" placeholder="Total a Repartir"
+                                         required="false" requiredMessage="Favor de ingresar Total a Repartir"/>
+                            <p:message for="idimporte" display="tooltip"/>
+
+                            <p:inputText id="idsd" value="#{ptuBean.importesd}" placeholder="S.D. Tope" size="10"
+                                         required="false" requiredMessage="Favor de ingresar S.D. Tope"/>
+                            <p:message for="idsd" display="tooltip"/>
+
+                            <p:inputText id="iddias" value="#{ptuBean.diasminimos}" placeholder="Mínimo Días" size="10"
+                                         required="false" requiredMessage="Favor de ingresar Mínimo Días"/>
+                            <p:message for="iddias" display="tooltip"/>
+
+                            <p:selectOneMenu id="idtipofecha" style="width: 200px" 
+                                             filter="true" filterMatchMode="contains" value="#{ptuBean.selectedtipofecha}"
+                                             required="false" requiredMessage="Favor de seleccionar Tipo Fecha">  
+                                <f:selectItem itemValue="" itemLabel="Tipo Fecha"/>
+                                <f:selectItems value="#{appBean.tipoFecha}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idtipofecha" display="tooltip"/>
+
+                            <p:inputText id="idanio" value="#{ptuBean.anio}" placeholder="Año" size="10"
+                                         required="true" requiredMessage="Favor de ingresar Año"/>
+                            <p:message for="idanio" display="tooltip"/>
+
+                            <p:commandButton value="Calcular" icon="ui-icon-play"
+                                             styleClass="style_botones" actionListener="#{ptuBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones" actionListener="#{ptuBean.listenerSelected()}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Cálculo PTU - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="center">
+                            <h:panelGrid columns="6">
+                                <p:outputLabel value="S.D. Anual Tope: "/>
+                                <p:inputText value="#{ptuBean.topesueldos}" readonly="true"> 
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+
+                                <p:outputLabel value="Total Gral. Días: "/>
+                                <p:inputText value="#{ptuBean.totalgeneraldias}" readonly="true">
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+
+                                <p:outputLabel value="Total Gral. Sueldos: "/>
+                                <p:inputText value="#{ptuBean.totalgeneralsueldos}" readonly="true">
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{ptuBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="ptu"
+                                                 value="#{ptuBean.cifras}"
+                                                 filteredValue="#{ptuBean.filteredcifras}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <!--<h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="PTU" />  
+                                                    </h:commandLink>-->
+                                                    <p:commandLink id="csv2"  actionListener="#{ptuBean.generarCsvPTU()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.aplica?'Sí':'No'}"  sortBy="#{ptu.aplica}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Aplica PTU" title="Aplica PTU"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.aplica?'Sí':'No'}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.numeroempleado}"  sortBy="#{ptu.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.numeroempleado}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.nombreempleado}" sortBy="#{ptu.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.nombreempleado}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.grupopago}" sortBy="#{ptu.grupopago}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Grupo Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.grupopago}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.fechaantiguedadstr}"  sortBy="#{ptu.fechaantiguedadstr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Antigüedad" title="Fecha Antigüedad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.fechaantiguedadstr}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.fechaingresostr}"  sortBy="#{ptu.fechaingresostr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Ingreso" title="Fecha Ingreso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.fechaingresostr}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.fechabajastr}"  sortBy="#{ptu.fechabajastr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Baja" title="Fecha Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.fechabajastr}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="exact" exportable="true"
+                                                  filterBy="#{ptu.estatus=='0'?'Inactivo':'Activo'}" sortBy="#{ptu.estatus}">
+                                            <f:facet name="header">
+                                                <h:outputText value="E. Empleado" title="Estatus Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.estatus=='0'?'Inactivo':'Activo'}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.fechainicioPtu}"  sortBy="#{ptu.fechainicioPtu}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Inicio PTU" title="Fecha Inicio PTU"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.fechainicioPtu}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.fechafinPtu}"  sortBy="#{ptu.fechafinPtu}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Fin PTU" title="Fecha Fin PTU"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.fechafinPtu}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ptu.diasnaturales}"  sortBy="#{ptu.diasnaturales}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Tiempo Días" title="Tiempo Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.diasnaturales}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.importe}" sortBy="#{ptu.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Sueldo Anual PTU" title="Sueldo Anual PTU"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.importe}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.sueldotopado}" sortBy="#{ptu.sueldotopado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Sueldo Anual Topado" title="Sueldo Anual Topado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.sueldotopado}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.factorpordias}" sortBy="#{ptu.factorpordias}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Días" title="Factor Por Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.factorpordias}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="8"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.montopordias}" sortBy="#{ptu.montopordias}">
+                                            <f:facet name="header">
+                                                <h:outputText value="M. Días" title="Monto Por Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.montopordias}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.factorporpesos}" sortBy="#{ptu.factorporpesos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Pesos" title="Factor Por Pesos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.factorporpesos}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="8"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.montoporpesos}" sortBy="#{ptu.montoporpesos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="M. Pesos" title="Monto Por Pesos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.montoporpesos}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.topePTU}" sortBy="#{ptu.topePTU}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Tope PTU" title="Tope PTU"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.topePTU}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="8"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <h:outputText value="Total Gral:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  filterBy="#{ptu.total}" sortBy="#{ptu.total}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Total" title="Total"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ptu.total}" style="#{ptu.aplica?'color: #C6C6C6':'color: #CE6868;'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{ptuBean.totalgeneral}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </h:outputText>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Guardar" icon="icon-save"
+                                                             styleClass="style_botones" actionListener="#{ptuBean.create(event)}"
+                                                             update=":form, :msgs" onclick="statusDialog.show();"/>
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
+
