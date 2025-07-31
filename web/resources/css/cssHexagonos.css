@@ -1,0 +1,151 @@
+header{
+    margin: auto;
+    width: 970px;
+}
+div.logo{
+    float: left;
+    margin-top: 0px;
+    margin-left: -40px;
+    z-index: 100;
+    position: absolute;
+}
+div.logoBg{
+    float: left;
+    margin-top: 160px;
+    margin-left: 320px;
+}
+div.contenedor1{
+    width: 301px;
+    height: 261px;
+}
+div.contenedor2{
+    width: 301px;
+    height: 261px;
+}
+
+div.ajustes{
+    width: 10px;
+}
+
+div.perfil{
+    font-size: .9em;
+    float: right;
+    color: white;
+    text-align: right;
+    width: 280px;
+    height: 100px;
+    margin: -260px -120px 0px 0px;
+}
+
+div#ajustes{
+    float: left;
+    margin-left: -900px;
+    margin-top: 150px;
+}
+
+div#azul{
+    float: left;
+    margin-left: 110px;
+    background-repeat: no-repeat;
+    background-image: url(../images/fondos/hexAzul.png);
+}
+
+div#amarillo{
+    float: left;
+    margin-left: -75px;
+    background-repeat: no-repeat;
+    background-image: url(../images/fondos/hexAmarillo.png);
+}
+
+div#morado{
+    float: left;
+    margin-left: -75px;
+    margin-top: 130px;
+    background-repeat: no-repeat;
+    background-image: url(../images/fondos/hexMorado.png);
+}
+
+div#rosa{
+    float: left;
+    margin-left: -526px;
+    background-repeat: no-repeat;
+    background-image: url(../images/fondos/hexRosa.png);
+}
+
+div#verde{
+    float: left;
+    margin-left: -75px;
+    margin-top: 0px;
+    background-repeat: no-repeat;
+    background-image: url(../images/fondos/hexVerde.png);
+}
+
+img.ajustes{
+    width: 60px; 
+    background-color: rgba(255,255,255,0.15);
+    padding: 10px;
+    display: block;
+    margin: 25px auto;
+    -webkit-border-radius: 50%;
+    -webkit-box-shadow: 0px 0px 0px 30px rgba(255,255,255,0);
+    -webkit-transition:box-shadow .4s;
+}
+
+img.icon{
+    width: 160px; 
+    background-color: rgba(255,255,255,0.15);
+    padding: 10px;
+    display: block;
+    margin: 25px auto;
+    -webkit-border-radius: 50%;
+    -webkit-box-shadow: 0px 0px 0px 30px rgba(255,255,255,0);
+    -webkit-transition:box-shadow .4s;
+}
+img.inconLogo{
+    width: 120px; 
+}
+
+img.inconLogoBg{
+    width: 320px; 
+}
+
+p.texto{
+    font-size: 1.2em;
+    color: white;
+    text-align: center;
+    opacity: 1;
+    -webkit-transition: .4s;
+}
+
+div.contenedor1:hover p.texto{
+    opacity: 1;
+}
+
+div.contenedor1:hover img.icon{
+    -webkit-box-shadow: 0px 0px 0px rgba(255,255,255,.6);
+}
+
+div.contenedor1:hover img.ajustes{
+    -webkit-box-shadow: 0px 0px 0px rgba(255,255,255,.6);
+}
+
+div.contenedor2:hover p.texto{
+    opacity: 1;
+}
+
+div.contenedor2:hover img.icon{
+    -webkit-box-shadow: 0px 0px 0px rgba(255,255,255,.6);
+}
+
+div.ajustes:hover img.ajustes{
+    -webkit-box-shadow: 0px 0px 0px rgba(255,255,255,.6);
+}
+.ui-state-default .icon-cancel{
+    background-image: url(../images/icons/cancel.png);
+}
+.ui-state-default .icon-login{
+    background-image: url(../images/icons/user.png);
+}
+.ui-state-default .icon-key{
+    background-image: url(../images/icons/key.png);
+}
