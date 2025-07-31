@@ -1,0 +1,479 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateFiscal.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="11">
+
+                            <p:selectOneMenu id="idGrupoPago" style="width: 200px" 
+                                             filter="true" filterMatchMode="contains" value="#{ajusteanualBean.selectedgrupopago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:inputText id="idMesInicio" value="#{ajusteanualBean.mesinicio}" placeholder="Mes Incio" size="10" 
+                                         style="text-align: center" required="true" requiredMessage="Favor de Ingresar Mes Inicio"/>
+                            <p:message for="idMesInicio" display="tooltip"/>
+
+
+                            <p:inputText id="idMesFin" value="#{ajusteanualBean.mesfin}" placeholder="Mes Fin" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Mes Fin"/>
+                            <p:message for="idMesFin" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{ajusteanualBean.anio}" placeholder="Año" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Año"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:selectOneMenu id="idTipoFecha" style="width: 200px" required="true" requiredMessage="Favor de Seleccionar Fecha de Cálculo"
+                                             filter="true" filterMatchMode="contains" value="#{ajusteanualBean.selectedtipofecha}">  
+                                <f:selectItem itemValue="" itemLabel="Fechas Cálculo"/>
+                                <f:selectItems value="#{appBean.fechasAjuste}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idTipoFecha" display="tooltip"/>
+
+                            <h:outputText value="Aplicar a Todos?" style="color: white" />
+                            <p:selectBooleanCheckbox value="#{ajusteanualBean.aplicarajuste}" />
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Resultado Ajuste Anual - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="right">
+                            <h:panelGrid columns="1">
+                                <p:commandButton value="Calcular" title="Calcular" icon="ui-icon-play" update=":form, :msgs"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{ajusteanualBean.consultar(event)}"
+                                                 onclick="statusDialog.show();"/> 
+
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{ajusteanualBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="ajuste"
+                                                 value="#{ajusteanualBean.ajuste}"
+                                                 filteredValue="#{ajusteanualBean.filteredajuste}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{ajusteanualBean.selectedajuste}"
+                                                 rowKey="#{ajuste.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.respuesta}"  sortBy="#{ajuste.respuesta}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Respuesta" title="Respuesta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.respuesta}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.rfccia}"  sortBy="#{ajuste.rfccia}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C. Cia." title="R.F.C. Compañía"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.rfccia}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.grupopago}"  sortBy="#{ajuste.grupopago}">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.grupopago}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{ajusteanualBean.selectedtipofecha==0}"
+                                                  filterBy="#{ajuste.fechaingreso}"  sortBy="#{ajuste.fechaingreso}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Ingreso" title="Fecha Ingreso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.fechaingreso}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{ajusteanualBean.selectedtipofecha==1}"
+                                                  filterBy="#{ajuste.fechaantiguedad}"  sortBy="#{ajuste.fechaantiguedad}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Antigüedad" title="Fecha Antigüedad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.fechaantiguedad}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.fechabaja}"  sortBy="#{ajuste.fechabaja}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Baja" title="Fecha Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.fechabaja}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.numeroempleado} - #{ajuste.nombreempleado}"  sortBy="#{ajuste.numeroempleado} - #{ajuste.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.numeroempleado} - #{ajuste.nombreempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{ajuste.rfc}"  sortBy="#{ajuste.rfc}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C. Empleado" title="R.F.C. Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.rfc}"/>
+                                            <f:facet name="footer">
+                                                <h:outputText value="Totales:"/>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalprevisionsocial}">
+                                            <f:facet name="header">
+                                                <h:outputText value="P. Social" title="Previsión Social"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalprevisionsocial}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.psocial}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalgravado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="B. Gravada" title="Base Gravada"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalgravado}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.bgravada}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalexento}">
+                                            <f:facet name="header">
+                                                <h:outputText value="B. Exenta" title="Base Exenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalexento}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.bexenta}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalsueldossalarios}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Sueldos y Salarios" title="Sueldos y Salarios"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalsueldossalarios}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.sueldosalarios}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalajusteanual}">
+                                            <f:facet name="header">
+                                                <h:outputText value="SyS + P.S." title="Sueldos y Salarios + Previsión Social"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalajusteanual}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.sueldosalariosps}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.previsionsocialgravada}">
+                                            <f:facet name="header">
+                                                <h:outputText value="P.S. Gravada" title="Previsión Social Gravada"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.previsionsocialgravada}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.psgravada}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.previsionsocialexenta}">
+                                            <f:facet name="header">
+                                                <h:outputText value="P.S. Exenta" title="Previsión Social Exenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.previsionsocialexenta}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.psexenta}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.ingresosgravados}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I. Gravados" title="Ingresos Gravados"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.ingresosgravados}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.igravados}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.ingresosexentos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I. Exentos" title="Ingresos Exentos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.ingresosexentos}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.iexentos}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.totalimpuestosretenidos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I. Retenido" title="Impuesto Retenido"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.totalimpuestosretenidos}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.iretenidos}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.impuestobruto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I.S.R. Bruto" title="I.S.R. Bruto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.impuestobruto}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.ibrutos}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.subsidiototal}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Subsidio Total" title="Subsidio Total"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.subsidiototal}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.subsidio}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.isrfavor}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I.S.R. Favor" title="I.S.R. Favor"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.isrfavor}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.isrfavor}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                  sortBy="#{ajuste.isrcargo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="I.S.R. Cargo" title="I.S.R. Cargo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{ajuste.isrcargo}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{ajusteanualBean.isrcargo}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 600px">
+                                                <p:panel header="Gravados" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{ajuste.conceptosgravados}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Periodo" sortBy="#{concepto.periodo}/#{concepto.anio}">
+                                                            <p:outputLabel value="#{concepto.periodo}/#{concepto.anio}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Concepto" sortBy="#{concepto.numeroconcepto}" filterBy="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}">
+                                                            <h:outputText value="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}" title="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="#{concepto.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                                <p:panel header="Exentos" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{ajuste.conceptosexentos}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Periodo" sortBy="#{concepto.periodo}/#{concepto.anio}">
+                                                            <p:outputLabel value="#{concepto.periodo}/#{concepto.anio}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Concepto" sortBy="#{concepto.numeroconcepto}" filterBy="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}">
+                                                            <h:outputText value="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}" title="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="#{concepto.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                                <p:panel header="P.Social" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{ajuste.conceptosprevisionsocial}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Periodo" sortBy="#{concepto.periodo}/#{concepto.anio}">
+                                                            <p:outputLabel value="#{concepto.periodo}/#{concepto.anio}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Concepto" sortBy="#{concepto.numeroconcepto}" filterBy="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}">
+                                                            <h:outputText value="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}" title="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="#{concepto.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                                <p:panel header="I.Retenidos" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{ajuste.conceptosimpuestosretenidos}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Periodo" sortBy="#{concepto.periodo}/#{concepto.anio}">
+                                                            <p:outputLabel value="#{concepto.periodo}/#{concepto.anio}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Concepto" sortBy="#{concepto.numeroconcepto}" filterBy="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}">
+                                                            <h:outputText value="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}" title="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="#{concepto.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                                <p:panel header="Subsidios" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{ajuste.conceptossubsidios}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Periodo" sortBy="#{concepto.mes}/#{concepto.anio}">
+                                                            <p:outputLabel value="#{concepto.mes}/#{concepto.anio}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Concepto" sortBy="#{concepto.numeroconcepto}" filterBy="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}">
+                                                            <h:outputText value="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}" title="#{concepto.numeroconcepto} - #{concepto.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="#{concepto.importe}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Resultado" title="Descargar Resultado" icon="icon-down"
+                                                             actionListener="#{ajusteanualBean.descargarReporteResultado()}"
+                                                             oncomplete="handleLShow(args)" 
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Descargar Acumulado Ajuste" title="Descargar Acumulado Ajuste" icon="icon-down"
+                                                             actionListener="#{ajusteanualBean.descargarReporteAcumuladoAjuste()}"
+                                                             oncomplete="handleLShow(args)" 
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Descargar Acumulado" title="Descargar Acumulado" icon="icon-down"
+                                                             actionListener="#{ajusteanualBean.descargarReporteAcumulado()}"
+                                                             oncomplete="handleLShow(args)" 
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/> 
+
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
