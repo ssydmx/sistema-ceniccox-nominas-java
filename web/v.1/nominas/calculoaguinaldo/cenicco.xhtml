@@ -1,0 +1,333 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="6">
+                            <p:selectOneMenu id="idGrupoPago" style="width: 200px" 
+                                             filter="true" filterMatchMode="contains" valueChangeListener="#{calculoaguinaldoBean.changeGrupoPago}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="idEmpleados"/>
+                            </p:selectOneMenu>
+                            <p:message for="idGrupoPago" display="tooltip"/>
+
+                            <p:selectCheckboxMenu id="idEmpleados" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{calculoaguinaldoBean.selectedRelaciones}" label="Empleado(s)"
+                                                  required="true" requiredMessage="#{appBean.mensajeErrorSeleccionEmpleados}">
+                                <f:selectItems value="#{calculoaguinaldoBean.relaciones}"/> 
+                            </p:selectCheckboxMenu>
+                            <p:message for="idEmpleados" display="tooltip"/>
+                            <p:inputText id="idPeriodo" placeholder="Periodo" required="true" requiredMessage="#{appBean.mensajeErrorPeriodo}"
+                                         value="#{calculoaguinaldoBean.numeroPeriodo}" size="10" style="text-align: center"/> 
+                            <p:message for="idPeriodo" display="tooltip"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Cálculo Aguinaldo - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="3">
+                                <p:commandButton value="Calcular" icon="ui-icon-play"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{calculoaguinaldoBean.create(event)}"
+                                                 update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                <p:commandButton value="Descargar Preliminar" title="Descargar Preliminar" icon="icon-down"
+                                                 actionListener="#{calculoaguinaldoBean.descargarReporte()}"
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                <p:commandButton value="Reporte Alpha" title="Reporte Alpha" icon="icon-down"
+                                                 rendered="#{appBean.servicioAlpha}"
+                                                 actionListener="#{calculoaguinaldoBean.descargarArchivoAlpha(event)}"
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{calculoaguinaldoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="nomina"
+                                                 value="#{calculoaguinaldoBean.nominas}"
+                                                 filteredValue="#{calculonominaBean.filteredNominas}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{nomina.relacionlaboral.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Nomina" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="7%" exportable="true"
+                                                  filterBy="#{nomina.relacionlaboral.numeroempleado}"  sortBy="#{nomina.relacionlaboral.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.relacionlaboral.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="15%" exportable="true"
+                                                  filterBy="#{nomina.relacionlaboral.idempleado.nombre} #{nomina.relacionlaboral.idempleado.apellidopaterno} #{nomina.relacionlaboral.idempleado.apellidomaterno}"
+                                                  sortBy="#{nomina.relacionlaboral.idempleado.nombre} #{nomina.relacionlaboral.idempleado.apellidopaterno} #{nomina.relacionlaboral.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.relacionlaboral.idempleado.nombre} #{nomina.relacionlaboral.idempleado.apellidopaterno} #{nomina.relacionlaboral.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="6%" exportable="true" sortBy="#{nomina.sd}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="SD" title="Salario Diario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.sd}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="6%" exportable="true" sortBy="#{nomina.sdi}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="SDI" title="Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.sdi}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="8%" exportable="true" sortBy="#{nomina.relacionlaboral.fechaIngresoStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Ingreso" title="Fecha Ingreso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.relacionlaboral.fechaIngresoStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" width="8%" exportable="true" sortBy="#{nomina.relacionlaboral.fechaAntiguedadStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Antiguedad" title="Fecha Antiguedad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.relacionlaboral.fechaAntiguedadStr}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Totales:"/>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column width="7%" exportable="true" sortBy="#{nomina.totalProvisiones}" 
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Provisiones" title="Total Provisiones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totalProvisiones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{calculoaguinaldoBean.totalprovisiones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column width="7%" exportable="true" sortBy="#{nomina.totalPercepcion}" 
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Percepción" title="Total Percepción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totalPercepcion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{calculoaguinaldoBean.totalpercepciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column width="7%" exportable="true" sortBy="#{nomina.totalDeduccion}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Deducción" title="Total Deducción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totalDeduccion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{calculoaguinaldoBean.totaldeducciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column width="7%" exportable="true" style="text-align: right" sortBy="#{nomina.netoPagar}">
+                                            <f:facet name="header">
+                                                <h:outputText value="N. Pagar" title="Neto Pagar"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.netoPagar}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{calculoaguinaldoBean.totalneto}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 600px">
+                                                <p:panel header="Percepciones" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{nomina.percepciones}" var="concepto" style="font-size: 1em;">
+                                                        <p:column headerText="Concepto" rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}">
+                                                            <h:outputText value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#C6C6C6':'#058205'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{nomina.totalPercepcion}" style="color: white;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                                <p:panel header="Deducciones" toggleable="true" collapsed="true">
+                                                    <p:dataTable  value="#{nomina.deducciones}" var="concepto"
+                                                                  style="font-size: 1em;">
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}">
+                                                            <p:outputLabel value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#C6C6C6':'#058205'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{nomina.totalDeduccion}" style="color: white;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                                <p:panel header="Provisiones" toggleable="true" collapsed="true" >
+                                                    <p:dataTable  value="#{nomina.provisiones}" var="concepto"
+                                                                  style="font-size: 1em;">
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}">
+                                                            <p:outputLabel value="#{concepto.concepto} - #{concepto.nombre}" title="#{concepto.nombre} (#{concepto.formula})"/>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="#{concepto.tiempo!=null?concepto.tiempo:0}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column rendered="#{concepto.incidencia==1 and (concepto.valor!=0)}" style="text-align: right;">
+                                                            <p:outputLabel value="*" rendered="#{concepto.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{concepto.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{concepto.valor}" style="color: #{concepto.suma=='0'?'#C6C6C6':'#058205'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                    <f:facet name="footer">
+                                                        <div align="right">
+                                                            <p:outputLabel value="#{nomina.totalProvisiones}" style="color: white;font-size: 1.2em">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </div>
+                                                    </f:facet>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Cerrar Nómina" title="Cerrar Nómina" icon="ui-icon-transferthick-e-w"
+                                                             actionListener="#{calculoaguinaldoBean.cerrarNomina(event)}"
+                                                             styleClass="style_botones" onclick="statusDialog.show();"
+                                                             update=":msgs"/> 
+                                            <p:commandButton value="Reportes Temporales" icon="icon-down"
+                                                             actionListener="#{calculoaguinaldoBean.nominaTemporal(event)}"
+                                                             update=":form, :msgs"
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/>
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
