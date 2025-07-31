@@ -1,0 +1,259 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateFiscal.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="9" style="margin-top: 20px">
+                            <p:selectOneMenu id="idregpatronal" value="#{movimientossuaBean.selectedidregistropatronal}"
+                                             style="width: 150px" filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorRegistroPatronal}">  
+                                <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+                                <f:selectItems value="#{registropatronalBean.registros}" 
+                                               var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}" 
+                                               itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                            </p:selectOneMenu>                                                                                  
+                            <p:message for="idregpatronal" display="tooltip"/>
+
+                            <p:selectOneMenu id="idtiposua" value="#{movimientossuaBean.selectedsua}"
+                                             style="width: 150px" filter="true" 
+                                             required="true" requiredMessage="Favor de seleccionar Tipo SUA">  
+                                <f:selectItem itemValue="" itemLabel="- Seleccione Tipo SUA -"/>
+                                <f:selectItems value="#{appBean.movimientosSua}"/>  
+                            </p:selectOneMenu>                                                                                  
+                            <p:message for="idtiposua" display="tooltip"/>
+
+                            <p:selectOneMenu id="idmes" value="#{movimientossuaBean.selectedmes}"
+                                             style="width: 150px" filter="true" 
+                                             required="true" requiredMessage="#{appBean.mensajeErrorVacioMes}">  
+                                <f:selectItem itemValue="" itemLabel="Mes"/>
+                                <f:selectItems value="#{appBean.comboMeses}"/>  
+                            </p:selectOneMenu>                                                                                  
+                            <p:message for="idmes" display="tooltip"/>
+
+                            <p:inputText id="idAnio" placeholder="Año" required="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"
+                                         value="#{movimientossuaBean.anio}" size="10" style="text-align: center"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{movimientossuaBean.consultar(event)}"
+                                             onclick="statusDialog.show();"
+                                             update=":form,:msgs"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Movimientos (SUA) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <p:panelGrid id="display">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{movimientossuaBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="vista"
+                                                 value="#{movimientossuaBean.vista}"
+                                                 filteredValue="#{movimientossuaBean.filteredvista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{movimientossuaBean.selectedvista}"
+                                                 rowKey="#{vista.idsua}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="MovimientosSUA" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center" width="5%"/>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.tipomovimiento}" sortBy="#{vista.tipomovimiento}">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Movimiento" title="Tipo Movimiento"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.tipomovimiento}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.grupopago}" sortBy="#{vista.grupopago}">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo de Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.grupopago}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroempleado}" sortBy="#{vista.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número del Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nombreempleado}" sortBy="#{vista.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre del Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreempleado}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nss}" sortBy="#{vista.nss}">
+                                            <f:facet name="header">
+                                                <h:outputText value="N.S.S." title="Número de Seguridad Social"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nss}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.curp}" sortBy="#{vista.curp}">
+                                            <f:facet name="header">
+                                                <h:outputText value="C.U.R.P." title="C.U.R.P."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.curp}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.rfc}" sortBy="#{vista.rfc}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C." title="R.F.C."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.rfc}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.registropatronal}" sortBy="#{vista.registropatronal}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R. Patronal" title="Registro Patronal"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.registropatronal}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.fechabaja}" sortBy="#{vista.fechabaja}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Baja" title="Fecha Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fechabaja}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.fechasdi}" sortBy="#{vista.fechasdi}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha S.D.I." title="Fecha Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fechasdi}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.sdi}" sortBy="#{vista.sdi}">
+                                            <f:facet name="header">
+                                                <h:outputText value="S.D.I." title="Salario Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.sdi}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.concepto}" sortBy="#{vista.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.concepto}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.tiempo}" sortBy="#{vista.tiempo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Tiempo" title="Tiempo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.tiempo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.fecharegistro}" sortBy="#{vista.fecharegistro}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Aplicar" title="Fecha Aplicar"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fecharegistro}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.referenciaa}" sortBy="#{vista.referenciaa}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.referenciaa}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.fechamovimientoinfonavit}" sortBy="#{vista.fechamovimientoinfonavit}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Infonavit" title="Fecha Infonavit"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.fechamovimientoinfonavit}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numerocredito}" sortBy="#{vista.numerocredito}">
+                                            <f:facet name="header">
+                                                <h:outputText value="N. Crédito Infonavit" title="Número de Crédito Infonavit"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numerocredito}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.descuento}" sortBy="#{vista.descuento}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Descuento" title="Descuento"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.descuento}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Crear SUA" icon="icon-exec"
+                                                             actionListener="#{movimientossuaBean.create(event)}"
+                                                             oncomplete="handleLShow(args)"
+                                                             onclick="statusDialog.show();"
+                                                             styleClass="style_botones"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
