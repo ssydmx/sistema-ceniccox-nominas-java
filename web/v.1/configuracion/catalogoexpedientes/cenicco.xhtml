@@ -1,0 +1,340 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <div align="center">
+                    <h:panelGrid columns="2">
+                        <p:fieldset legend="Tipo de Contacto(s) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                            <div align="right">
+                                <h:form>
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearchContacto:display"
+                                                         onclick="searchDialogContacto.show();"
+                                                         actionListener="#{tipocontactoBean.limpiar(event)}"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add" 
+                                                         actionListener="#{tipocontactoBean.limpiar(event)}"
+                                                         title="Alta" value="Alta" 
+                                                         update=":formCreateContacto:display"
+                                                         onclick="createDialogContacto.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </h:form>    
+                            </div>
+                            <div align="center">
+                                <h:form id="formTipoContacto">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{tipocontactoBean.informacion}"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+
+                                        </f:facet>     
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableTipoContacto" var="tipoContacto" value="#{tipocontactoBean.tipoContactos}" 
+                                                             resizableColumns="true" style="font-size: 1em"
+                                                             rowKey="#{tipoContacto.idtipocontacto}"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                             filteredValue="#{tipocontactoBean.fileteredTipoContactos}"
+                                                             selection="#{tipocontactoBean.tipoContacto}"
+                                                             scrollable="true" scrollHeight="250"
+                                                             widgetVar="registrosTableTipoContacto" selectionMode="single">
+
+                                                    <p:ajax event="rowSelect" update=":formUpdateContacto:display" oncomplete="updateDialogContacto.show()"/>
+
+                                                    <f:facet name="header">  
+                                                        <p:outputPanel>  
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTableTipoContacto.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{tipocontactoBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target=":formTipoContacto:dataTableTipoContacto" fileName="tipocontacto" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              sortBy="#{tipoContacto.nombre}" filterBy="#{tipoContacto.nombre}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Nombre"/>
+                                                        </f:facet>
+                                                        <h:outputText value="#{tipoContacto.nombre}"/> 
+                                                    </p:column>
+
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </h:form>    
+                            </div>
+                        </p:fieldset>  
+                        <p:fieldset legend="Tipo de Documento(s) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                            <div align="right">
+                                <h:form>
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearchDocumento:display"
+                                                         actionListener="#{tipodocumentoBean.limpiar(event)}"
+                                                         onclick="searchDialogDocumento.show();"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add" 
+                                                         update=":formCreateDocumento:display"
+                                                         actionListener="#{tipodocumentoBean.limpiarAlta(event)}"
+                                                         title="Alta" value="Alta" onclick="createDialogDocumento.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </h:form>    
+                            </div>
+                            <div align="center">
+                                <h:form id="formTipodocumento">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{tipodocumentoBean.informacion}"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>       
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTable" var="tipoDoc" value="#{tipodocumentoBean.tipoDocumentos}" 
+                                                             resizableColumns="true" style="font-size: 1em"
+                                                             rowKey="#{tipoDoc.idtipodocto}"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                             filteredValue="#{tipodocumentoBean.filteredTipoDocumentos}"
+                                                             selection="#{tipodocumentoBean.tipoDocumento}"
+                                                             scrollable="true" scrollHeight="250"
+                                                             widgetVar="registrosTable" selectionMode="single">  
+
+                                                    <p:ajax event="rowSelect" update=":formUpdateDocumento" oncomplete="updateDialogDocumento.show()"/>
+
+                                                    <f:facet name="header">  
+                                                        <p:outputPanel>  
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{tipodocumentoBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target=":formTipodocumento:dataTable" fileName="Tipo de Documentos" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column width="100%" exportable="true" filterBy="#{tipoDoc.nombre}"
+                                                              sortBy="#{tipoDoc.nombre}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Nombre"/>
+                                                        </f:facet>
+                                                        <h:outputText value="#{tipoDoc.nombre}"/>  
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </h:form>   
+
+                            </div>
+                        </p:fieldset>
+                    </h:panelGrid>    
+                </div>
+
+                <!--DIALOGOS DE TIPO DE CONTACTO-->
+                <!--FORM CREATE-->
+                <h:form id="formCreateContacto">
+                    <p:dialog header="Alta Tipo de Contacto"  
+                              widgetVar="createDialogContacto" resizable="false" id="createDlgContacto"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreCreateC" value="#{tipocontactoBean.tipoContacto.nombre}"
+                                         required="true"
+                                         requiredMessage="#{appBean.mensajeErrorNombreTipoContacto}"/>
+                            <p:message for="idNombreCreateC" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipocontactoBean.create(event)}"
+                                                 update=":formTipoContacto,:formCreateContacto:display , :msgs"
+                                                 oncomplete="handleCreateContacto(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialogContacto.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO DE UPATE-->
+                <h:form id="formUpdateContacto">
+                    <p:dialog header="Editar Tipo de Contacto"
+                              widgetVar="updateDialogContacto" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreEditC" value="#{tipocontactoBean.tipoContacto.nombre}" required="true" requiredMessage="#{appBean.mensajeErrorNombreTipoContacto}"/>
+                            <p:message for="idNombreEditC" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipocontactoBean.edit(event)}"
+                                                 update=":formTipoContacto:display ,:formUpdateContacto:display, :msgs"
+                                                 oncomplete="handleUpdateContacto(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialogContacto.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH-->
+                <h:form id="formSearchContacto">
+                    <p:dialog header="Consultar Tipo de Contacto(s)"
+                              widgetVar="searchDialogContacto" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+
+                            <p:outputLabel value="Nombre: "/>
+                            <p:inputText id="idNombreSearchC" value="#{tipocontactoBean.tipoContacto.nombre}"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipocontactoBean.consultar(event)}"
+                                                 update=":formTipoContacto:display"
+                                                 onclick="searchDialogContacto.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="searchDialogContacto.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGOS DE TIPO DOCUMENTOS-->
+                <!--FORM CREATE-->
+                <h:form id="formCreateDocumento">
+                    <p:dialog header="Alta Tipo de Documento" 
+                              widgetVar="createDialogDocumento" resizable="false" id="createDlgDocumento"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreCreateDoc" value="#{tipodocumentoBean.tipoDocumento.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreTipoDocumento}"/>
+                            <p:message for="idNombreCreateDoc" display="icon"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipodocumentoBean.create(event)}"
+                                                 update=":formTipodocumento:display ,:formCreateDocumento:display, :msgs"
+                                                 oncomplete="handleCreateDocumento(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialogDocumento.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--DIALOGO DE UPATE-->
+                <h:form id="formUpdateDocumento">
+                    <p:dialog header="Editar Tipo de Documento" 
+                              widgetVar="updateDialogDocumento" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombreEditDoc" value="#{tipodocumentoBean.tipoDocumento.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreTipoDocumento}"/>
+                            <p:message for="idNombreEditDoc" display="icon"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipodocumentoBean.edit(event)}"
+                                                 update=":formTipodocumento:display ,:formUpdateDocumento:display, :msgs"
+                                                 oncomplete="handleUpdateDocumento(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialogDocumento.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH-->
+                <h:form id="formSearchDocumento">
+                    <p:dialog header="Consultar Tipo de Documento"
+                              widgetVar="searchDialogDocumento" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+
+                            <p:outputLabel value="Nombre: "/>
+                            <p:inputText id="idNombreSearchDoc" value="#{tipodocumentoBean.tipoDocumento.nombre}"/>
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{tipodocumentoBean.consultar(event)}"
+                                                 update=":formTipodocumento:display"
+                                                 onclick="searchDialogDocumento.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="searchDialogDocumento.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
