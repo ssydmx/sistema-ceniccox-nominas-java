@@ -1,0 +1,232 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <style>
+            .size-column {
+                width: 40px;
+            }
+            .ui-widget-header .ui-inputfield, .ui-widget-content .ui-inputfield {
+                text-align: center;
+                border-radius: 1rem;
+            }
+            .ui-dialog-footer {
+                text-align: right !important;
+            }
+        </style>
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Turnos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false"> 
+                        <div align="right">
+                            <h:panelGrid columns="4">
+                                <p:commandButton value="Layout" icon="icon-down" styleClass="style_botones" oncomplete="handleLShow(args)"
+                                                 onstart="statusDialog.show()" actionListener="#{turnosBean.descargarLayout(event)}"/>
+                                <p:commandButton value="Cargar Turnos" icon="icon-csv" styleClass="style_botones"
+                                                 onstart="statusDialog.show()" onclick="globalTurnosDialog.show();"/>
+                                <p:commandButton id="btnCreate" icon="icon-add" styleClass="style_botones"
+                                                 title="Alta" value="Crear turno" 
+                                                 actionListener="#{turnosBean.openModalCreateTurno(event)}"/>
+                                <p:commandButton id="btnReload" update="datalist" icon="ui-icon-arrowrefresh-1-e" styleClass="style_botones"
+                                                 title="Alta" value="Recargar turnos" 
+                                                 actionListener="#{turnosBean.consultar(event)}"/>
+                            </h:panelGrid>
+                        </div>
+                        <div align="left">
+                            <h:panelGrid>
+                                <h:panelGrid>
+                                    <p:outputLabel value="Buscador"/>
+                                    <p:inputText value="#{turnosBean.filterValueTurno}">
+                                        <p:ajax event="keyup" update="datalist" listener="#{turnosBean.filterListTurno()}" />
+                                    </p:inputText>
+                                </h:panelGrid>
+                            </h:panelGrid>
+                        </div>
+                        <div>
+                            <p:dataGrid id="datalist" var="turno" value="#{turnosBean.turnos}" columns="2" rows="10" paginator="true"  
+                                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,20,30">
+                                <p:column>
+                                    <div style="padding: 20px; border-style: solid; border-radius: 1rem;">
+                                        <div style="text-align: right; padding-bottom: 5px">
+                                            <p:commandButton icon="icon-cancel" title="Eliminar" style="border-radius: 1rem;"
+                                                             actionListener="#{turnosBean.openModalDeleteTurno(turno)}"
+                                                             styleClass="style_botones"/>
+                                        </div>
+                                        <h:panelGrid id="display" columns="2" style="width: 100%">
+                                            <h:panelGrid style="width: 100%">
+                                                <p:outputLabel value="Turno *"/>
+                                                <p:inputText style="width: 90%" id="turno" value="#{turno.jornadaLaboral.nombre}" required="true" requiredMessage="Ingresar Tipo de Jornada"/>
+                                            </h:panelGrid>
+                                            <h:panelGrid style="width: 100%">
+                                                <p:outputLabel value="Nombre *"/>
+                                                <p:inputText style="width: 90%" id="nombreTurno" value="#{turno.nombre}" required="true" requiredMessage="Ingresar Nombre de Turno"/>
+                                            </h:panelGrid>
+                                        </h:panelGrid> 
+                                        <h:panelGrid id="display-desc" style="width: 100%">
+                                            <h:panelGrid style="width: 100%">
+                                                <p:outputLabel value="Descripcion *"/>
+                                                <p:inputText style="width: 97%" id="descripcionTurno" value="#{turno.descripcion}" required="true" requiredMessage="Ingresar Descripcion de Turno"/>
+                                            </h:panelGrid>
+                                        </h:panelGrid>
+                                        <br></br>
+                                        <p:accordionPanel activeIndex="-1">
+                                            <p:tab title="Horarios">
+                                                <h:form>
+                                                    <div class="card" style="text-align: center; width: 50%px;">
+                                                        <p:dataTable var="horario" value="#{turno.horarios}">
+                                                            <p:column headerText="Dia" style="width: 20px;">
+                                                                <h:outputText value="#{horario.dia}" />
+                                                            </p:column>
+
+                                                            <p:column headerText="Horario Inicial" styleClass="size-column">
+                                                                <p:inputText maxlength="5" value="#{horario.horarioInicial1}" styleClass="size-column" placeholder="--:--"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Horario Final" styleClass="size-column">
+                                                                <p:inputText maxlength="5" value="#{horario.horarioFinal1}" styleClass="size-column" placeholder="--:--"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Hora de comida" style="width: 10px;">
+                                                                <p:tooltip id="toolTipA" for="toolTipAuto" value="Soy comida"/>
+                                                                <h:graphicImage id="toolTipAuto" value="#{pathManager.path}/resources/images/icons/comida.png"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Horario Inicial" styleClass="size-column">
+                                                                <p:inputText maxlength="5" value="#{horario.horarioInicial2}" styleClass="size-column" placeholder="--:--"/>
+                                                            </p:column>
+
+                                                            <p:column headerText="Horario Final" styleClass="size-column">
+                                                                <p:inputText maxlength="5" value="#{horario.horarioFinal2}" styleClass="size-column" placeholder="--:--"/>
+                                                            </p:column>
+                                                        </p:dataTable>
+                                                    </div>
+                                                </h:form>
+                                            </p:tab>
+                                        </p:accordionPanel>
+                                    </div>
+                                </p:column>
+                            </p:dataGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formCreateTurno">
+                    <p:dialog header="Crear turno" 
+                              widgetVar="createTurnoDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2" style="width: 100%">
+                            <h:panelGrid style="width: 100%">
+                                <p:outputLabel value="Nombre *"/>
+                                <p:inputText style="width: 90%" id="nombreTurno" value="#{turnosBean.turnoCreate.nombre}" required="true" requiredMessage="Ingresar Nombre"/>
+                            </h:panelGrid>
+                            <h:panelGrid style="width: 100%">
+                                <p:outputLabel value="Descripcion *"/>
+                                <p:inputText style="width: 500px" id="descripcionTurno" value="#{turnosBean.turnoCreate.descripcion}" required="true" requiredMessage="Ingresar Descripcion"/>
+                            </h:panelGrid>
+                        </h:panelGrid> 
+                        <br></br>
+                        <h:form>
+                            <div class="card" style="text-align: center; width: 50%px;">
+                                <p:dataTable var="horario" value="#{turnosBean.horariosCreate}">
+                                    <p:column headerText="Dia" style="width: 20px;">
+                                        <h:outputText value="#{horario.dia}" />
+                                    </p:column>
+
+                                    <p:column headerText="Horario Inicial" styleClass="size-column">
+                                        <p:inputText maxlength="5" value="#{horario.horarioInicial1}" styleClass="size-column" placeholder="--:--"/>
+                                    </p:column>
+
+                                    <p:column headerText="Horario Final" styleClass="size-column">
+                                        <p:inputText maxlength="5" value="#{horario.horarioFinal1}" styleClass="size-column" placeholder="--:--"/>
+                                    </p:column>
+
+                                    <p:column headerText="Hora de comida" style="width: 10px;">
+                                        <p:tooltip id="toolTipA" for="toolTipAuto" value="Soy comida"/>
+                                        <h:graphicImage id="toolTipAuto" value="#{pathManager.path}/resources/images/icons/taco.png"/>
+                                    </p:column>
+
+                                    <p:column headerText="Horario Inicial" styleClass="size-column">
+                                        <p:inputText maxlength="5" value="#{horario.horarioInicial2}" styleClass="size-column" placeholder="--:--"/>
+                                    </p:column>
+
+                                    <p:column headerText="Horario Final" styleClass="size-column">
+                                        <p:inputText maxlength="5" value="#{horario.horarioFinal2}" styleClass="size-column" placeholder="--:--"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </h:form>
+                        <br></br>
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{turnosBean.create(this)}"
+                                             onclick="createTurnoDialog.hide();
+                                                         statusDialog.show();"
+                                             update=":form:datalist, :msgs"
+                                             styleClass="style_botones"/>
+                            &nbsp;&nbsp;
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createTurnoDialog.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formConfimDeleteTurno">
+                    <p:dialog header="Alerta de eliminación de turno" widgetVar="confirmDeleteTurno" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="¿Está seguro de ELIMINAR el turno: #{turnosBean.turnoLaboralDelete.nombre}?"
+                                           style="font-weight: bold;"/>
+
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             update=":form:datalist, :msgs"
+                                             actionListener="#{turnosBean.delete(turno)}"
+                                             onclick="statusDialog.show();
+                                                         confirmDeleteTurno.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmDeleteTurno.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formGlobalTurnos"  enctype="multipart/form-data">
+                    <p:dialog id="globalDlg" header="Masivo Turnos" widgetVar="globalTurnosDialog" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+
+                        <h:panelGrid id="display" columns="1" style="margin:0 auto;">  
+                            <p:fileUpload  value="#{turnosBean.archivo}" mode="advanced" oncomplete="globalDialog.hide()"
+                                           fileUploadListener="#{turnosBean.fileUploadListenerGlobalTurnos}" auto="true"
+                                           uploadLabel="Cargar" cancelLabel="Cancelar" label="Seleccionar" update=":msgs"/>
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>
