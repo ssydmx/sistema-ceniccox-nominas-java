@@ -1,0 +1,206 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Catálogo Bancos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="right">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Alta" styleClass="style_botones" icon="icon-add" title="Alta"
+                                                 onstart="statusDialog.show()" actionListener="#{bancoBean.limpiar(event)}"
+                                                 update=":formCreate:display" onclick="createDialog.show();"/>
+                                <p:commandButton value="Actualizar" styleClass="style_botones" icon="ui-icon-arrowrefresh-1-e" update=":msgs, :form:display"
+                                                 title="Actualizar" onstart="statusDialog.show()" actionListener="#{bancoBean.consultar(event)}"/>
+                            </h:panelGrid>
+                        </div>
+
+                        <p:panelGrid id="display" columns="1" style=" margin-top: 5px">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <p:outputLabel value="#{bancoBean.informacion}" style="color: white"/>
+                                </div>
+                            </f:facet>
+
+                            <p:dataTable id="dataTable" var="banco"
+                                         value="#{bancoBean.bancos}"
+                                         filteredValue="#{bancoBean.filteredBancos}"
+                                         resizableColumns="true" scrollable="true"
+                                         scrollHeight="300" style="font-size: .8em"
+                                         emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                         widgetVar="registrosTable"
+
+                                         editable="true" editMode="cell">
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Buscador:"/>
+                                        <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>
+                                        <div class="datableImagenes" id="csv">
+                                            <h:commandLink id="csv">  
+                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                <p:dataExporter type="csv" target="dataTable" fileName="bancos" />  
+                                            </h:commandLink>
+                                        </div>
+                                    </p:outputPanel>    
+                                </f:facet>
+
+                                <p:column filterMatchMode="contains" exportable="true"
+                                          filterBy="#{banco.banco}" sortBy="#{banco.banco}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Banco" title="Banco"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.banco}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.banco}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true"
+                                          filterBy="#{banco.nombre}" sortBy="#{banco.nombre}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Nombre" title="Nombre"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.nombre}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.nombre}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                          filterBy="#{banco.nocliente}" sortBy="#{banco.nocliente}">
+                                    <f:facet name="header">
+                                        <h:outputText value="No. Cliente" title="Número Clientes"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.nocliente}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.nocliente}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                          filterBy="#{banco.sucursal}" sortBy="#{banco.sucursal}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Sucursal" title="Sucursal"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.sucursal}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.sucursal}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                          filterBy="#{banco.cuenta}" sortBy="#{banco.cuenta}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Cuenta" title="Cuenta"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.cuenta}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.cuenta}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                          filterBy="#{banco.caracterespecial}" sortBy="#{banco.caracterespecial}">
+                                    <f:facet name="header">
+                                        <h:outputText value="Caracter Especial" title="Caracter Especial"/>
+                                    </f:facet>
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:outputLabel value="#{banco.caracterespecial}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{banco.caracterespecial}"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column exportable="false" width="10%" style="text-align: center">
+                                    <p:commandButton styleClass="style_botones" icon="icon-save" update=":msgs"
+                                                     title="Guardar" onstart="statusDialog.show()" actionListener="#{bancoBean.editar(banco)}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Banco" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">
+                        <h:panelGrid id="display" columns="2" cellpadding="3">
+                            <p:outputLabel value="Clave:"/>
+                            <p:inputText value="#{bancoBean.banco.banco}"/>
+
+                            <p:outputLabel value="Nombre:"/>
+                            <p:inputText value="#{bancoBean.banco.nombre}"/>
+                            
+                            <p:outputLabel value="No. Cliente:" title="Número Cliente"/>
+                            <p:inputText value="#{bancoBean.banco.nocliente}"/>
+                            
+                            <p:outputLabel value="Sucursal:" title="Sucursal"/>
+                            <p:inputText value="#{bancoBean.banco.sucursal}"/>
+                            
+                            <p:outputLabel value="Cuenta:" title="Cuenta"/>
+                            <p:inputText value="#{bancoBean.banco.cuenta}"/>
+                            
+                            <p:outputLabel value="Carac. Especial:" title="Caracter Especial"/>
+                            <p:inputText value="#{bancoBean.banco.nombre}"/>
+                        </h:panelGrid>
+
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{bancoBean.create(event)}"
+                                             update=":formCreate:display, :msgs"
+                                             oncomplete="handleCreate(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createDialog.hide();"/>
+                        </f:facet>
+
+                    </p:dialog>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
