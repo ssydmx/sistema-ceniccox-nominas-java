@@ -1,0 +1,70 @@
+div.cenicco{
+    margin-top: 25px;
+    margin-left: -70px;
+    z-index: 100;
+    position: absolute;
+}
+img.cenicco{
+    width: 70px; 
+}
+
+div#menurecibos{
+    z-index: 100;
+    position: absolute;
+    width: 150px;
+    margin-top: 10px;
+    font-size: 1.0em;
+    float: left;
+    margin-left: -45px;
+}
+div#menurecibos ul{
+    list-style: none;
+
+}
+div#menurecibos ul li{
+    margin-top: 6px;
+    background-color: red;
+    width: 160px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    border-radius: 20px 0px 20px 0px;
+    box-shadow: 5px 0px 10px #939393;
+    -webkit-transition: padding-left 0.9s;
+}
+div#menurecibos ul li a{
+    color: rgb(4,84,145);
+    font-weight: normal;
+    text-decoration: none;
+}
+div#menurecibos li ul{
+    display: none;
+    position: absolute;
+    min-width: 140px;
+}
+div#menurecibos li ul li{
+    border-radius: 0px 20px 0px 20px;
+    background-color: rgb(207,170,44);
+    margin-left: 110px;
+}
+div#menurecibos li:hover > ul{
+    display: block;
+}
+div#menurecibos ul li:hover{
+    background: rgb(207,170,44);
+    padding-left: 50px;
+}
+div#menurecibos ul  li a:hover{
+    color: white;
+}
+
+fieldset#bg_color{
+    margin-top:20px;
+    background: rgba(221,197,47,1);
+    color: white;
+}
+
+legend{
+    color: white;
+}
+
