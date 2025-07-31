@@ -1,0 +1,298 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <p:fieldset legend="Administración Usuarios - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                    <div align="right">
+                        <h:form id="form">
+                            <h:panelGrid columns="3">
+                                <p:selectOneMenu id="estatusUsuario" style="width: 150px" value="#{usuarioBean.selectedEstatus}">  
+                                    <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                    <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                </p:selectOneMenu>
+                                <p:commandButton id="btnSearch" value="Consultar" icon="icon-search"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{usuarioBean.consultar(event)}"
+                                                 update=":formUsuarios"/> 
+                                <p:commandButton id="btnCreate" icon="icon-add"
+                                                 title="Alta" value="Alta"
+                                                 actionListener="#{usuarioBean.limpiar(event)}"
+                                                 update=":formCreate:display"
+                                                 onclick="createDialog.show();"
+                                                 styleClass="style_botones"/>
+                            </h:panelGrid>
+                        </h:form>
+                    </div>
+                    <div align="center">
+                        <h:form id="formUsuarios">
+                            <p:panelGrid id="display" columns="1">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{usuarioBean.informacion}"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="usuario" value="#{usuarioBean.usuarios}" 
+                                                 resizableColumns="true" style="font-size: .8em; width: 1200px;margin-top: 15px;"
+                                                 scrollable="true" scrollHeight="300"
+                                                 rowKey="#{usuario.idUsuario}"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{usuarioBean.filteredUsuarios}"
+                                                 selection="#{usuarioBean.selectedUsuario}" selectionMode="single"
+                                                 widgetVar="registrosTablePerfiles">
+
+                                        <p:column width="20" exportable="false">
+                                            <p:rowToggler />
+                                        </p:column>
+
+                                        <p:ajax event="rowSelect" onstart="updateDialog.show();" update=":formUpdate:display" listener="#{usuarioBean.listenerSelected()}"/>
+
+                                        <p:column filterMatchMode="contains" filterBy="#{usuario.nombre} #{usuario.apellidoPaterno} #{usuario.apellidoMaterno}" 
+                                                  sortBy="#{usuario.nombre} #{usuario.apellidoPaterno} #{usuario.apellidoMaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <h:outputText value="#{usuario.nombre} #{usuario.apellidoPaterno} #{usuario.apellidoMaterno}"/> 
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{usuario.email}"
+                                                  filterBy="#{usuario.email}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="E-mail" title="E-mail"/>
+                                            </f:facet>
+                                            <h:outputText value="#{usuario.email}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{usuario.estatus}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Estatus" title="Estatus"/>
+                                            </f:facet>
+                                            <h:outputText value="#{usuario.estatus==1?'Activo':'Inactivo'}" 
+                                                          style="font-weight: bold;color: #{usuario.estatus==1?'#6CC52E':'red'}"/> 
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{usuario.username}"
+                                                  filterBy="#{usuario.username}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="User-name" title="User-name"/>
+                                            </f:facet>
+                                            <h:outputText value="#{usuario.username}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" sortBy="#{usuario.idPerfil.nombre}"
+                                                  filterBy="#{usuario.idPerfil.nombre}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Perfil" title="Perfil"/>
+                                            </f:facet>
+                                            <h:outputText value="#{usuario.idPerfil.nombre}"/>
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid  columns="1" style="width:20%">
+                                                <f:facet name="header">
+                                                    <p:outputLabel value="Detalle"/>
+                                                </f:facet>
+                                                <p:dataTable value="#{usuario.relacion}" var="relacion" style="font-size: 1em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}">
+
+                                                    <p:column headerText="Grupo Pago" sortBy="#{relacion.idGrupoPago.grupopago} - #{relacion.idGrupoPago.nombre}">
+                                                        <p:outputLabel value="#{relacion.idGrupoPago.grupopago} - #{relacion.idGrupoPago.nombre}"/>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:panelGrid>
+                        </h:form>
+                    </div>  
+                    <div align="center">
+                        <h:form id="formUpdate">
+                            <p:dialog header="Editar Usuario" 
+                                      widgetVar="updateDialog" resizable="false" id="updateDlgUsuario" position="center,center" closeOnEscape="true"
+                                      showEffect="fade" hideEffect="explode" modal="true">  
+
+                                <h:panelGrid id="display" columns="3" cellpadding="5">
+
+                                    <p:outputLabel value="Nombre: *" title="Nombre"/>
+                                    <p:inputText id="idNombre" value="#{usuarioBean.selectedUsuario.nombre}" required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                                    <p:message for="idNombre" display="icon"/>
+
+                                    <p:outputLabel value="A. Paterno: *" title="Apellido Paterno"/>
+                                    <p:inputText id="idPaterno" value="#{usuarioBean.selectedUsuario.apellidoPaterno}" required="true" requiredMessage="#{appBean.mensajeErrorApellidoPaterno}"/>
+                                    <p:message for="idPaterno" display="icon"/>
+
+                                    <p:outputLabel value="A. Materno:" title="Apellido Materno"/>
+                                    <p:inputText id="idAMaterno" value="#{usuarioBean.selectedUsuario.apellidoMaterno}"/>
+                                    <p:message for="idAMaterno" display="icon"/>
+
+                                    <p:outputLabel value="E-mail:" title="E-mail"/>
+                                    <p:inputText id="idEmail" value="#{usuarioBean.selectedUsuario.email}"/>
+                                    <p:message for="idEmail" display="icon"/>
+
+                                    <p:outputLabel value="Usuario: *" title="Usuario"/>
+                                    <p:inputText id="idUserName" value="#{usuarioBean.selectedUsuario.username}" required="true" requiredMessage="#{appBean.mensajeErrorUsuario}"/>
+                                    <p:message for="idUserName" display="icon"/>
+
+                                    <p:outputLabel value="Password: *" title="Password"/>
+                                    <p:inputText id="idPassword" value="#{usuarioBean.selectedUsuario.password}" required="true" requiredMessage="#{appBean.mensajeErrorPassword}"/>
+                                    <p:message for="idPassword" display="icon"/>
+
+                                    <p:outputLabel value="Perfil: *"/>
+                                    <p:selectOneMenu id="idPerfil" value="#{usuarioBean.selectedUsuario.idPerfil.idPerfil}" 
+                                                     style="width: 180px" filter="true" required="true" requiredMessage="#{appBean.mensajeErrorPerfil}">  
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{usuarioBean.perfilCenicco.perfiles}"
+                                                       var="perfil" itemValue="#{perfil.idPerfil}" itemLabel="#{perfil.nombre}"/>  
+                                    </p:selectOneMenu>                                                                                  
+                                    <p:message for="idPerfil" display="icon"/>
+
+                                    <p:outputLabel value="Estatus: *"/>
+                                    <p:selectOneMenu id="idEstatus" style="width: 180px" value="#{usuarioBean.selectedUsuario.estatus}">  
+                                        <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                    </p:selectOneMenu>
+                                    <p:message for="idEstatus" display="icon"/>
+
+                                    <h:outputText value="Ejecutivo:" title="Ejecutivo"/>
+                                    <p:selectBooleanCheckbox id="idEjecutivo" value="#{usuarioBean.selectedUsuario.permisoEjecutivo}" />
+                                    <p:message for="idEjecutivo" display="icon"/>
+                                    
+                                    <h:outputText value="C. Nómina Incidencias:" title="Cálculo Nómina Incidencias"/>
+                                    <p:selectBooleanCheckbox id="idNomina" value="#{usuarioBean.selectedUsuario.permisoCalculoNomina}" />
+                                    <p:message for="idNomina" display="icon"/>
+
+                                    <p:outputLabel value="Grupos de Pago: *"/>
+                                    <p:selectCheckboxMenu id="idGruposPago" panelStyle="width:300px" filter="true" filterMatchMode="contains"
+                                                          style="width: 180px; text-align: center;margin-top: 11px; height: 24px" 
+                                                          value="#{usuarioBean.selectedRelaciones}" label="Seleccione"
+                                                          required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">
+                                        <f:selectItems value="#{usuarioBean.relaciones}"/> 
+                                    </p:selectCheckboxMenu>
+                                    <p:message for="idGruposPago" display="tooltip"/>
+
+                                </h:panelGrid>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-save" 
+                                                     title="Guardar" value="Guardar"
+                                                     styleClass="style_botones"
+                                                     update=":formUsuarios, :formUpdate:display, :msgs"
+                                                     oncomplete="handleUpdate(args)"
+                                                     actionListener="#{usuarioBean.edit(event)}"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     onclick="updateDialog.hide();"
+                                                     styleClass="style_botones" immediate="true"/>
+                                </f:facet>
+                            </p:dialog>
+                        </h:form>
+                    </div>
+                    <div align="center">
+                        <h:form id="formCreate">
+                            <p:dialog header="Crear Usuario" 
+                                      widgetVar="createDialog" resizable="false" id="createDlgUsuario" position="center,center" closeOnEscape="true"
+                                      showEffect="fade" hideEffect="explode" modal="true">  
+
+                                <h:panelGrid id="display" columns="3" cellpadding="5">
+
+                                    <p:outputLabel value="Nombre: *" title="Nombre"/>
+                                    <p:inputText id="idNombre" value="#{usuarioBean.usuario.nombre}" required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                                    <p:message for="idNombre" display="icon"/>
+
+                                    <p:outputLabel value="A. Paterno: *" title="Apellido Paterno"/>
+                                    <p:inputText id="idPaterno" value="#{usuarioBean.usuario.apellidoPaterno}" required="true" requiredMessage="#{appBean.mensajeErrorApellidoPaterno}"/>
+                                    <p:message for="idPaterno" display="icon"/>
+
+                                    <p:outputLabel value="A. Materno:" title="Apellido Materno"/>
+                                    <p:inputText id="idAMaterno" value="#{usuarioBean.usuario.apellidoMaterno}"/>
+                                    <p:message for="idAMaterno" display="icon"/>
+
+                                    <p:outputLabel value="E-mail:" title="E-mail"/>
+                                    <p:inputText id="idEmail" value="#{usuarioBean.usuario.email}"/>
+                                    <p:message for="idEmail" display="icon"/>
+
+                                    <p:outputLabel value="Usuario: *" title="Usuario"/>
+                                    <p:inputText id="idUserName" value="#{usuarioBean.usuario.username}" required="true" requiredMessage="#{appBean.mensajeErrorUsuario}"/>
+                                    <p:message for="idUserName" display="icon"/>
+
+                                    <p:outputLabel value="Password: *" title="Password"/>
+                                    <p:inputText id="idPassword" value="#{usuarioBean.usuario.password}" required="true" requiredMessage="#{appBean.mensajeErrorPassword}"/>
+                                    <p:message for="idPassword" display="icon"/>
+
+                                    <p:outputLabel value="Perfil: *"/>
+                                    <p:selectOneMenu id="idPerfil" value="#{usuarioBean.usuario.idPerfil.idPerfil}" 
+                                                     style="width: 180px" filter="true" required="true" requiredMessage="#{appBean.mensajeErrorPerfil}">  
+                                        <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                        <f:selectItems value="#{usuarioBean.perfilCenicco.perfiles}"
+                                                       var="perfil" itemValue="#{perfil.idPerfil}" itemLabel="#{perfil.nombre}"/>  
+                                    </p:selectOneMenu>                                                                                  
+                                    <p:message for="idPerfil" display="icon"/>
+
+                                    <p:outputLabel value="Estatus: *"/>
+                                    <p:selectOneMenu id="idEstatus" style="width: 180px" value="#{usuarioBean.usuario.estatus}">  
+                                        <f:selectItems value="#{appBean.comboEstatus}"/>  
+                                    </p:selectOneMenu>
+                                    <p:message for="idEstatus" display="icon"/>
+
+                                    <h:outputText value="Ejecutivo:" title="Ejecutivo"/>
+                                    <p:selectBooleanCheckbox id="idEjecutivo" value="#{usuarioBean.usuario.permisoEjecutivo}" />
+                                    <p:message for="idEjecutivo" display="icon"/>
+                                    
+                                    <h:outputText value="C. Nómina Incidencias" title="Cálculo Nómina Incidencias"/>
+                                    <p:selectBooleanCheckbox id="idNomina" value="#{usuarioBean.usuario.permisoCalculoNomina}" />
+                                    <p:message for="idNomina" display="icon"/>
+
+                                    <p:outputLabel value="Grupos de Pago: *"/>
+                                    <p:selectCheckboxMenu id="idGruposPago" panelStyle="width:300px" filter="true" filterMatchMode="contains"
+                                                          style="width: 180px; text-align: center;margin-top: 11px; height: 24px" 
+                                                          value="#{usuarioBean.selectedRelaciones}" label="Seleccione"
+                                                          required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">
+                                        <f:selectItems value="#{usuarioBean.relaciones}"/> 
+                                    </p:selectCheckboxMenu>
+                                    <p:message for="idGruposPago" display="tooltip"/>
+
+                                </h:panelGrid>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     styleClass="style_botones"
+                                                     update=":formUsuarios, :formCreate:display, :msgs"
+                                                     oncomplete="handleCreate(args)"
+                                                     actionListener="#{usuarioBean.create(event)}"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     onclick="createDialog.hide();"
+                                                     styleClass="style_botones" immediate="true"/>
+                                </f:facet>
+                            </p:dialog>
+                        </h:form>
+                    </div>
+                </p:fieldset>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
