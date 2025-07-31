@@ -1,0 +1,689 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Reportes Mensuales - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="center">
+                            <p:tabView id="tabGeneral" dynamic="true" cache="false">
+                                <p:tab title="Por Concepto" id="tabPorConcepto">
+                                    <h:panelGrid columns="6">
+                                        <p:selectOneMenu style="width: 200px" 
+                                                         filter="true" filterMatchMode="contains" value="#{mensualxconceptoBean.idgrupopago}">  
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:inputText value="#{mensualxconceptoBean.mesinicio}" placeholder="Mes Incio" size="10" style="text-align: center"/>
+
+                                        <p:inputText value="#{mensualxconceptoBean.mesfin}" placeholder="Mes Fin" size="10" style="text-align: center"/>
+
+                                        <p:inputText id="idAnio" value="#{mensualxconceptoBean.anio}" placeholder="Año" size="10" style="text-align: center"/>
+
+                                        <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{mensualxconceptoBean.consultar(event)}"
+                                                         update="displayConcepto, :msgs" onclick="statusDialog.show();"/> 
+                                    </h:panelGrid>
+                                    <p:panelGrid id="displayConcepto" style="margin-top: 5px;">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{mensualxconceptoBean.informacion}" style="color: white;"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTable" var="vista"
+                                                             value="#{mensualxconceptoBean.registros}"
+                                                             filteredValue="#{mensualxconceptoBean.filteredRegistros}"
+                                                             resizableColumns="true" scrollable="true"
+                                                             scrollHeight="300" style="font-size: .8em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                             widgetVar="registrosTable"
+                                                             rowKey="#{vista.idconceptonomina}">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>  
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{mensualxconceptoBean.descargarReporte()}" oncomplete="handleLShow(args)"
+                                                                               onclick="statusDialog.show();">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target="dataTable" fileName="MensualXConcepto" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              filterBy="#{vista.naturaleza}"  sortBy="#{vista.naturaleza}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Naturaleza" title="Naturaleza"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.naturaleza}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              filterBy="#{vista.numeroconcepto} - #{vista.nombreconcepto}"  sortBy="#{vista.numeroconcepto}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Concepto" title="Concepto"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.numeroconcepto} - #{vista.nombreconcepto}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                              filterBy="#{vista.anio}"  sortBy="#{vista.anio}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Año" title="Año"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.anio}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                              filterBy="#{vista.mes}"  sortBy="#{vista.mes}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Mes" title="Mes"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.mes}"/>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="Total:"/>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" style="text-align: right" sortBy="#{vista.tiempo}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Tiempo" title="Tiempo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.totalTiempo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoBean.totalTiempo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column exportable="true" style="text-align: right" sortBy="#{vista.importe}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Importe" title="Importe"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{vista.totalImporte}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoBean.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:tab>
+                                <p:tab title="Por Empleado y Concepto" id="tabPorEmpleadoConcepto">
+                                    <h:panelGrid columns="7">
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.numeroempleado}" placeholder="No. Empleado" style="text-align: center" size="10"/>
+
+                                        <p:selectCheckboxMenu panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                              style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                              value="#{mensualxconceptoempleadoBean.grupopago}" label="Grupo(s) Pago">
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                        </p:selectCheckboxMenu>
+
+                                        <p:selectOneMenu style="width: 200px" value="#{mensualxconceptoempleadoBean.selectedRegistroPatronal}"
+                                                         filter="true" filterMatchMode="contains">  
+                                            <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+                                            <f:selectItems value="#{registropatronalBean.registros}" 
+                                                           var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}" 
+                                                           itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                                        </p:selectOneMenu>                                                                                  
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.mesinicio}" placeholder="Incio" style="text-align: center" size="10"/>
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.mesfin}" placeholder="Fin" style="text-align: center" size="10"/>
+
+                                        <p:inputText id="idAnioEmpleado" value="#{mensualxconceptoempleadoBean.anio}" placeholder="Año" style="text-align: center" size="10"/>
+
+                                        <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{mensualxconceptoempleadoBean.consultar(event)}"
+                                                         update="displayEmpleado, :msgs" onclick="statusDialog.show();"/> 
+                                    </h:panelGrid>
+                                    <p:panelGrid id="displayEmpleado" style="margin-top: 5px;">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{mensualxconceptoempleadoBean.informacion}" style="color: white;"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableEmpleado" var="vista" paginator="true"
+                                                             value="#{mensualxconceptoempleadoBean.registros}"
+                                                             filteredValue="#{mensualxconceptoempleadoBean.filteredRegistros}"
+                                                             resizableColumns="true" scrollable="true" scrollHeight="300"
+                                                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                                             rowsPerPageTemplate="50,100,200,500,1000"
+                                                             rows="50" style="font-size: .8em" lazy="true"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                             widgetVar="registrosTableEmpleado"
+                                                             rowKey="#{vista.idconceptonomina}">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>  
+                                                            <div class="datableImagenes" id="pdf">
+                                                                <p:commandLink id="pdf" actionListener="#{mensualxconceptoempleadoBean.descargarReporte()}" oncomplete="handleLShow(args)"
+                                                                               onclick="statusDialog.show();">  
+                                                                    <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="csv" actionListener="#{mensualxconceptoempleadoBean.descargarCsv()}" oncomplete="handleLShow(args)"
+                                                                               onclick="statusDialog.show();">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column headerText="No. Empleado">
+                                                        <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Empleado">
+                                                        <p:outputLabel value="#{vista.nombreempleado} - #{vista.nombreempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="S.D.">
+                                                        <p:outputLabel value="#{vista.sd}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column headerText="S.D.I.">
+                                                        <p:outputLabel value="#{vista.sdi}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column headerText="Grupo Pago">
+                                                        <p:outputLabel value="#{vista.grupopago} - #{vista.nombregrupopago}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Registro Patronal">
+                                                        <p:outputLabel value="#{vista.registropatronal}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Tipo Proceso">
+                                                        <p:outputLabel value="#{vista.tipoproceso}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Concepto">
+                                                        <p:outputLabel value="#{vista.numeroconcepto} - #{vista.nombreconcepto}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Naturaleza">
+                                                        <p:outputLabel value="#{vista.naturaleza}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Año">
+                                                        <p:outputLabel value="#{vista.anio}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Mes" footerText="Total:">
+                                                        <p:outputLabel value="#{vista.mes}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" sortBy="#{vista.totalTiempo}" headerText="Tiempo">
+                                                        <p:outputLabel value="#{vista.totalTiempo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoempleadoBean.totalTiempo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Importe" 
+                                                              footerText="#{mensualxconceptoempleadoBean.totalImporte}">
+                                                        <p:outputLabel value="#{vista.totalImporte}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoempleadoBean.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:commandButton value="Reporte Cierre Costos" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteMensualCierreCostos()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs" rendered="#{appBean.servicioWhiteHat}"/> 
+                                                        <p:commandButton value="Reporte Nomina Costo Empresa" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteNominaCostoEmpresa()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs"/> 
+                                                        <p:commandButton value="Reporte Nomina Acumulado Empleado" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteNominaAcumuladoEmpleado()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs" rendered="#{appBean.servicioKonecta}"/>
+                                                        <p:commandButton value="Reporte Analisis IMSS" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteAnalisisIMSS()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs" rendered="#{appBean.servicioGrupoBakertilly }"/>
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:panelGrid columns="4" rendered="#{appBean.servicioGrupoBakertilly}">
+                                                            <p:row>
+                                                                <p:column colspan="3">
+                                                                    <p:selectOneRadio value="#{mensualxconceptoempleadoBean.selectedTipoConsulta}">  
+                                                                        <f:selectItem itemLabel="Mensual" itemValue="0"/>  
+                                                                        <f:selectItem itemLabel="Periodo" itemValue="1" />
+                                                                    </p:selectOneRadio>
+                                                                </p:column>
+                                                            </p:row>
+                                                            <p:commandButton value="Acumulado - Periodo ó Mensual" icon="icon-down" styleClass="style_botones"
+                                                                             oncomplete="handleLShow(args)"
+                                                                             actionListener="#{mensualxconceptoempleadoBean.descargaReporteNominaEmpresaBakertillyPeriodoMensual()}"
+                                                                             onstart="statusDialog.show()"
+                                                                             update=":form, :msgs"/> 
+                                                        </p:panelGrid>
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                    </p:panelGrid>
+                                </p:tab>
+                                <p:tab title="Acumulados" id="tabAcumulado">
+                                    <h:panelGrid columns="5">
+                                        <p:inputText value="#{acumuladosnominaBean.numeroEmpleado}" placeholder="No. Empleado" size="10" style="text-align: center"/>
+
+                                        <p:selectOneMenu style="width: 200px" filter="true" filterMatchMode="contains"
+                                                         value="#{acumuladosnominaBean.selectedIdGrupoPago}">  
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu style="width: 200px" value="#{acumuladosnominaBean.mes}"
+                                                         filter="true" filterMatchMode="contains">  
+                                            <f:selectItem itemValue="" itemLabel="Mes"/>
+                                            <f:selectItems value="#{appBean.comboMeses}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:inputText id="idanioAcumulado" value="#{acumuladosnominaBean.anio}" placeholder="Año" size="10" style="text-align: center"/>
+
+                                        <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                         actionListener="#{acumuladosnominaBean.consultar(event)}"
+                                                         styleClass="style_botones" onclick="statusDialog.show();"
+                                                         update="displayAcmulado, :msgs"/> 
+                                    </h:panelGrid>
+                                    <p:panelGrid id="displayAcmulado" style="margin-top: 5px;">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{acumuladosnominaBean.informacion}" style="color: white;"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableAcumulados" var="acum"
+                                                             value="#{acumuladosnominaBean.acumulados}"
+                                                             filteredValue="#{acumuladosnominaBean.filteredAcumulados}"
+                                                             resizableColumns="true" scrollable="true"
+                                                             scrollHeight="300" style="font-size: .8em"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                             widgetVar="registrosTableAcumulado"
+                                                             rowKey="#{acum.idacumulado}">
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>  
+                                                            <h:outputText value="Buscador:" />  
+                                                            <p:inputText id="globalFilter" onkeyup="registrosTableAcumulado.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target="dataTableAcumulados" fileName="AcumuladosNomina" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              filterBy="#{acum.relacionlaboral.numeroempleado}"  sortBy="#{acum.relacionlaboral.numeroempleado}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.relacionlaboral.numeroempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true"
+                                                              filterBy="#{acum.relacionlaboral.idempleado.nombre} #{acum.relacionlaboral.idempleado.apellidopaterno} #{acum.relacionlaboral.idempleado.apellidomaterno}"
+                                                              sortBy="#{acum.relacionlaboral.idempleado.nombre} #{acum.relacionlaboral.idempleado.apellidopaterno} #{acum.relacionlaboral.idempleado.apellidomaterno}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Empleado"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.relacionlaboral.idempleado.nombre} #{acum.relacionlaboral.idempleado.apellidopaterno} #{acum.relacionlaboral.idempleado.apellidomaterno}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" filterBy="#{acum.mes}" sortBy="#{acum.mes}" style="text-align: center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Mes"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.mes}"/>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" 
+                                                              filterBy="#{acum.grupopago.grupopago} - #{acum.grupopago.nombre}"
+                                                              sortBy="#{acum.grupopago.grupopago} - #{acum.grupopago.nombre}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="G. Pago" title="Gtrupo Pago"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.grupopago.grupopago} - #{acum.grupopago.nombre}"/> 
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" 
+                                                              sortBy="#{acum.tiempo}"
+                                                              style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="Tiempo" title="Tiempo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.tiempo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" sortBy="#{acum.basegravada}"
+                                                              style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="BG ISR" title="Base Gravada ISR"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.basegravada}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" sortBy="#{acum.impuestoretenido}"
+                                                              style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="ISR Retenido" title="ISR Retenido"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.impuestoretenido}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+                                                    <p:column filterMatchMode="contains" exportable="true" sortBy="#{acum.basegravadaaguinaldo}"
+                                                              style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="BG Aguinaldo" title="Base Gravada Aguinaldo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.basegravadaaguinaldo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column filterMatchMode="contains" exportable="true" sortBy="#{acum.isrretenidoaguinaldo}"
+                                                              style="text-align: right">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="ISR Aguinaldo" title="ISR Aguinaldo"/>
+                                                        </f:facet>
+                                                        <p:outputLabel value="#{acum.isrretenidoaguinaldo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:commandButton value="Reporte Rotacion Empleados" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{acumuladosnominaBean.descargarReporteRotacionEmpleados()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs" rendered="#{appBean.servicioKonecta}"/> 
+                                                        <p:commandButton value="Reporte Consolidado Prestaciones" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{acumuladosnominaBean.descargarReporteConsolidadoPrestaciones()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs" rendered="#{appBean.servicioMelonn}"/> 
+                                                    </div>
+
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                    </p:panelGrid>
+
+                                </p:tab>
+
+                                <p:tab title="Costos Empleado Departamento" id="tabPorCostoEmpleadoConceptoDepartamento" rendered="#{appBean.servicioMinnt}">
+                                    <h:panelGrid columns="7">
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.numeroempleado}" placeholder="No. Empleado" style="text-align: center" size="10"/>
+
+                                        <p:selectOneMenu style="width: 200px" 
+                                                         filter="true" filterMatchMode="contains" value="#{mensualxconceptoempleadoBean.idgrupopago}">  
+                                            <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                            <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                                           var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:selectOneMenu style="width: 200px" value="#{mensualxconceptoempleadoBean.selectedRegistroPatronal}"
+                                                         filter="true" filterMatchMode="contains">  
+                                            <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+                                            <f:selectItems value="#{registropatronalBean.registros}" 
+                                                           var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}" 
+                                                           itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                                        </p:selectOneMenu>
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.mesinicio}" placeholder="Mes Incio" style="text-align: center" size="10"/>
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.mesfin}" placeholder="Mes Fin" style="text-align: center" size="10"/>
+
+                                        <p:inputText value="#{mensualxconceptoempleadoBean.anio}" placeholder="Año" style="text-align: center" size="10"/>
+
+                                        <p:commandButton value="Consultar" title="Consultar" icon="icon-search"
+                                                         styleClass="style_botones"
+                                                         actionListener="#{mensualxconceptoempleadoBean.consultar(event)}"
+                                                         update="displayEmpleadoCosto, :msgs" onclick="statusDialog.show();"/> 
+                                    </h:panelGrid>
+                                    <p:panelGrid id="displayEmpleadoCosto" style="margin-top: 5px;">
+                                        <f:facet name="header">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="center">
+                                                        <p:outputLabel value="#{mensualxconceptoempleadoBean.informacion}" style="color: white;"/>    
+                                                    </div>
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                        <p:row>
+                                            <p:column>
+                                                <p:dataTable id="dataTableEmpleadoCosto" var="vista" paginator="true"
+                                                             value="#{mensualxconceptoempleadoBean.registros}"
+                                                             filteredValue="#{mensualxconceptoempleadoBean.filteredRegistros}"
+                                                             resizableColumns="true" scrollable="true" scrollHeight="300"
+                                                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                                             rowsPerPageTemplate="50,100,200,500,1000" rows="50" 
+                                                             style="font-size: .8em" lazy="true"
+                                                             emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                             widgetVar="registrosTableEmpleado"
+                                                             rowKey="#{vista.idconceptonomina}">
+
+                                                    <f:facet name="header">
+                                                        <p:outputPanel>  
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="costos" actionListener="#{mensualxconceptoempleadoBean.descargarReporte()}" oncomplete="handleLShow(args)"
+                                                                               onclick="statusDialog.show();">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                            <div class="datableImagenes" id="csv">
+                                                                <p:commandLink id="provisiones" actionListener="#{mensualxconceptoempleadoBean.descargarCsv()}" oncomplete="handleLShow(args)"
+                                                                               onclick="statusDialog.show();">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                </p:commandLink>
+                                                            </div>
+                                                        </p:outputPanel>
+                                                    </f:facet>
+
+                                                    <p:column headerText="No. Empleado">
+                                                        <p:outputLabel value="#{vista.numeroempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Empleado">
+                                                        <p:outputLabel value="#{vista.nombreempleado} - #{vista.nombreempleado}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="S.D.">
+                                                        <p:outputLabel value="#{vista.sd}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column headerText="S.D.I.">
+                                                        <p:outputLabel value="#{vista.sdi}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+
+                                                    <p:column headerText="Grupo Pago">
+                                                        <p:outputLabel value="#{vista.grupopago} - #{vista.nombregrupopago}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Registro Patronal">
+                                                        <p:outputLabel value="#{vista.registropatronal}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Tipo Proceso">
+                                                        <p:outputLabel value="#{vista.tipoproceso}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Concepto">
+                                                        <p:outputLabel value="#{vista.numeroconcepto} - #{vista.nombreconcepto}"/>
+                                                    </p:column>
+
+                                                    <p:column headerText="Naturaleza">
+                                                        <p:outputLabel value="#{vista.naturaleza}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Año">
+                                                        <p:outputLabel value="#{vista.anio}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Mes" footerText="Total:">
+                                                        <p:outputLabel value="#{vista.mes}"/>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" sortBy="#{vista.totalTiempo}" headerText="Tiempo">
+                                                        <p:outputLabel value="#{vista.totalTiempo}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoempleadoBean.totalTiempo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column style="text-align: right" headerText="Importe" 
+                                                              footerText="#{mensualxconceptoempleadoBean.totalImporte}">
+                                                        <p:outputLabel value="#{vista.totalImporte}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                        <f:facet name="footer">
+                                                            <p:outputLabel value="#{mensualxconceptoempleadoBean.totalImporte}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </f:facet>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:column>
+                                        </p:row>
+                                        <f:facet name="footer">
+                                            <p:row>
+                                                <p:column>
+                                                    <div align="right">
+                                                        <p:commandButton value="Reporte Costo Empresa" icon="icon-down" styleClass="style_botones"
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteMensualCostoEmpresa()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs"/> 
+                                                        <p:commandButton value="Reporte Provisiones" icon="icon-down" styleClass="style_botones" 
+                                                                         oncomplete="handleLShow(args)"
+                                                                         actionListener="#{mensualxconceptoempleadoBean.descargarReporteMensualProvisionesCostoEmpresa()}"
+                                                                         onstart="statusDialog.show()"
+                                                                         update=":form, :msgs"/> 
+                                                    </div>
+
+                                                </p:column>
+                                            </p:row>
+                                        </f:facet>
+                                    </p:panelGrid>
+                                </p:tab>
+                            </p:tabView>
+                        </div>
+
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
