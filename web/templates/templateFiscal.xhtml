@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssHexagonos.css"/>
+        <style>
+            body{
+                background-color : rgb(32,32,32);
+            }
+        </style>
+        <title>Fiscal</title>
+    </h:head>
+
+    <h:body>
+
+        <div id="menu" class="ui-widget ui-widget-header ui-corner-all">
+            <h:form>  
+                <div align="right">
+                    <h:panelGrid columns="4">
+                        <p:clock pattern="dd/MM/yyyy HH:mm:ss" mode="server"/>
+                        <p:selectOneMenu id="idComboModulo" value="#{urlsBean.selectedModulo}" style="width: 180px;text-align: left;" effect="fold"
+                                         valueChangeListener="#{urlsBean.cambiarURL}" filter="true" filterMatchMode="contains"> 
+                            <f:selectItems value="#{urlsBean.comboUrl}"/>
+                            <p:ajax partialSubmit="true"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+
+                <p:menubar>  
+                    <p:submenu label="Reportes">
+                        <p:submenu label="IMSS">
+                            <p:menuitem value="Altas IDSE" url="#{appBean.basePath}fiscal/altasidse/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoFiscalAltasIdse}"/>  
+                            <p:menuitem value="Bajas IDSE" url="#{appBean.basePath}fiscal/bajasidse/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoFiscalBajasIdse}"/>  
+                            <p:menuitem value="Modificación Salario IDSE" url="#{appBean.basePath}fiscal/sueldosidse/cenicco.xhtml" rendered="#{permisosBean.permisoFiscalSalarioIdse}" update="idComboModulo"/>  
+                            <p:menuitem value="Confronta" url="#{appBean.basePath}fiscal/confrontaidse/cenicco.xhtml" rendered="#{permisosBean.permisoFiscalSalarioIdse}" update="idComboModulo"/>  
+                        </p:submenu>
+                        <p:submenu label="SUA">
+                            <p:menuitem value="Ingresos" url="#{appBean.basePath}fiscal/ingresossua/cenicco.xhtml" rendered="#{permisosBean.permisoFiscalTrabajadoresSua}" update="idComboModulo"/>  
+                            <p:menuitem value="Movimientos SUA" url="#{appBean.basePath}fiscal/movimientossua/cenicco.xhtml" rendered="#{permisosBean.permisoFiscalTrabajadoresSua}" update="idComboModulo"/>  
+                        </p:submenu>
+                        <p:submenu label="SAT">
+                            <p:menuitem value="Bajas o Altas" url="#{appBean.basePath}fiscal/sat/cenicco.xhtml" update="idComboModulo"/>  
+                        </p:submenu>
+                    </p:submenu>  
+                    <p:submenu label="Procesos">
+                        <p:menuitem value="Variabilidad Bimestral" url="#{appBean.basePath}fiscal/variabilidadbimestral/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoFiscalVariabilidadBimestral}"/>  
+                        <p:submenu label="Ajuste Anual">
+                            <p:menuitem value="Empleados Sin Ajuste" url="#{appBean.basePath}fiscal/ajusteanualempleados/cenicco.xhtml"/>  
+                            <p:menuitem value="Resultado" url="#{appBean.basePath}fiscal/ajusteanual/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoFiscalVariabilidadBimestral}"/>  
+                        </p:submenu>
+                        <p:menuitem value="Constancias" url="#{appBean.basePath}fiscal/constancias/cenicco.xhtml" update="idComboModulo" rendered="#{permisosBean.permisoFiscalVariabilidadBimestral}"/>  
+
+                    </p:submenu>
+                    <p:menuitem value="Inicio" url="#{appBean.basePath}inicio/index.xhtml" icon="ui-icon-home"/> 
+                </p:menubar>
+            </h:form>
+        </div>
+
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>
