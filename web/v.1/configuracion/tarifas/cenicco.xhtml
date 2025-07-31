@@ -1,0 +1,334 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:tabView id="gral" style="margin-top: 2%; color: rgba(137,137,137,1)">
+                        <p:tab title="Tarifa ISR">
+                            <div align="center">
+                                <h:panelGrid columns="3">
+                                    <p:inputText id="idisrcuotafija" value="#{tarifaisrBean.tarifa.cuotaFija}" placeholder="Cuota Fija"/>
+
+                                    <p:inputText id="idisrliminferior" value="#{tarifaisrBean.tarifa.limiteInferior}" placeholder="Límite Inferior"/>
+
+                                    <p:commandButton value="Alta" icon="icon-add" style="width: 120px"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{tarifaisrBean.create(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                                    <p:inputText id="idisrlsuperior" value="#{tarifaisrBean.tarifa.limiteSuperior}" placeholder="Límite Superior"/>
+
+                                    <p:inputText id="idisrpocentaje" value="#{tarifaisrBean.tarifa.procentaje}" placeholder="% Sobre Excedente"/>
+
+
+                                    <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                     styleClass="style_botones" immediate="true" style="width: 120px"
+                                                     actionListener="#{tarifaisrBean.consultar(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                </h:panelGrid>
+                            </div>
+                            <p:panelGrid>
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{tarifaisrBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTableIsr" var="isr"
+                                                     value="#{tarifaisrBean.tarifas}"
+                                                     filteredValue="#{tarifaisrBean.filteredtarifas}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTableIsr" editable="true" editMode="cell"
+                                                     rowKey="#{isr.idTarifa}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableIsr.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <p:commandLink id="csv" actionListener="#{tarifaisrBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png"/>  
+                                                        </p:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column exportable="true" headerText="Cuota Fija" style="text-align: center" sortBy="#{isr.cuotaFija}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{isr.cuotaFija}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{isr.cuotaFija}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Límite Inferior" style="text-align: center" sortBy="#{isr.limiteInferior}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{isr.limiteInferior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{isr.limiteInferior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Límite Superior" style="text-align: center" sortBy="#{isr.limiteSuperior}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{isr.limiteSuperior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{isr.limiteSuperior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="% Sobre Excedente" style="text-align: center" sortBy="#{isr.procentaje}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{isr.procentaje}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{isr.procentaje}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column> 
+                                            <p:column exportable="false" width="30"> 
+                                                <div align="center">
+                                                    <p:commandButton icon="icon-save" title="Editar"
+                                                                     styleClass="style_botones"
+                                                                     actionListener="#{tarifaisrBean.editar(tab)}"
+                                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                                </div>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </p:tab>
+                        <p:tab title="Tarifa Subsidio">
+                            <div align="center">
+                                <h:panelGrid columns="5">
+                                    <p:inputText value="#{tarifasubsidioBean.tarifa.limiteInferior}" placeholder="Límite Inferior"/>
+
+                                    <p:inputText value="#{tarifasubsidioBean.tarifa.limiteSuperior}" placeholder="Límite Superior"/>
+                                    
+                                    <p:inputText value="#{tarifasubsidioBean.tarifa.subsidio}" placeholder="Subsidio"/>
+
+                                    <p:commandButton value="Alta" icon="icon-add" style="width: 120px"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{tarifasubsidioBean.create(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                                    <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                     styleClass="style_botones" immediate="true" style="width: 120px"
+                                                     actionListener="#{tarifasubsidioBean.consultar(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                </h:panelGrid>
+                            </div>
+                            <p:panelGrid>
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{tarifasubsidioBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTableSubsidio" var="subsidio"
+                                                     value="#{tarifasubsidioBean.tarifas}"
+                                                     filteredValue="#{tarifasubsidioBean.filteredTarifas}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTableSubsidio" editable="true" editMode="cell"
+                                                     rowKey="#{subsidio.idTarifa}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableSubsidio.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <p:commandLink id="csv" actionListener="#{tarifasubsidioBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png"/>  
+                                                        </p:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column exportable="true" headerText="Límite Inferior" style="text-align: center" sortBy="#{subsidio.limiteInferior}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{subsidio.limiteInferior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{subsidio.limiteInferior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Límite Superior" style="text-align: center" sortBy="#{subsidio.limiteSuperior}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{subsidio.limiteSuperior}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{subsidio.limiteSuperior}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Subsidio" style="text-align: center" sortBy="#{subsidio.subsidio}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{subsidio.subsidio}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{subsidio.subsidio}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column> 
+                                            <p:column exportable="false" width="30"> 
+                                                <div align="center">
+                                                    <p:commandButton icon="icon-save" title="Editar"
+                                                                     styleClass="style_botones"
+                                                                     actionListener="#{tarifaisrBean.editar(tab)}"
+                                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                                </div>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </p:tab>
+                        <p:tab title="Ramas (IMSS)">
+<div align="center">
+                                <h:panelGrid columns="5">
+                                    <p:inputText value="#{ramaimssBean.tarifa.rama}" placeholder="Descripción Rama"/>
+
+                                    <p:inputText value="#{ramaimssBean.tarifa.empleado}" placeholder="Valor Empleado"/>
+                                    
+                                    <p:inputText value="#{ramaimssBean.tarifa.patron}" placeholder="Valor Patrón"/>
+
+                                    <p:commandButton value="Alta" icon="icon-add" style="width: 120px"
+                                                     styleClass="style_botones"
+                                                     actionListener="#{ramaimssBean.create(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                                    <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                     styleClass="style_botones" immediate="true" style="width: 120px"
+                                                     actionListener="#{ramaimssBean.consultar(event)}"
+                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                </h:panelGrid>
+                            </div>
+                            <p:panelGrid>
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{ramaimssBean.informacion}" style="color: white;"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTableRamas" var="rama"
+                                                     value="#{ramaimssBean.tarifas}"
+                                                     filteredValue="#{ramaimssBean.filterdTarifa}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTableRamas" editable="true" editMode="cell"
+                                                     rowKey="#{rama.idRama}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableRamas.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <p:commandLink id="csv" actionListener="#{ramaimssBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png"/>  
+                                                        </p:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column filterMatchMode="contains" exportable="true" headerText="Descripción Rama"
+                                                      filterBy="#{rama.rama}"  sortBy="#{rama.rama}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{rama.rama}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{rama.rama}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Valor Empleado" style="text-align: center" sortBy="#{rama.empleado}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{rama.empleado}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{rama.empleado}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column exportable="true" headerText="Valor Pattrón" style="text-align: center" sortBy="#{rama.patron}">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <p:outputLabel value="#{rama.patron}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{rama.patron}"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column> 
+                                            <p:column exportable="false" width="30"> 
+                                                <div align="center">
+                                                    <p:commandButton icon="icon-save" title="Editar"
+                                                                     styleClass="style_botones"
+                                                                     actionListener="#{ramaimssBean.editar(tab)}"
+                                                                     update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                                </div>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </p:tab>
+                    </p:tabView>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
