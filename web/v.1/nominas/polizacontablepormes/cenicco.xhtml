@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="15">
+                            <p:selectOneMenu id="idestatusempleado" style="width: 150px" value="#{polizamesBean.selectedestatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="- Estatus Empleado -"/>
+                                <f:selectItems value="#{appBean.comboEstatusRelacionLaboral}"/>  
+                            </p:selectOneMenu>                            
+                            <p:selectCheckboxMenu id="idGruposPago" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{polizamesBean.selectedGruposPago}" label="Grupo(s) Pago" requiredMessage="#{appBean.mensajeErrorGrupoPago}" required="true">
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectCheckboxMenu>
+                            <p:message for="idGruposPago" display="tooltip"/>
+
+                            <p:selectCheckboxMenu id="idTiposNomina" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{polizamesBean.selectedTiposNomina}" label="Tipo(s) Nómina" requiredMessage="#{appBean.mensajeErrorGrupoPago}" required="true">
+                                <f:selectItems value="#{tipoprocesoBean.tiposProceso}"
+                                               var="tipoProceso" itemValue="#{tipoProceso.idtipoproceso}" itemLabel="#{tipoProceso.nombre}"/>  
+                            </p:selectCheckboxMenu>
+                            <p:message for="idTiposNomina" display="tooltip"/>
+                            <p:inputText id="idMesInicio" value="#{polizamesBean.mesinicio}" placeholder="Mes Inicio" size="5" style="text-align: center"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorPeriodo}"/>
+                            <p:message for="idMesInicio" display="tooltip"/>
+
+                            <p:inputText id="idMesFin" value="#{polizamesBean.mesfin}" placeholder="Mes Fin" size="5" style="text-align: center"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorPeriodo}"/>
+                            <p:message for="idMesFin" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{polizamesBean.anio}" placeholder="Año" size="5" style="text-align: center"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton icon="ui-icon-refresh" title="Traer Empleados"
+                                             styleClass="style_botones"
+                                             actionListener="#{polizamesBean.updateEmpleados(event)}"
+                                             update="idEmpleados" onclick="statusDialog.show();"/> 
+
+                            <p:selectCheckboxMenu id="idEmpleados" panelStyle="width:450px" filter="true" filterMatchMode="contains"
+                                                  style="width: 200px; text-align: center;margin-top: 11px; height: 24px" 
+                                                  value="#{polizamesBean.selectedRelaciones}" label="Empleado(s)">
+                                <f:selectItems value="#{polizamesBean.relaciones}"/> 
+                            </p:selectCheckboxMenu>
+                            <p:message for="idEmpleados" display="tooltip"/>
+
+                            <p:commandButton value="Calcular" icon="ui-icon-play"
+                                             styleClass="style_botones"
+                                             actionListener="#{polizamesBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Póliza Contable (Mensual) - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{polizamesBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="poliza"
+                                                 value="#{polizamesBean.header}"
+                                                 filteredValue="#{polizamesBean.filteredHeader}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{poliza.id}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf" actionListener="#{polizamesBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="csv">
+                                                    <p:commandLink id="csv" actionListener="#{polizamesBean.descargarReporteXls()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{poliza.concepto}" sortBy="#{poliza.concepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{poliza.concepto}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Totales:"/>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{poliza.cargo}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Total Cargo" title="Total Cargo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{poliza.cargo}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{polizamesBean.totalCargo}" style="#{polizamesBean.totalCargo!=polizamesBean.totalAbono?'color:red;':'color: green'}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="4"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{poliza.abono}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Total Abono" title="Total Abono"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{poliza.abono}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{polizamesBean.totalAbono}" style="#{polizamesBean.totalCargo!=polizamesBean.totalAbono?'color:red;':'color: green'}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 800px" rendered="#{!empty poliza.detalle}">
+                                                <p:panel header="Detalle" toggleable="true" collapsed="false">
+                                                    <p:dataTable id="registrosTableConceptos" value="#{poliza.detalle}" var="detalle" style="font-size: 1em;">
+                                                        <f:facet name="header">
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target="registrosTableConceptos" fileName="CuentasPorConcepto_#{poliza.concepto}" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </f:facet>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{detalle.cuentacontable}#"  
+                                                                  sortBy="#{detalle.cuentacontable}">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Cuenta"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{detalle.cuentacontable}"/>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{detalle.cargo}" 
+                                                                  style="text-align: right">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Cargo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{detalle.cargo}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="3"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                                  style="text-align: right" sortBy="#{detalle.abono}">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Abono"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{detalle.abono}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="3"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:selectOneMenu id="idTipoPoliza" style="text-align: center; width: 250px; top: 8px; right: 8px;" value="#{polizamesBean.selectedTipoPoliza}"
+                                                             filter="true" filterMatchMode="contains">  
+                                                <f:selectItem itemValue="" itemLabel="- Tipo Poliza -"/>
+                                                <f:selectItems value="#{polizamesBean.tiposPoliza}"
+                                                               var="tipoPoliza" itemValue="#{tipoPoliza.parametro}" itemLabel="#{tipoPoliza.parametro}"/>  
+                                            </p:selectOneMenu>
+                                            <p:commandButton value="Limpiar" icon="ui-icon-trash"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{polizamesBean.limpiar(event)}"
+                                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Descargar Póliza" icon="icon-down"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{polizamesBean.listenerSelectedHeader()}" oncomplete="handleLShow(args)"
+                                                             onclick="statusDialog.show();"/> 
+                                            <p:commandButton value="Descargar Póliza con Conceptos" icon="icon-down"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{polizamesBean.listenerSelectedHeaderConceptos()}" oncomplete="handleLShow(args)"
+                                                             onclick="statusDialog.show();" rendered="#{appBean.servicioMinnt}"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
