@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="true"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="9">
+                            <p:inputText id="idnumeroempleado" placeholder="Número Empleado"
+                                         value="#{movimientoBean.numeroempleado}" size="13" style="text-align: center"/> 
+
+                            <p:selectOneMenu id="idGrupoPago" style="width: 150px" value="#{movimientoBean.selectedgrupopago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idmodulo" style="width: 110px" filter="true" filterMatchMode="contains"
+                                             value="#{movimientoBean.modulo}">  
+                                <f:selectItem itemValue="" itemLabel="Módulo"/>
+                                <f:selectItems value="#{appBean.comboModulos}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idtipomovimiento" style="width: 110px" filter="true" filterMatchMode="contains"
+                                             value="#{movimientoBean.tipomovimiento}">  
+                                <f:selectItem itemValue="" itemLabel="Tipo Movimiento"/>
+                                <f:selectItems value="#{appBean.comboTipoMovimiento}"/>  
+                            </p:selectOneMenu>
+
+                            <p:inputMask id="idfechainicio" value="#{movimientoBean.fechainicio}" mask="99/99/9999" size="8"
+                                         title="Fecha Inicio" placeholder="Fecha Inicio"/>
+
+                            <p:inputMask id="idfechafin" value="#{movimientoBean.fechafin}" mask="99/99/9999" size="8"
+                                         title="Fecha Fin" placeholder="Fecha Fin"/>
+
+                            <p:selectOneMenu id="iduario" style="width: 110px" filter="true" filterMatchMode="contains"
+                                             value="#{movimientoBean.selectedusuario}">  
+                                <f:selectItem itemValue="" itemLabel="Usuario"/>
+                                <f:selectItems value="#{usuarioBean.usuarios}"  
+                                               var="usuario" itemValue="#{usuario.idUsuario}" itemLabel="#{usuario.nombre} #{usuario.apellidoPaterno} #{usuario.apellidoMaterno}"/>  
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{movimientoBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Movimientos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false"> 
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{movimientoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="movimiento"
+                                                 value="#{movimientoBean.movimientos}"
+                                                 filteredValue="#{movimientoBean.filteredmovimientos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{movimiento.idmovimiento}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Movimientos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.modulo}"  sortBy="#{movimiento.modulo}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Módulo" title="Módulo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.modulo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.accion}"  sortBy="#{movimiento.accion}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Acción" title="Acción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.accion}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.tipomovimiento}"  sortBy="#{movimiento.tipomovimiento}">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Movimiento" title="Tipo Movimiento"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.tipomovimiento}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.movimiento}"  sortBy="#{movimiento.movimiento}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Movimiento" title="Movimiento"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.movimiento}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.relacionlaboral.numeroempleado}"  sortBy="#{movimiento.relacionlaboral.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.relacionlaboral.numeroempleado} - #{movimiento.relacionlaboral.idempleado.nombre} #{movimiento.relacionlaboral.idempleado.apellidopaterno} #{movimiento.relacionlaboral.idempleado.apellidomaterno}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{movimiento.usuario.nombre} #{movimiento.usuario.apellidoPaterno} #{movimiento.usuario.apellidoMaterno}"  
+                                                  sortBy="#{movimiento.usuario.nombre} #{movimiento.usuario.apellidoPaterno} #{movimiento.usuario.apellidoMaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Usuario" title="Usuario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.usuario.nombre} #{movimiento.usuario.apellidoPaterno} #{movimiento.usuario.apellidoMaterno}"/>
+                                        </p:column>
+                                        <p:column sortBy="#{movimiento.fecharegistro.toGregorianCalendar().time}" exportable="true">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Registro" title="Fecha Registro"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.fecharegistro.toGregorianCalendar().time}" style="text-align: center">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column>
+                                            <f:facet name="header">
+                                                <h:outputText value="Respuesta" title="Respuesta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{movimiento.respuesta}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
