@@ -1,0 +1,435 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="11">
+                            <p:selectOneMenu id="idGrupoPago" style="width: 200px" value="#{comparacionNominaBean.selectedGrupopago}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorSeleccionEmpleados}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idGrupoPago" display="tooltip"/>
+
+                            <p:inputText id="idPeriodoInicio" placeholder="Parámetro Inicio" required="true" requiredMessage="Favor de ingresar Parámetro Inicio"
+                                         value="#{comparacionNominaBean.periodoinicio}" size="15" style="text-align: center"/> 
+                            <p:message for="idPeriodoInicio" display="tooltip"/>
+
+                            <p:inputText id="idPeriodoFin" placeholder="Parámetro Fin" required="true" requiredMessage="Favor de ingresar Parámetro Fin"
+                                         value="#{comparacionNominaBean.periodofin}" size="15" style="text-align: center"/> 
+                            <p:message for="idPeriodoFin" display="tooltip"/>
+
+                            <p:inputText id="idAnio" placeholder="Año" required="true" requiredMessage="Favor de ingresar Año"
+                                         value="#{comparacionNominaBean.anio}" size="10" style="text-align: center"/> 
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:selectOneMenu id="idAgrupacion" style="width: 200px" value="#{comparacionNominaBean.selectedPeriodoMes}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="Favor de seleccionar Agrupación">  
+                                <f:selectItem itemValue="" itemLabel="Agrupación"/>
+                                <f:selectItems value="#{appBean.comboPeriodoMes}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idAgrupacion" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones" 
+                                             actionListener="#{comparacionNominaBean.consultar(event)}"
+                                             update=":form:display, :msgs" onclick="statusDialog.show();"/>
+                        </h:panelGrid>
+
+                    </div>
+                    <div align="center">
+                        <h:panelGrid id="display" columns="2" >
+                            <p:accordionPanel multiple="true">
+                                <p:tab title="Perecepciones" closable="false">
+                                    <p:dataTable id="dataTablePercepciones" var="vista"
+                                                 value="#{comparacionNominaBean.percepciones}"
+                                                 filteredValue="#{comparacionNominaBean.filteredPercepciones}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="190" style="font-size: 1em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTablePercepciones">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTablePercepciones.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTablePercepciones" fileName="ReporteGeneralPercepciones" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroconcepto}" sortBy="#{vista.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Concepto" title="Número Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nombreconcepto}" sortBy="#{vista.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==0}"
+                                                  filterBy="#{vista.periodo}" sortBy="#{vista.periodo}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.periodo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==1}"
+                                                  filterBy="#{vista.aniomes}" sortBy="#{vista.mes}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.aniomes}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  style="text-align: right"
+                                                  filterBy="#{vista.importe}" sortBy="#{vista.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{comparacionNominaBean.totalPercepciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                                <p:tab title="Deducciones" closable="false">
+                                    <p:dataTable id="dataTableDeducciones" var="vista"
+                                                 value="#{comparacionNominaBean.deducciones}"
+                                                 filteredValue="#{comparacionNominaBean.filteredDeducciones}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="190" style="font-size: 1em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTableDeducciones">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTableDeducciones.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableDeducciones" fileName="ReporteGeneralDeducciones" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroconcepto}" sortBy="#{vista.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Concepto" title="Número Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nombreconcepto}" sortBy="#{vista.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==0}"
+                                                  filterBy="#{vista.periodo}" sortBy="#{vista.periodo}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.periodo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==1}"
+                                                  filterBy="#{vista.aniomes}" sortBy="#{vista.mes}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.aniomes}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  style="text-align: right"
+                                                  filterBy="#{vista.importe}" sortBy="#{vista.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{comparacionNominaBean.totalDeducciones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                                <p:tab title="Provisiones" closable="false">
+                                    <p:dataTable id="dataTableProvisiones" var="vista"
+                                                 value="#{comparacionNominaBean.provisiones}"
+                                                 filteredValue="#{comparacionNominaBean.filteredProvisiones}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="190" style="font-size: 1em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTableProvisiones">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTableProvisiones.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableProvisiones" fileName="ReporteGeneralProvisiones" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroconcepto}" sortBy="#{vista.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Concepto" title="Número Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.nombreconcepto}" sortBy="#{vista.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==0}"
+                                                  filterBy="#{vista.periodo}" sortBy="#{vista.periodo}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.periodo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==1}"
+                                                  filterBy="#{vista.aniomes}" sortBy="#{vista.mes}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.aniomes}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  style="text-align: right"
+                                                  filterBy="#{vista.importe}" sortBy="#{vista.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{comparacionNominaBean.totalProvisiones}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                                <p:tab title="Impuesto Sobre Renta" closable="false">
+                                    <p:dataTable id="dataTableISr" var="vista"
+                                                 value="#{comparacionNominaBean.tablaisr}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="190" style="font-size: 1em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTableIsr">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableISr" fileName="ReporteGeneralISR" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column exportable="true" sortBy="#{vista.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Concepto" title="Número Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{vista.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==0}" sortBy="#{vista.periodo}"
+                                                  filterBy="#{vista.periodo}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.periodo}"/>
+                                        </p:column>
+                                        <p:column exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==1}" sortBy="#{vista.mes}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.aniomes}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column exportable="true" style="text-align: right" sortBy="#{vista.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{comparacionNominaBean.totalIsr}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                                <p:tab title="Netos" closable="false">
+                                    <p:dataTable id="dataTableNetos" var="vista"
+                                                 value="#{comparacionNominaBean.tablanetos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="190" style="font-size: 1em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTableNetos">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableNetos" fileName="ReporteGeneralNetos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column exportable="true" sortBy="#{vista.numeroconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Concepto" title="Número Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroconcepto}"/>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{vista.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Concepto" title="Concepto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==0}" sortBy="#{vista.periodo}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.periodo}"/>
+                                        </p:column>
+                                        <p:column exportable="true" rendered="#{comparacionNominaBean.selectedPeriodoMes==1}" sortBy="#{vista.mes}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.aniomes}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column exportable="true" style="text-align: right" sortBy="#{vista.importe}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Importe" title="Importe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="#{comparacionNominaBean.totalNetos}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </f:facet>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                            </p:accordionPanel>
+                            <p:accordionPanel multiple="true">
+                                <p:tab title="Gráfica Percepciones" closable="false">
+                                    <p:lineChart id="grafPercepciones" value="#{comparacionNominaBean.barPercepciones}" seriesColors="045FB4"
+                                                 legendPosition="ne" xaxisAngle="45" style="width: 550px;height: 300px" zoom="true" shadow="true"
+                                                 animate="true" title="Percepciones" yaxisLabel="Importe (Millones)"/>
+                                </p:tab>
+                                <p:tab title="Gráfica Deducciones" closable="false">
+                                    <p:lineChart id="grafDeducciones" value="#{comparacionNominaBean.barDeducciones}" seriesColors="FF4000"
+                                                 legendPosition="ne" xaxisAngle="45" style="width: 550px;height: 300px" zoom="true" shadow="true"
+                                                 animate="true" title="Deducciones" yaxisLabel="Importe (Millones)"/>
+                                </p:tab>
+                                <p:tab title="Gráfica Provisiones" closable="false">
+                                    <p:lineChart id="grafProvisiones" value="#{comparacionNominaBean.barProvisiones}" seriesColors="04B486"
+                                                 legendPosition="ne" xaxisAngle="45" style="width: 550px;height: 300px" zoom="true" shadow="true"
+                                                 animate="true" title="Provisiones" yaxisLabel="Importe (Millones)"/>
+                                </p:tab>
+                                <p:tab title="Gráfica Impuesto Sobre Renta" closable="false">
+                                    <p:lineChart id="grafIsr" value="#{comparacionNominaBean.barIsr}" seriesColors="F7D358"
+                                                 legendPosition="ne" xaxisAngle="45" style="width: 550px;height: 252px" zoom="true" shadow="true"
+                                                 animate="true" title="Impuesto Sobre Renta" yaxisLabel="Importe (Millones)"/>
+                                </p:tab>
+                                <p:tab title="Gráfica Netos" closable="false">
+                                    <p:lineChart id="grafNetos" value="#{comparacionNominaBean.barNetos}" seriesColors="A901DB  "
+                                                 legendPosition="ne" xaxisAngle="45" style="width: 550px;height: 252px" zoom="true" shadow="true"
+                                                 animate="true" title="Netos" yaxisLabel="Importe (Millones)"/>
+                                </p:tab>
+                            </p:accordionPanel>
+                        </h:panelGrid>
+                    </div>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
