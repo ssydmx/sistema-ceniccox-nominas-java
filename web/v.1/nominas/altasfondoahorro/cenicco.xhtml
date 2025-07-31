@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="10">
+                            <p:selectOneMenu id="idMesingreso" style="width: 150px"
+                                             filter="true" filterMatchMode="contains" value="#{altafondoahorroBean.mes}">  
+                                <f:selectItem itemValue="" itemLabel="Mes Ingreso Empleado"/>
+                                <f:selectItems value="#{appBean.comboMeses}"/>  
+                            </p:selectOneMenu>
+                            <p:inputText id="idAnioIngreso" value="#{altafondoahorroBean.anio}" placeholder="Año" style="text-align: center"/>
+                            <p:selectOneMenu id="idgrupopago" style="width: 150px" 
+                                             filter="true" filterMatchMode="contains" value="#{altafondoahorroBean.idGrupopago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" var="gp" 
+                                               itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:inputMask id="idFechaPago" value="#{altafondoahorroBean.fechaaplicar}" mask="99999999" size="10" style="text-align: center"
+                                         title="Fecha Aplicar" placeholder="YYYYMMDD" required="true" requiredMessage="Favor de Ingresar la Fecha a Aplicar"/>
+                            <p:message for="idFechaPago" display="tooltip"/>
+
+                            <p:selectOneMenu id="idSecuencia" style="width: 150px" required="true" requiredMessage="Favor de Seleccionar Secuencia"
+                                             filter="true" filterMatchMode="contains" value="#{altafondoahorroBean.secuencia}">  
+                                <f:selectItems value="#{appBean.comboSecuencia}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idSecuencia" display="tooltip"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Alta Fondo de Ahorro - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <div align="right">
+                            <h:panelGrid columns="1">
+
+                                <p:commandButton value="Actualizar" icon="ui-icon-arrowrefresh-1-e"
+                                                 styleClass="style_botones"
+                                                 actionListener="#{altafondoahorroBean.consultar(event)}"
+                                                 update=":form, :msgs" onclick="statusDialog.show();"/> 
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{altafondoahorroBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="vista"
+                                                 value="#{altafondoahorroBean.vista}"
+                                                 filteredValue="#{altafondoahorroBean.filteredvista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{altafondoahorroBean.selectedvista}"
+                                                 rowKey="#{vista.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="AltasFondoAhorro" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.numeroempleado}"  sortBy="#{vista.numeroempleado}" width="10%">
+                                            <f:facet name="header">
+                                                <h:outputText value="N. Empleado" title="Número de Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.apellidopaterno} #{vista.apellidomaterno} #{vista.nombre}"  
+                                                  sortBy="#{vista.apellidopaterno}" width="30%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.apellidopaterno} #{vista.apellidomaterno} #{vista.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{vista.grupopago}" sortBy="#{vista.grupopago}" width="10%">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.grupopago}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.area}" sortBy="#{vista.area}" style="text-align: center" width="20%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Área" title="Área"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.area}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{vista.clabe}"  
+                                                  sortBy="#{vista.clabe}" style="text-align: center" width="20%">
+                                            <f:facet name="header">
+                                                <h:outputText value="CLABE" title="CLABE"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.clabe}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Altas" title="Descargar Altas" icon="icon-down"
+                                                             actionListener="#{altafondoahorroBean.create(event)}"
+                                                             oncomplete="handleLShow(args)" 
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
