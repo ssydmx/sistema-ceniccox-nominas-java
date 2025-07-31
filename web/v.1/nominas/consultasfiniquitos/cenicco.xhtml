@@ -1,0 +1,464 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <style>
+            .fa-pdf-icon {
+                background: url("#{resource['images/icons/jr_pdf_s.png']}") no-repeat !important;
+                width: 20px !important;
+                height: 20px !important;
+                padding-right: 5px !important;
+            }
+            .fa-excel-icon {
+                background: url("#{resource['images/icons/jr_excel_s.png']}") no-repeat !important;
+                width: 20px !important;
+                height: 20px !important;
+                padding-right: 5px !important;
+            }
+            .fa-word-icon {
+                background: url("#{resource['images/icons/jr_word_s.png']}") no-repeat !important;
+                width: 20px !important;
+                height: 20px !important;
+                padding-right: 5px !important;
+            }
+            .fa-menu-icon {
+                background: url("#{resource['images/icons/jr_menu_s.png']}") no-repeat !important;
+            }
+        </style>
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="4" style="margin-top: 5px">
+
+                            <p:selectOneMenu id="idAplicado" style="width: 200px" value="#{consultaFiniquitoBean.selectedAplicado}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Finiquito Aplicado?"/>
+                                <f:selectItems value="#{appBean.comboSeleccion}"/>  
+                            </p:selectOneMenu>
+
+                            <p:inputText value="#{consultaFiniquitoBean.numeroempleado}" placeholder="No. Empleado"/>
+
+                            <p:selectOneMenu id="grupoPago" style="width: 200px" value="#{consultaFiniquitoBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search" title="Consultar"
+                                             actionListener="#{consultaFiniquitoBean.consultar(event)}" onstart="statusDialog.show()"
+                                             style="width: 100px" update=":msgs, :form:display"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Consulta Finiquitos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="right">
+                            <h:panelGrid columns="4">
+                                <p:commandButton value="Finiquitos (zip)" title="Finiquitos (zip)" icon="icon-down" rendered="#{appBean.servicioGrupoBakertilly}"
+                                                 actionListener="#{consultaFiniquitoBean.descargarFiniquitos()}" oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();" update=":msgs,:form:display"/> 
+                                <p:commandButton value="Carta Combinada" title="Carta de Finiquitos Combinados" icon="icon-down"
+                                                 actionListener="#{consultaFiniquitoBean.descargarCartaCombinada(consultaFiniquitoBean.selectedFiniquitos)}"
+                                                 styleClass="style_botones" onclick="statusDialog.show();" update=":msgs, :form:display"/> 
+                                <p:commandButton value="Carta Desglose" title="Carta Desgloce finiquito" icon="icon-down"
+                                                 actionListener="#{consultaFiniquitoBean.descargarCartaFiniquitoDesglosado()}" 
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                                <p:commandButton value="Descargar Preliminar" title="Descargar Preliminar" icon="icon-down"
+                                                 actionListener="#{consultaFiniquitoBean.descargarReporte()}"
+                                                 oncomplete="handleLShow(args)" 
+                                                 styleClass="style_botones" onclick="statusDialog.show();"/> 
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{consultaFiniquitoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTableNomina" var="nomina" value="#{consultaFiniquitoBean.finiquitos}"
+                                                 resizableColumns="true" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                 filteredValue="#{consultaFiniquitoBean.filteredFiniquitos}"
+                                                 scrollable="true" scrollHeight="300"
+                                                 selection="#{consultaFiniquitoBean.selectedFiniquitos}"
+                                                 rowKey="#{nomina.idfiniquito}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTableNomina.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTableNomina" fileName="Finiquitos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                                        <p:column width="30" style="text-align:center" rendered="#{appBean.servicioEPAM}">
+                                            <f:facet name="header">
+                                                <h:outputText />
+                                            </f:facet>
+                                            <!--<p:commandButton id="dynaButton" icon="fa-menu-icon" title="#{'Proporcionales'}"/>-->
+                                            <h:graphicImage id="dynaButton" value="#{pathManager.path}/resources/images/icons/jr_menu_s.png"/>
+                                            <p:menu overlay="true" trigger="dynaButton" my="left bottom" at="bottom right" style="width: 200px;">
+                                                <p:submenu label="(EN) Proporcionales">
+                                                    <p:menuitem value="Excel" icon="fa-excel-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarCartaPartesPromocionalesFiniquito(nomina, 'xlsx', 'en')}" oncomplete="handleLShow(args)"
+                                                                onclick="statusDialog.show();" immediate="true"/>
+
+                                                    <p:menuitem value="PDF" icon="fa-pdf-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarCartaPartesPromocionalesFiniquito(nomina, 'pdf', 'en')}" oncomplete="handleLShow(args)"
+                                                                onclick="statusDialog.show();" immediate="true"/>
+                                                </p:submenu>
+                                                <p:submenu label="(ES) Proporcionales">
+                                                    <p:menuitem value="Excel" icon="fa-excel-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarCartaPartesPromocionalesFiniquito(nomina, 'xlsx', 'es')}" oncomplete="handleLShow(args)"
+                                                                onclick="statusDialog.show();" immediate="true"/>
+
+                                                    <p:menuitem value="PDF" icon="fa-pdf-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarCartaPartesPromocionalesFiniquito(nomina, 'pdf', 'es')}" oncomplete="handleLShow(args)"
+                                                                onclick="statusDialog.show();" immediate="true"/>
+                                                </p:submenu>
+                                                <p:submenu label="(ES) Convenio Terminacion">
+                                                    <p:menuitem value="PDF" icon="fa-pdf-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarConvenioTerminacionW(nomina)}" oncomplete="handleLShow(args)"
+                                                                onclick="statusDialog.show();" immediate="true"/>
+                                                </p:submenu>
+                                                <p:submenu label="(En) Convenio Terminacion">
+                                                    <p:menuitem value="PDF" icon="fa-pdf-icon"
+                                                                actionListener="#{consultaFiniquitoBean.descargarConvenioTerminacionWEn(nomina,'en')}" oncomplete="handleLShow(args)" 
+                                                                onclick="statusDialog.show();" immediate="true"/>
+                                                </p:submenu>
+                                            </p:menu>
+                                        </p:column>
+                                        <p:column style="width:20px" exportable="false">
+                                            <p:rowToggler />
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  sortBy="#{nomina.idfiniquito}" filterBy="#{nomina.idfiniquito}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.idfiniquito}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" 
+                                                  sortBy="#{nomina.numeroempleado}" filterBy="#{nomina.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  sortBy="#{nomina.nombreempleado}" filterBy="#{nomina.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.nombreempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  sortBy="#{nomina.grupopago}" filterBy="#{nomina.grupopago}">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.grupopago}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  sortBy="#{nomina.causabaja}" filterBy="#{nomina.causabaja}">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Baja" title="Causa Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.causabaja}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  sortBy="#{nomina.fechaRegistroStr}" filterBy="#{nomina.fechaRegistroStr}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Cálculo" title="Fecha de Cálculo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.fechaRegistroStr}"/>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{nomina.totalpercepciones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Percepción" title="Percepciones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totalpercepciones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{nomina.totaldeducciones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Deducción"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totaldeducciones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{nomina.totalprovisiones}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Provisión"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.totalprovisiones}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column exportable="true" sortBy="#{nomina.netopagar}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Neto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{nomina.netopagar}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column width="30" exportable="false">
+                                            <f:facet name="header">
+                                                <h:outputText value="#{appBean.servicioWhiteHat ? 'D. Finiquito' :  'C. Finiquito'}" />
+                                            </f:facet>
+                                            <p:commandButton oncomplete="handleLShow(args)" actionListener="#{consultaFiniquitoBean.descargarDocumentoPDF(nomina)}" 
+                                                             onclick="statusDialog.show();" icon="icon-pdf" title="#{appBean.servicioWhiteHat ? 'Desgloce Finiquito' : 'Carta Finiquito'}"/>
+                                        </p:column>
+                                        <p:column width="40" exportable="false" rendered="#{appBean.servicioYamana}">
+                                            <p:commandButton value="c.f" actionListener="#{consultaFiniquitoBean.descargarconvenioFiniquito(nomina)}"
+                                                             onclick="statusDialog.show();" oncomplete="handleLShow(args)" icon="icon-pdf"  title="Convenio Finiquito"/>
+                                        </p:column>
+                                        <p:column width="40" exportable="false" rendered="#{appBean.servicioGrupoBakertilly}">
+                                            <p:commandButton value="R.C.F" actionListener="#{consultaFiniquitoBean.descargarReciboGenericoFiniquito(nomina)}"
+                                                             onclick="statusDialog.show();" oncomplete="handleLShow(args)" icon="icon-pdf"  title="Recibo Generico Finiquito"/>
+                                        </p:column>
+                                        <p:column width="30" exportable="false" rendered="#{appBean.servicioAlpha}">
+                                            <f:facet name="header">
+                                                <h:outputText value="C. Desgloce"/>
+                                            </f:facet>
+                                            <p:commandButton oncomplete="handleLShow(args)" actionListener="#{consultaFiniquitoBean.descargarFiniquitoDesglosado(nomina)}" 
+                                                             onclick="statusDialog.show();" icon="icon-pdf" title="Carta Finiquito Desglosado"/>
+                                        </p:column>
+                                        <p:column width="40" exportable="false" rendered="#{appBean.servicioYamana}">
+                                            <p:commandButton value="S.F.A" actionListener="#{consultaFiniquitoBean.descargarSaldoFondoAhorro(nomina)}"
+                                                             onclick="statusDialog.show();" oncomplete="handleLShow(args)" style="color: #2C3E50;font-size: 0.8em"  title="Saldo Fondo de Ahorro"/>
+                                        </p:column>
+                                        <p:column width="30" exportable="false">
+                                            <f:facet name="header">
+                                                <h:outputText value="Aplicar"/>
+                                            </f:facet>
+                                            <p:commandButton title="Aplicar" icon="icon-check" update=":formDialog:display" actionListener="#{consultaFiniquitoBean.dialogAplicar(nomina)}"
+                                                             styleClass="style_botones" onclick="confirmDialog.show();" style="color: #B90C0C" rendered="#{nomina.aplicado!=1}"/> 
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid  columns="2" style="width: 1020px">
+                                                <p:panelGrid columns="1">
+                                                    <f:facet name="header">
+                                                        <p:outputLabel value="Percepciones"/> 
+                                                    </f:facet>
+                                                    <p:dataTable  value="#{nomina.conceptosPercepciones}" var="percepcion"
+                                                                  style="font-size: 1em;"
+                                                                  emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                  scrollable="true" scrollHeight="150" >
+
+                                                        <p:column headerText="No. Concepto" sortBy="#{percepcion.concepto}">
+                                                            <p:outputLabel value="#{percepcion.concepto}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Concepto" sortBy="#{percepcion.nombre}">
+                                                            <p:outputLabel value="#{percepcion.nombre}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Tiempo" sortBy="#{percepcion.nombre}" style="text-align: right">
+                                                            <p:outputLabel value="#{percepcion.tiempo}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="*" rendered="#{percepcion.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{percepcion.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{percepcion.valor}" style="color: #{percepcion.suma=='0'?'balck':'green'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+
+                                                    </p:dataTable>
+                                                </p:panelGrid>
+                                                <p:panelGrid columns="1">
+                                                    <f:facet name="header">
+                                                        <p:outputLabel value="Deducciones"/> 
+                                                    </f:facet>
+                                                    <p:dataTable  value="#{nomina.conceptosDeducciones}" var="deduccion"
+                                                                  style="font-size: 1em;"
+                                                                  emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                  scrollable="true" scrollHeight="150">
+
+                                                        <p:column headerText="No. Concepto" sortBy="#{deduccion.concepto}">
+                                                            <p:outputLabel value="#{deduccion.concepto}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Concepto" sortBy="#{deduccion.nombre}">
+                                                            <p:outputLabel value="#{deduccion.nombre}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Tiempo" sortBy="#{deduccion.nombre}" style="text-align: right">
+                                                            <p:outputLabel value="#{deduccion.tiempo}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="*" rendered="#{deduccion.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{deduccion.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{deduccion.valor}" style="color: #{deduccion.suma=='0'?'balck':'green'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panelGrid>
+                                                <p:panelGrid columns="1">
+                                                    <f:facet name="header">
+                                                        <p:outputLabel value="Provisiones"/> 
+                                                    </f:facet>
+                                                    <p:dataTable  value="#{nomina.conceptosProvisiones}" var="provision"
+                                                                  style="font-size: 1em;"
+                                                                  emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                                  scrollable="true" scrollHeight="150">
+
+                                                        <p:column headerText="No. Concepto" sortBy="#{provision.concepto}">
+                                                            <p:outputLabel value="#{provision.concepto}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Concepto" sortBy="#{provision.nombre}">
+                                                            <p:outputLabel value="#{provision.nombre}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Tiempo" sortBy="#{provision.nombre}" style="text-align: right">
+                                                            <p:outputLabel value="#{provision.tiempo}"/>
+                                                        </p:column>
+
+                                                        <p:column headerText="Importe" style="text-align: right">
+                                                            <p:outputLabel value="*" rendered="#{provision.isn==1}"/>
+                                                            <p:outputLabel value="•" rendered="#{provision.naturaleza=='01'}"/>
+                                                            <p:outputLabel value="#{provision.valor}" style="color: #{provision.suma=='0'?'balck':'green'}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panelGrid>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="left">
+                                            <p:commandButton value="Eliminar Finiquito(s)" title="Eliminar finiquito" icon="icon-cancel"
+                                                             onclick="confirmErase.show();"
+                                                             styleClass="style_botones"/> 
+
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formDialog">
+                    <p:dialog header="Alerta Finiquito" widgetVar="confirmDialog" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true" width="500px" style="text-align: center"> 
+                        <p:panelGrid id="display">
+                            <p:row>
+                                <p:column colspan="2">
+                                    <p:outputLabel value="Está seguro de finiquitar al empleado: #{consultaFiniquitoBean.selectedFiniquito.nombreempleado}?. 
+                                                   Se modificará el estado a Inactivo en Kardex."
+                                                   style="font-weight: bold;"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:selectOneMenu style="width: 180px" value="#{consultaFiniquitoBean.periodoaplicar}"
+                                                     filter="true" filterMatchMode="contains">  
+                                        <f:selectItem itemValue="" itemLabel="Mes a Aplicar"/>
+                                        <f:selectItems value="#{appBean.comboMeses}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column>
+                                    <p:inputText value="#{consultaFiniquitoBean.mesaplicar}" placeholder="Año a Aplicar"/>        
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             actionListener="#{consultaFiniquitoBean.aplicar(event)}"
+                                             update=":form:display,:msgs"
+                                             onclick="statusDialog.show();
+                                                         confirmDialog.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmDialog.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formConfimDelete">
+                    <p:dialog header="Alerta de eliminación de finiquito" widgetVar="confirmErase" resizable="false"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fold" hideEffect="fold" modal="true" width="350px" style="text-align: center"> 
+                        <h:panelGrid id="display">
+                            <p:outputLabel value="¿Está seguro de ELIMINAR el finiquito(s): #{consultaFiniquitoBean.usuario.username}?"
+                                           style="font-weight: bold;"/>
+
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton value="Sí" icon="icon-check"
+                                             update=":form:display,:msgs"
+                                             actionListener="#{consultaFiniquitoBean.eliminar()}"
+                                             onclick="statusDialog.show();
+                                                         confirmErase.hide();"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton value="No" icon="icon-cancel"
+                                             onclick="confirmErase.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
