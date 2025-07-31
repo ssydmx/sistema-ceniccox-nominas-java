@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <div align="center">
+                    <h:form id="form">
+                        <h:panelGrid columns="1" id="display">
+                            <p:fieldset legend="Catálogo General - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                                <div align="right">
+                                    <h:panelGrid columns="2">
+                                        <p:commandButton id="btnSearch" icon="icon-search" 
+                                                         title="Consultar" value="Consultar"
+                                                         update=":formSearch:display"
+                                                         actionListener="#{catalogoGeneralBean.limpiar(event)}"
+                                                         onclick="searchDialog.show();"
+                                                         styleClass="style_botones"/>
+                                        <p:commandButton id="btnCreate" icon="icon-add" 
+                                                         title="Alta" value="Alta" 
+                                                         update=":formCreate:display"
+                                                         actionListener="#{catalogoGeneralBean.limpiar(event)}"
+                                                         onclick="createDialog.show();"
+                                                         styleClass="style_botones"/>
+                                    </h:panelGrid>
+                                </div>
+                                <div align="center">
+                                    <p:panelGrid columns="1">
+                                        <f:facet name="header">
+                                            <div align="center">
+                                                <p:outputLabel value="#{catalogoGeneralBean.informacion}"/>    
+                                            </div>
+                                        </f:facet> 
+                                        <p:dataTable id="dataTable" var="catalogo" value="#{catalogoGeneralBean.catalogos}" 
+                                                     resizableColumns="true"
+                                                     paginator="true" rows="12" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                                     rowKey="#{catalogo.idcatgeneral}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{catalogoGeneralBean.filteredCatalogos}"
+                                                     selection="#{catalogoGeneralBean.catalogo}" selectionMode="single"
+                                                     style="margin-top: 15px;width: 1050px;font-size: 1em;"
+                                                     widgetVar="registrosTable">  
+
+                                            <p:ajax event="rowSelect" update=":formUpdate" oncomplete="updateDialog.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{catalogoGeneralBean.descargarReporte()}" oncomplete="handleLShow(args)"> 
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target="dataTable" fileName="CatalogoGeneral" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column sortBy="#{catalogo.columna}" filterBy="#{catalogo.columna}" 
+                                                      filterMatchMode="contains" width="10%"
+                                                      exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Columna"/>
+                                                </f:facet>
+                                                <h:outputText value="#{catalogo.columna}"/>  
+                                            </p:column>
+
+                                            <p:column sortBy="#{catalogo.nombre}" filterBy="#{catalogo.nombre}" 
+                                                      filterMatchMode="contains" width="10%"
+                                                      exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre"/>
+                                                </f:facet>
+                                                <h:outputText value="#{catalogo.nombre}"/>  
+                                            </p:column>
+
+                                            <p:column sortBy="#{catalogo.tabla}" filterBy="#{catalogo.tabla}" 
+                                                      filterMatchMode="contains" width="10%"
+                                                      exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Tabla"/>
+                                                </f:facet>
+                                                <h:outputText value="#{catalogo.tabla}"/>  
+                                            </p:column>
+
+                                            <p:column sortBy="#{catalogo.valor}" filterBy="#{catalogo.valor}" 
+                                                      filterMatchMode="contains" width="10%"
+                                                      exportable="true">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Valor"/>
+                                                </f:facet>
+                                                <h:outputText value="#{catalogo.valor}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </div>
+                            </p:fieldset>
+                        </h:panelGrid>
+                    </h:form>
+                </div>
+                <!--FORM CREATE-->
+                <h:form id="formCreate">
+                    <p:dialog header="Alta Catálogo" 
+                              widgetVar="createDialog" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Columna: *"/>
+                            <p:inputText id="idColumna" value="#{catalogoGeneralBean.catalogo.columna}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorColumna}"/>
+                            <p:message for="idColumna" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{catalogoGeneralBean.catalogo.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                            <p:message for="idNombre" display="icon"/>
+
+                            <p:outputLabel value="Tabla: *"/>
+                            <p:inputText id="idTabla" value="#{catalogoGeneralBean.catalogo.tabla}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorTabla}"/>
+                            <p:message for="idTabla" display="icon"/>
+
+                            <p:outputLabel value="Valor: *"/>
+                            <p:inputText id="idValor" value="#{catalogoGeneralBean.catalogo.valor}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorValor}"/>
+                            <p:message for="idValor" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{catalogoGeneralBean.create(event)}"
+                                                 update=":form:display ,:formCreate:display, :msgs"
+                                                 oncomplete="handleCreate(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="createDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM UPDATE-->
+                <h:form id="formUpdate">
+                    <p:dialog header="Editar Catálogo" 
+                              widgetVar="updateDialog" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3">
+                            <p:outputLabel value="Columna: *"/>
+                            <p:inputText id="idColumna" value="#{catalogoGeneralBean.catalogo.columna}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorColumna}"/>
+                            <p:message for="idColumna" display="icon"/>
+
+                            <p:outputLabel value="Nombre: *"/>
+                            <p:inputText id="idNombre" value="#{catalogoGeneralBean.catalogo.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombre}"/>
+                            <p:message for="idNombre" display="icon"/>
+
+                            <p:outputLabel value="Tabla: *"/>
+                            <p:inputText id="idTabla" value="#{catalogoGeneralBean.catalogo.tabla}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorTabla}"/>
+                            <p:message for="idTabla" display="icon"/>
+
+                            <p:outputLabel value="Valor: *"/>
+                            <p:inputText id="idValor" value="#{catalogoGeneralBean.catalogo.valor}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorValor}"/>
+                            <p:message for="idValor" display="icon"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{catalogoGeneralBean.edit(event)}"
+                                                 update=":form:display ,:formCreate:display, :msgs"
+                                                 oncomplete="handleUpdate(args)"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones" immediate="true"
+                                                 onclick="updateDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <!--FORM SEARCH-->
+                <h:form id="formSearch">
+                    <p:dialog header="Consultar Catálogo(s)" 
+                              widgetVar="searchDialog" resizable="false" id="searchDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2">
+                            <p:outputLabel value="Columna:"/>
+                            <p:inputText value="#{catalogoGeneralBean.catalogo.columna}"/>
+
+                            <p:outputLabel value="Nombre:"/>
+                            <p:inputText value="#{catalogoGeneralBean.catalogo.nombre}"/>
+
+                            <p:outputLabel value="Tabla:"/>
+                            <p:inputText  value="#{catalogoGeneralBean.catalogo.tabla}"/>
+
+                            <p:outputLabel value="Valor:"/>
+                            <p:inputText value="#{catalogoGeneralBean.catalogo.valor}"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                 title="Aceptar" value="Aceptar"
+                                                 actionListener="#{catalogoGeneralBean.consultar(event)}"
+                                                 styleClass="style_botones"
+                                                 update=":form:display"
+                                                 onclick="searchDialog.hide();"/>
+                                <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar"
+                                                 styleClass="style_botones"
+                                                 onclick="searchDialog.hide();"/>
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog>
+                </h:form>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
