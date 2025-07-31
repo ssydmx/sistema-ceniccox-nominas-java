@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="6">
+                            <p:selectOneMenu id="idSecuencia" style="width: 100px" required="true" requiredMessage="Favor de Seleccionar Secuencia"
+                                             filter="true" filterMatchMode="contains" value="#{altacuentabancariaBean.secuencia}">  
+                                <f:selectItems value="#{appBean.comboSecuencia}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idSecuencia" display="tooltip"/>
+                            <p:inputMask id="idFechaAlta" value="#{altacuentabancariaBean.fechaalta}" mask="99/99/9999"
+                                         title="Fecha de Alta" placeholder="Fecha de Alta*"/>
+                            <p:selectOneMenu id="idBanco" style="width: 150px" value="#{altacuentabancariaBean.selectedBanco}"
+                                             filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorBanco}">  
+                                <f:selectItem itemValue="" itemLabel="Banco"/>
+                                <f:selectItems value="#{altacuentabancariaBean.bancos}"
+                                               var="banco" itemValue="#{banco.idbanco}" itemLabel="#{banco.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:selectOneMenu id="compania" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{altacuentabancariaBean.nombreCompania}"
+                                             required="true" requiredMessage="Favor de seleccionar companía">  
+                                <f:selectItem itemValue="" itemLabel="Compañía"/>
+                                <f:selectItems value="#{companiasBean.companias}"
+                                               var="compania" itemValue="#{compania.nombre}" itemLabel="#{compania.nombre}"/>  
+                            </p:selectOneMenu>  
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                         styleClass="style_botones"
+                                         actionListener="#{altacuentabancariaBean.consultar(event)}"
+                                         update=":form, :msgs" onclick="statusDialog.show();"/> 
+                        </h:panelGrid> 
+                    </div>
+                    <p:fieldset legend="Altas Cuentas Bancarias Banamex - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{altacuentabancariaBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="cuenta"
+                                                 value="#{altacuentabancariaBean.cuentas}"
+                                                 filteredValue="#{altacuentabancariaBean.filteredvista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{altacuentabancariaBean.selectedvista}"
+                                                 rowKey="#{cuenta.idcuenta}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf" >  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="AltaCuentas" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" selectionMode="multiple" style="text-align:center"/>
+
+                                        <p:column width="7%" filterMatchMode="contains" exportable="true" style="text-align:center"
+                                                  filterBy="#{cuenta.numeroempleado}"  sortBy="#{cuenta.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{cuenta.apaterno} #{cuenta.amaterno} #{cuenta.nombre}"  sortBy="#{cuenta.apaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.apaterno} #{cuenta.amaterno} #{cuenta.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.rfc}"  sortBy="#{cuenta.rfc}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C." title="R.F.C."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.rfc}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.nombrebancoempleado}"  sortBy="#{cuenta.nombrebancoempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Banco" title="Banco del Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.nombrebancoempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.clabeempleado}"  sortBy="#{cuenta.clabeempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Clabe" title="Clabe"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.clabeempleado}"/>
+                                            <f:facet name="footer">
+                                                <p:outputLabel value="Total:"/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{cuenta.nombrebancoempleado}"  sortBy="#{cuenta.nombrebancoempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Cuenta" title="Cuenta"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{cuenta.cuentaempleado}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+
+
+                                            <p:commandButton value="Descargar Archivo Altas" title="Descargar Archivo de Altas" icon="icon-down"
+                                                             actionListener="#{altacuentabancariaBean.listenerSelected()}"
+                                                             oncomplete="handleLShow(args)" styleClass="style_botones" 
+                                                             onclick="statusDialog.show();"/> 
+
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
