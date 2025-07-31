@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <style>
+        body {
+            overflow: hidden; /* Hide scrollbars */
+        }
+    </style>
+    <body>
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <div align="center">
+                        <h:panelGrid columns="6">
+                            <p:selectOneMenu id="idSecuencia" style="width: 100px" required="true" requiredMessage="Favor de Seleccionar Secuencia"
+                                             filter="true" filterMatchMode="contains" value="#{altacuentabancariabanorteBean.selectedSecuencia}">  
+                                <f:selectItems value="#{appBean.comboSecuencia}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idSecuencia" display="tooltip"/>
+
+                            <p:inputMask id="idFechaInicioAlta" value="#{altacuentabancariabanorteBean.fechaInicioAlta}" mask="99/99/9999" title="Fecha Inicio de Alta" placeholder="Fecha Inicio de Alta*"/>
+                            <p:inputMask id="idFechaFinAlta" value="#{altacuentabancariabanorteBean.fechaFinAlta}" mask="99/99/9999" title="Fecha Fin de Alta" placeholder="Fecha Fin de Alta*"/>
+
+                            <p:selectOneMenu id="idBanco" style="width: 150px" value="#{altacuentabancariabanorteBean.selectedBanco}"
+                                             filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorBanco}">  
+                                <f:selectItem itemValue="" itemLabel="Banco"/>
+                                <f:selectItems value="#{altacuentabancariabanorteBean.bancos}"
+                                               var="banco" itemValue="#{banco.idbanco}" itemLabel="#{banco.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{altacuentabancariabanorteBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+                        </h:panelGrid> 
+                    </div>
+                    <p:fieldset legend="Altas Cuentas Bancarias Banorte - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{altacuentabancariaBean.informacion}" style="color: white;"/>     
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="empleado" value="#{altacuentabancariabanorteBean.empleados}"
+                                                 filteredValue="#{altacuentabancariabanorteBean.filteredvista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 paginator="true" rows="50" rowsPerPageTemplate="50,100,200,300" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                              emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                              widgetVar="registrosTable"
+                                                              selection="#{altacuentabancariabanorteBean.selectedvista}"
+                                                              rowKey="#{empleado.idEmpleado}">
+
+                                                     <f:facet name="header">
+                                                         <p:outputPanel>  
+                                                             <h:outputText value="Buscador:" />  
+                                                             <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                                 <div class="datableImagenes" id="pdf">
+                                                                     <p:commandLink id="pdf" >  
+                                                                         <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                                     </p:commandLink>
+                                                                 </div>
+                                                                 <div class="datableImagenes" id="csv">
+                                                                     <h:commandLink id="csv">  
+                                                                         <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                         <p:dataExporter type="csv" target="dataTable" fileName="AltaCuentas" />  
+                                                                     </h:commandLink>
+                                                                 </div>
+                                                             </p:outputPanel>
+                                                         </f:facet>
+
+                                        <!--<p:ajax event="page" listener="#{altacuentabancariabanorteBean.updateSelected()}" />-->
+                                                         <p:column width="10%" selectionMode="multiple" style="text-align:center"/>
+
+                                                         <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.numeroEmpleado}"  sortBy="#{empleado.numeroEmpleado}">
+                                                             <f:facet name="header">
+                                                                 <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                                             </f:facet>
+                                                             <p:outputLabel value="#{empleado.numeroEmpleado}"/>
+                                                         </p:column>
+
+                                                         <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.nombreCorto}"  sortBy="#{empleado.nombreCorto}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Nombre Empleado" title="Nombre Empleado"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.nombreCorto}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align: center" filterBy="#{empleado.fechaNacimiento}" sortBy="#{empleado.fechaNacimiento}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Fecha Nacimiento" title="Fecha Nacimiento"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.fechaNacimiento.toGregorianCalendar().time}">
+                                                         <f:convertDateTime type="" pattern="dd/MM/yyyy" />
+                                                     </p:outputLabel>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.codigoPostal}"  sortBy="#{empleado.codigoPostal}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Codigo Postal" title="Codigo Postal"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.codigoPostal}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.numeroTelefono}"  sortBy="#{empleado.numeroTelefono}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Numero Telefono" title="Numero Telefono"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.numeroTelefono}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.sexo}"  sortBy="#{empleado.sexo}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Sexo" title="Sexo"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.sexo}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.estadoCivil}"  sortBy="#{empleado.estadoCivil}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Estado Civil" title="Estado Civil"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.estadoCivil}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.rfc}"  sortBy="#{empleado.rfc}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="RFC" title="RFC"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.rfc}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.curp}"  sortBy="#{empleado.curp}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="CURP" title="CURP"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.curp}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.nombreBancoEmpleado}"  sortBy="#{empleado.nombreBancoEmpleado}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Banco Empleado" title="Banco Empleado"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.nombreBancoEmpleado}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.numeroCuenta}"  sortBy="#{empleado.numeroCuenta}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Cuenta" title="Cuenta"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.numeroCuenta}"/>
+                                                 </p:column>
+
+                                                 <p:column width="10%" filterMatchMode="contains" exportable="true" style="text-align:center" filterBy="#{empleado.sueldo}"  sortBy="#{empleado.sueldo}">
+                                                     <f:facet name="header">
+                                                         <h:outputText value="Sueldo" title="Sueldo"/>
+                                                     </f:facet>
+                                                     <p:outputLabel value="#{empleado.sueldo}"/>
+                                                 </p:column>
+
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Archivo Altas" title="Descargar Archivo de Altas" icon="icon-down"
+                                                             actionListener="#{altacuentabancariabanorteBean.generarLayoutBanorte()}"
+                                                             oncomplete="handleLShow(args)" styleClass="style_botones" update=":msgs, :form"
+                                                             onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <h:form id="formEmpladosBanorteError">
+                    <p:dialog id="comodinesDlg" 
+                              header="Empleados Banorte Error" 
+                              widgetVar="EmpladosBanorteErrorDialog" 
+                              resizable="false"  
+                              showEffect="fade" 
+                              hideEffect="explode" 
+                              appendTo="@(body)"
+                              modal="true"
+                              height="300px">  
+
+                        <h:panelGrid id="display">
+                            <p:dataTable id="dataTableEmpladosBanorteError" 
+                                         var="res" 
+                                         value="#{altacuentabancariabanorteBean.numerosEmpleadosError}"
+                                         emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                         widgetVar="respuestaTable"
+                                         resizableColumns="true"
+                                         style="font-size: .8em; width: 720px !important">
+
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <div class="datableImagenes" id="csv">
+                                            <h:commandLink id="csv">  
+                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                <p:dataExporter type="csv" target="dataTableEmpladosBanorteError" fileName="EmpladosBanorteError" />  
+                                            </h:commandLink>
+                                        </div>
+                                    </p:outputPanel>
+                                </f:facet>
+
+                                <p:column sortBy="#{res.numeroEmpleado}" exportable="true">
+                                    <f:facet name="header">
+                                        <p:outputLabel value="No. Empleado"/>
+                                    </f:facet>
+                                    <p:outputLabel value="#{res.numeroEmpleado}"/> 
+                                </p:column>
+
+                                <p:column sortBy="#{res.nombreCorto}" exportable="true">
+                                    <f:facet name="header">
+                                        <p:outputLabel value="Nombre Empleado"/>
+                                    </f:facet>
+                                    <p:outputLabel value="#{res.nombreCorto}"/> 
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGrid>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Cancelar" icon="icon-cancel"
+                                             onclick="EmpladosBanorteErrorDialog.hide();"
+                                             styleClass="style_botones"/> 
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
