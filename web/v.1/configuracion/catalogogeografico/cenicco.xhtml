@@ -1,0 +1,792 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <div align="left">
+                    <h:panelGrid columns="2" style="width: 97.5%">
+                        <h:panelGrid columns="1" style="width: 50%">
+                            <p:fieldset legend="Paises - #{appBean.compania.nombre}" 
+                                        styleClass="bg_color" toggleable="true" collapsed="false">
+                                <div align="right">
+                                    <h:form>
+                                        <h:panelGrid columns="1">
+                                            <p:commandButton id="btnCreatePais" icon="icon-add"
+                                                             actionListener="#{paisBean.limpiar(event)}"
+                                                             update=":formCreatePais:display"
+                                                             title="Alta" value="Alta"
+                                                             onclick="createDialogPais.show();"
+                                                             styleClass="style_botones"/>
+                                        </h:panelGrid>
+                                    </h:form>    
+                                </div>
+                                <h:form id="formPaises">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <div align="center">
+                                                <p:outputLabel value="#{paisBean.informacion}"/>    
+                                            </div>
+                                        </f:facet>
+                                        <p:dataTable id="dataTablePais" var="pais" value="#{paisBean.paises}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     rowKey="#{pais.idpais}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{paisBean.filteredPaises}"
+                                                     selection="#{paisBean.pais}"
+                                                     scrollable="true" scrollHeight="170"
+                                                     widgetVar="registrosTablePais" selectionMode="single">
+
+                                            <p:ajax event="rowSelect" update=":formUpdatePais:display" oncomplete="updateDialogPais.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTablePais.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{paisBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formPaises:dataTablePais" fileName="paises" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+                                            <p:column width="150px" exportable="true" filterBy="#{pais.nombre}"
+                                                      sortBy="#{pais.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre"/>
+                                                </f:facet>
+                                                <h:outputText value="#{pais.nombre}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:fieldset> 
+                            <p:fieldset legend="Estados - #{appBean.compania.nombre}" styleClass="bg_color"
+                                        toggleable="true" collapsed="false">
+                                <div align="right">
+                                    <h:form>
+                                        <h:panelGrid columns="2">
+                                            <p:commandButton id="btnSearchEstado" icon="icon-search" 
+                                                             title="Consultar" value="Consultar"
+                                                             update=":formSearchEstado:display"
+                                                             onclick="searchDialogEstado.show();"
+                                                             actionListener="#{estadoBean.limpiar(event)}"
+                                                             styleClass="style_botones"/>
+                                            <p:commandButton id="btnCreateEstado" icon="icon-add"
+                                                             actionListener="#{estadoBean.limpiar(event)}"
+                                                             update=":formCreateEstado:display"
+                                                             title="Alta" value="Alta"
+                                                             onclick="createDialogEstado.show();"
+                                                             styleClass="style_botones"/>
+                                        </h:panelGrid>
+                                    </h:form>
+                                </div>
+                                <h:form id="formEstados">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <div align="center">
+                                                <p:outputLabel value="#{estadoBean.informacion}"/>    
+                                            </div>
+                                        </f:facet>
+                                        <p:dataTable id="dataTableEstado" var="estado" value="#{estadoBean.estados}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     rowKey="#{estado.idestado}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{estadoBean.filteredEstados}"
+                                                     selection="#{estadoBean.estado}"
+                                                     scrollable="true" scrollHeight="180"
+                                                     widgetVar="registrosTableEstado" selectionMode="single">
+
+                                            <p:ajax event="rowSelect" update=":formUpdateEstados:display" oncomplete="updateDialogEstado.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableEstado.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{estadoBean.descargarReporte()}" oncomplete="handleLShow(args)"> 
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formEstados:dataTableEstado" fileName="estados" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+                                            <p:column filterMatchMode="contains" width="120" exportable="true"
+                                                      sortBy="#{estado.idpais.nombre}" filterBy="#{estado.idpais.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Pais"/>
+                                                </f:facet>
+                                                <h:outputText value="#{estado.idpais.nombre}"/>  
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" width="120" exportable="true"
+                                                      sortBy="#{estado.nombre}" filterBy="#{estado.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Estado"/>
+                                                </f:facet>
+                                                <h:outputText value="#{estado.nombre}"/>  
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" width="120" exportable="true"
+                                                      sortBy="#{estado.impuesto}" filterBy="#{estado.impuesto}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Impuesto"/>
+                                                </f:facet>
+                                                <h:outputText value="#{estado.impuesto}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:fieldset>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="width: 50%">
+                            <p:fieldset legend="Municipios - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true" collapsed="false">
+                                <div align="right">
+                                    <h:form>
+                                        <h:panelGrid columns="2">
+                                            <p:commandButton id="formSearchMunicipio" icon="icon-search"
+                                                             title="Consulta" value="Consulta"
+                                                             actionListener="#{municipioBean.limpiar(event)}"
+                                                             update=":formSearchMunicipio:display"
+                                                             onclick="searchDialogMunicipio.show();"
+                                                             styleClass="style_botones"/>
+                                            <p:commandButton id="btnCreateMunicipio" icon="icon-add"
+                                                             actionListener="#{municipioBean.limpiar(event)}"
+                                                             update=":formCreateMunicipio:display"
+                                                             title="Alta" value="Alta"
+                                                             onclick="createDialogMunicipio.show();"
+                                                             styleClass="style_botones"/>
+                                        </h:panelGrid>
+                                    </h:form>    
+                                </div>
+                                <h:form id="formMunicipios">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <div align="center">
+                                                <p:outputLabel value="#{municipioBean.informacion}"/>    
+                                            </div>
+                                        </f:facet>
+                                        <p:dataTable id="dataTableMunicipio" var="municipio" value="#{municipioBean.municipios}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     rowKey="#{municipio.idmunicipio}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{municipioBean.filteredMunicipios}"
+                                                     selection="#{municipioBean.municipio}"
+                                                     scrollable="true" scrollHeight="180"
+                                                     widgetVar="registrosTableMunicipio" selectionMode="single">
+
+                                            <p:ajax event="rowSelect" update=":formUpdateMunicipios:display" oncomplete="updateDialogMunicipio.show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableMunicipio.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{municipioBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formMunicipios:dataTableMunicipio" fileName="municipio" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column filterMatchMode="contains" width="150" exportable="true"
+                                                      sortBy="#{municipio.idestado.idpais.nombre}" filterBy="#{municipio.idestado.idpais.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Pais"/>
+                                                </f:facet>
+                                                <h:outputText value="#{municipio.idestado.idpais.nombre}"/>  
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" width="150" exportable="true"
+                                                      sortBy="#{municipio.idestado.nombre}" filterBy="#{municipio.idestado.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Estado"/>
+                                                </f:facet>
+                                                <h:outputText value="#{municipio.idestado.nombre}"/>  
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" width="150" exportable="true"
+                                                      sortBy="#{municipio.nombre}" filterBy="#{municipio.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Municipio"/>
+                                                </f:facet>
+                                                <h:outputText value="#{municipio.nombre}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:fieldset>
+                            <p:fieldset legend="Ciudades - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true" collapsed="false">
+                                <div align="right">
+                                    <h:form>
+                                        <h:panelGrid columns="2">
+                                            <p:commandButton id="formSearchCiudad" icon="icon-search"
+                                                             title="Consulta" value="Consulta"
+                                                             actionListener="#{ciudadBean.limpiar(event)}"
+                                                             update=":formSearchCiudad:display"
+                                                             onclick="searchDialogCiudad.show();"
+                                                             styleClass="style_botones"/>
+                                            <p:commandButton id="btnCreateCiudad" icon="icon-add"
+                                                             actionListener="#{ciudadBean.limpiarAlta(event)}"
+                                                             update=":formCreateCiudad:display"
+                                                             title="Alta" value="Alta"
+                                                             onclick="createDialogCiudad.show();"
+                                                             styleClass="style_botones"/>
+                                        </h:panelGrid>
+                                    </h:form>    
+                                </div>
+                                <h:form id="formCiudades">
+                                    <p:panelGrid id="display" columns="1">
+                                        <f:facet name="header">
+                                            <div align="center">
+                                                <p:outputLabel value="#{ciudadBean.informacion}"/>    
+                                            </div>
+                                        </f:facet>
+                                        <p:dataTable id="dataTableCiudad" var="ciudad" value="#{ciudadBean.ciudades}" 
+                                                     resizableColumns="true" style="font-size: 1em"
+                                                     rowKey="#{ciudad.idciudad}"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}"
+                                                     filteredValue="#{ciudadBean.filteredCiudades}"
+                                                     selection="#{ciudadBean.ciudad}"
+                                                     scrollable="true" scrollHeight="180"
+                                                     widgetVar="registrosTableCiudad" selectionMode="single">
+
+                                            <p:ajax event="rowSelect" update=":formUpdateCiudades:display" oncomplete="updateDialogCiudad .show()"/>
+
+                                            <f:facet name="header">  
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTableCiudad.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+
+                                                    <div class="datableImagenes" id="pdf">
+                                                        <p:commandLink id="pdf" actionListener="#{ciudadBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                            <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                        </p:commandLink>
+                                                    </div>
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target=":formCiudades:dataTableCiudad" fileName="ciudad" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column filterMatchMode="contains" width="107" exportable="true"
+                                                      sortBy="#{ciudad.idmunicipio.idestado.idpais.nombre}" filterBy="#{ciudad.idmunicipio.idestado.idpais.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Pais"/>
+                                                </f:facet>
+                                                <h:outputText value="#{ciudad.idmunicipio.idestado.idpais.nombre}"/>  
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" width="107" exportable="true"
+                                                      sortBy="#{ciudad.idmunicipio.idestado.nombre}" filterBy="#{ciudad.idmunicipio.idestado.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Estado"/>
+                                                </f:facet>
+                                                <h:outputText value="#{ciudad.idmunicipio.idestado.nombre}"/>  
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" width="107" exportable="true"
+                                                      sortBy="#{ciudad.idmunicipio.nombre}" filterBy="#{ciudad.idmunicipio.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Municipio"/>
+                                                </f:facet>
+                                                <h:outputText value="#{ciudad.idmunicipio.nombre}"/>  
+                                            </p:column>
+                                            <p:column filterMatchMode="contains" width="107" exportable="true"
+                                                      sortBy="#{ciudad.nombre}" filterBy="#{ciudad.nombre}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Ciudad"/>
+                                                </f:facet>
+                                                <h:outputText value="#{ciudad.nombre}"/>  
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:fieldset>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                    <!--DIALOGO CREATE PAISES-->
+                    <h:form id="formCreatePais">
+                        <p:dialog header="Alta Pais" 
+                                  widgetVar="createDialogPais" resizable="false" id="createDlgPais"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Nombre: *"/>
+                                <p:inputText id="idNombrePais" value="#{paisBean.pais.nombre}"
+                                             required="true"
+                                             requiredMessage="#{appBean.mensajeErrorNombrePais}"/>
+                                <p:message for="idNombrePais" display="icon"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{paisBean.create(event)}"
+                                                     update=":formPaises:display ,:formCreatePais:display, :msgs"
+                                                     oncomplete="handleCreatePais(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="createDialogPais.hide();"/>
+                                </f:facet>
+
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <!--DIALOGO CREATE ESTADOS-->
+                    <h:form id="formCreateEstado">
+                        <p:dialog header="Alta Estado" 
+                                  widgetVar="createDialogEstado" resizable="false" id="createDlgEstado"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="3">
+
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{estadoBean.estado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais"
+                                                   itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+
+                                <p:outputLabel value="Estado: *"/>
+                                <p:inputText id="idNombre" value="#{estadoBean.estado.nombre}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}"/>
+                                <p:message for="idNombre" display="icon"/>
+
+                                <p:outputLabel value="Impuesto: *"/>
+                                <p:inputText id="idImpuesto" value="#{estadoBean.estado.impuesto}"
+                                             required="true" requiredMessage="Favor de Ingresar el Impuesto"/>
+                                <p:message for="idImpuesto" display="icon"/>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{estadoBean.create(event)}"
+                                                     update=":formEstados:display ,:formCreateEstado:display, :msgs"
+                                                     oncomplete="handleCreateEstado(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="createDialogEstado.hide();"/>
+                                </f:facet>
+
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <!--FORM CREATE MUNICIPIOS-->
+                    <h:form id="formCreateMunicipio">
+                        <p:dialog header="Alta Municipio" 
+                                  widgetVar="createDialogMunicipio" resizable="false" id="createDlgMunicipio"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{municipioBean.municipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}"
+                                                 valueChangeListener="#{municipioBean.consultarEstados}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+
+                                <p:outputLabel value="Estado: *"/>
+                                <p:selectOneMenu id="idEstado" value="#{municipioBean.municipio.idestado.idestado}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idEstado" display="icon"/>
+                                <p:outputLabel value="Municipio: *"/>
+                                <p:inputText id="idMunicipio" value="#{municipioBean.municipio.nombre}"
+                                             required="true"
+                                             requiredMessage="#{appBean.mensajeErrorNombreMunicipio}"/>
+                                <p:message for="idMunicipio" display="icon"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{municipioBean.create(event)}"
+                                                     update=":formMunicipios:display ,:formCreateMunicipio:display, :msgs"
+                                                     oncomplete="handleCreateMunicipio(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="createDialogMunicipio.hide();"/>
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <!--FORM CREATE CIUDADES-->
+                    <h:form id="formCreateCiudad">
+                        <p:dialog header="Alta Ciudad" 
+                                  widgetVar="createDialogCiudad" resizable="false" id="createDlgCiudad"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="3">
+
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{ciudadBean.ciudad.idmunicipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}"
+                                                 valueChangeListener="#{ciudadBean.consultarEstados}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado, idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+
+                                <p:outputLabel value="Estado: *"/>
+                                <p:selectOneMenu id="idEstado" value="#{ciudadBean.ciudad.idmunicipio.idestado.idestado}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}"
+                                                 valueChangeListener="#{ciudadBean.consultarMunicipios}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idEstado" display="icon"/>
+
+                                <p:outputLabel value="Municipio: *"/>
+                                <p:selectOneMenu id="idMunicipio" value="#{ciudadBean.ciudad.idmunicipio.idmunicipio}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreMunicipio}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{municipioBean.municpiosByIdEstado}" var="municipioCiudad"
+                                                   itemValue="#{municipioCiudad.idmunicipio}" itemLabel="#{municipioCiudad.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idMunicipio" display="icon"/>
+
+                                <p:outputLabel value="Ciudad: *"/>
+                                <p:inputText id="idCiudad" value="#{ciudadBean.ciudad.nombre}"
+                                             required="true"
+                                             requiredMessage="#{appBean.mensajeErrorNombreCiudad}"/>
+                                <p:message for="idCiudad" display="icon"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{ciudadBean.create(event)}"
+                                                     update=":formCiudades:display ,:formCreateCiudad:display, :msgs"
+                                                     oncomplete="handleCreateCiudad(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="createDialogCiudad.hide();"/>
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <!--DIALOGO UPDATE PAISES-->
+                    <h:form id="formUpdatePais">
+                        <p:dialog header="Editar País" 
+                                  widgetVar="updateDialogPais" resizable="false" id="updateDlg"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">  
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Nombre: *"/>
+                                <p:inputText id="idNombre" value="#{paisBean.pais.nombre}"
+                                             required="true"
+                                             requiredMessage="#{appBean.mensajeErrorNombrePais}"/>
+                                <p:message for="idNombre" display="icon"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{paisBean.edit(event)}"
+                                                     update=":formPaises:display ,:formUpdatePais:display, :msgs"
+                                                     oncomplete="handleUpdatePais(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="updateDialogPais.hide();"/>
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form> 
+                    <!--DIALOGO UPDATE ESTADOS-->
+                    <h:form id="formUpdateEstados">
+                        <p:dialog header="Editar Estado" 
+                                  widgetVar="updateDialogEstado" resizable="false" id="updateDlgEstado"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{estadoBean.estado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+
+                                <p:outputLabel value="Estado: *"/>
+                                <p:inputText id="idNombre" value="#{estadoBean.estado.nombre}" 
+                                             required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}"/>
+                                <p:message for="idNombre" display="icon"/>
+
+                                <p:outputLabel value="Impuesto: *"/>
+                                <p:inputText id="idImpuesto" value="#{estadoBean.estado.impuesto}"
+                                             required="true" requiredMessage="Favor de Ingresar el Impuesto"/>
+                                <p:message for="idImpuesto" display="icon"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{estadoBean.edit(event)}"
+                                                     update=":formEstados:display ,:formUpdateEstados:display, :msgs"
+                                                     oncomplete="handleUpdateEstado(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="updateDialogEstado.hide();"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </p:dialog>
+                    </h:form>
+                    <!--DIALOGO UPDATE MUNICIPIOS-->
+                    <h:form id="formUpdateMunicipios">
+                        <p:dialog header="Editar Municipio" 
+                                  widgetVar="updateDialogMunicipio" resizable="false" id="updateDlgMunicipio"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{municipioBean.municipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}"
+                                                 valueChangeListener="#{municipioBean.consultarEstados(event)}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+                                <p:outputLabel value="Estado: *"/>
+                                <p:selectOneMenu id="idEstado" value="#{municipioBean.municipio.idestado.idestado}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idEstado" display="icon"/>
+                                <p:outputLabel value="Municipio: *"/>
+                                <p:inputText id="idNombre" value="#{municipioBean.municipio.nombre}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorNombreMunicipio}"/>
+                                <p:message for="idNombre" display="icon"/>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{municipioBean.edit(event)}"
+                                                     update=":formMunicipios:display ,:formUpdateMunicipios:display, :msgs"
+                                                     oncomplete="handleUpdateMunicipio(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="updateDialogMunicipio.hide();"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </p:dialog>
+                    </h:form>
+                    <!--DIALOGO UPDATE CIUDADES-->
+                    <h:form id="formUpdateCiudades">
+                        <p:dialog header="Editar Ciudad" 
+                                  widgetVar="updateDialogCiudad" resizable="false" id="updateDlgCiudad"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">
+                            <h:panelGrid id="display" columns="3">
+                                <p:outputLabel value="Pais: *"/>
+                                <p:selectOneMenu id="idPais" value="#{ciudadBean.ciudad.idmunicipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombrePais}"
+                                                 valueChangeListener="#{ciudadBean.consultarEstados}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado, idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idPais" display="icon"/>
+                                <p:outputLabel value="Estado: *"/>
+                                <p:selectOneMenu id="idEstado" value="#{ciudadBean.ciudad.idmunicipio.idestado.idestado}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreEstado}"
+                                                 valueChangeListener="#{ciudadBean.consultarMunicipios}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idEstado" display="icon"/>
+
+                                <p:outputLabel value="Municipio: *"/>
+                                <p:selectOneMenu id="idMunicipio" value="#{ciudadBean.ciudad.idmunicipio.idmunicipio}" style="width: 180px" filter="true"
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorNombreMunicipio}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{municipioBean.municpiosByIdEstado}" var="municipioCiudad"
+                                                   itemValue="#{municipioCiudad.idmunicipio}" itemLabel="#{municipioCiudad.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:message for="idMunicipio" display="icon"/>
+
+                                <p:outputLabel value="Ciudad: *"/>
+                                <p:inputText id="idNombre" value="#{ciudadBean.ciudad.nombre}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorNombreCiudad}"/>
+                                <p:message for="idNombre" display="icon"/>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{ciudadBean.edit(event)}"
+                                                     update=":formCiudades:display ,:formUpdateCiudades:display, :msgs"
+                                                     oncomplete="handleUpdateCiudad(args)"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="updateDialogCiudad.hide();"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </p:dialog>
+                    </h:form>
+                    <!--DIALOGO SEARCH ESTADOS-->
+                    <h:form id="formSearchEstado">
+                        <p:dialog header="Consultar Estado(s)"
+                                  widgetVar="searchDialogEstado" resizable="false" id="searchDlgEstado"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true">
+                            <h:panelGrid id="display" columns="2">
+                                <p:outputLabel value="Pais: "/>
+                                <p:selectOneMenu value="#{estadoBean.estado.idpais.idpais}" style="width: 180px" filter="true">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                </p:selectOneMenu> 
+
+                                <p:outputLabel value="Estado: "/>
+                                <p:inputText value="#{estadoBean.estado.nombre}"/>
+
+                                <p:outputLabel value="Impuesto: "/>
+                                <p:inputText value="#{estadoBean.estado.impuesto}"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{estadoBean.consultar(event)}"
+                                                     update=":formEstados:display"
+                                                     onclick="searchDialogEstado.hide();"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="searchDialogEstado.hide();"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </p:dialog>
+                    </h:form>
+                    <!--FORM SEARCH MUNICIPIOS-->
+                    <h:form id="formSearchMunicipio">
+                        <p:dialog header="Consulta Municipio(s)"
+                                  widgetVar="searchDialogMunicipio" resizable="false" id="searchDlgMunicipio"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true"> 
+                            <h:panelGrid id="display" columns="2">
+                                <p:outputLabel value="Pais: "/>
+                                <p:selectOneMenu id="idPais" value="#{municipioBean.municipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 valueChangeListener="#{municipioBean.consultarEstados}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado"/>
+                                </p:selectOneMenu> 
+                                <p:outputLabel value="Estado: "/>
+                                <p:selectOneMenu id="idEstado" value="#{municipioBean.municipio.idestado.idestado}" style="width: 180px" filter="true">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:outputLabel value="Municipio: "/>
+                                <p:inputText value="#{municipioBean.municipio.nombre}"/>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{municipioBean.consultar(event)}"
+                                                     update=":formMunicipios:display"
+                                                     onclick="searchDialogMunicipio.hide();"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="searchDialogMunicipio.hide();"/>
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <!--FORM SEARCH CIUDADES-->
+                    <h:form id="formSearchCiudad">
+                        <p:dialog header="Consulta Ciudad(es)"
+                                  widgetVar="searchDialogCiudad" resizable="false" id="searchDlgCiudad"
+                                  styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                                  showEffect="fade" hideEffect="explode" modal="true"> 
+                            <h:panelGrid id="display" columns="2">
+                                <p:outputLabel value="Pais: "/>
+                                <p:selectOneMenu id="idPais" value="#{ciudadBean.ciudad.idmunicipio.idestado.idpais.idpais}" style="width: 180px" filter="true"
+                                                 valueChangeListener="#{ciudadBean.consultarEstados}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{paisBean.paises}" var="pais" itemValue="#{pais.idpais}" itemLabel="#{pais.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idEstado, idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:outputLabel value="Estado: "/>
+                                <p:selectOneMenu id="idEstado" value="#{ciudadBean.ciudad.idmunicipio.idestado.idestado}" style="width: 180px" filter="true"
+                                                 valueChangeListener="#{ciudadBean.consultarMunicipios}">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{estadoBean.estadoByIdPais}" var="estado" itemValue="#{estado.idestado}" itemLabel="#{estado.nombre}"/>
+                                    <p:ajax partialSubmit="true" update="idMunicipio"/>
+                                </p:selectOneMenu> 
+                                <p:outputLabel value="Municipio: "/>
+                                <p:selectOneMenu id="idMunicipio" value="#{ciudadBean.ciudad.idmunicipio.idmunicipio}" style="width: 180px" filter="true">
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{municipioBean.municpiosByIdEstado}" var="municipioCiudad"
+                                                   itemValue="#{municipioCiudad.idmunicipio}" itemLabel="#{municipioCiudad.nombre}"/>
+                                </p:selectOneMenu> 
+                                <p:outputLabel value="Ciudad:"/>
+                                <p:inputText value="#{ciudadBean.ciudad.nombre}"/>
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnAceptar" icon="icon-check" 
+                                                     title="Aceptar" value="Aceptar"
+                                                     actionListener="#{ciudadBean.consultar(event)}"
+                                                     update=":formCiudades:display"
+                                                     onclick="searchDialogCiudad.hide();"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar"
+                                                     styleClass="style_botones" immediate="true"
+                                                     onclick="searchDialogCiudad.hide();"/>
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:dialog>
+                    </h:form>
+                    <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+                </div>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
