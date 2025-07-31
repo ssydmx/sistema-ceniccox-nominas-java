@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssHexagonos.css"/>
+        <style>
+            body{
+                background-color : rgb(32,32,32);
+            }
+        </style>
+        <title>Tiempo y Asistencias</title>
+    </h:head>
+
+    <h:body>
+
+        <div id="menu" class="ui-widget ui-widget-header ui-corner-all">
+            <h:form>  
+                <div align="right">
+                    <h:panelGrid columns="4">
+                    <p:clock pattern="dd/MM/yyyy HH:mm:ss" mode="server"/>
+                    <p:selectOneMenu id="idComboModulo" value="#{urlsBean.selectedModulo}" style="width: 180px;text-align: left;" effect="fold"
+                                     valueChangeListener="#{urlsBean.cambiarURL}" filter="true" filterMatchMode="contains"> 
+                        <f:selectItems value="#{urlsBean.comboUrl}"/>
+                        <p:ajax partialSubmit="true"/>
+                    </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+                <p:menubar>  
+                    <p:submenu label="Relación Laboral">
+                        <p:menuitem value="Catálogo Empleados" url="#{appBean.basePath}empleados/catalogo/cenicco.xhtml" rendered="#{permisosBean.permisoCatalogoEmpleados}"/> 
+                    </p:submenu>
+                    <p:submenu label="Reportes">
+                        <p:menuitem value="Reporte Maestro" url="#{appBean.basePath}empleados/reportes/cenicco.xhtml" rendered="#{permisosBean.permisoReporteMaestro}"/> 
+                        <p:menuitem value="Histórico Sueldos" url="#{appBean.basePath}empleados/sueldos/cenicco.xhtml" rendered="#{permisosBean.permisoReporteMaestro}"/> 
+                        <p:menuitem value="Dependientes" url="#{appBean.basePath}empleados/reportedependientes/cenicco.xhtml" rendered="#{permisosBean.permisoReporteMaestro}"/> 
+                        <p:menuitem value="Rotación Personal" url="#{appBean.basePath}empleados/rotacionpersonal/cenicco.xhtml" rendered="#{permisosBean.permisoCatalogoEmpleados}"/> 
+                        <p:menuitem value="Interface" url="#{appBean.basePath}empleados/interface/cenicco.xhtml" rendered="#{permisosBean.permisoInterfaceJde}"/> 
+                        <p:menuitem value="Movimientos" url="#{appBean.basePath}empleados/movimientos/cenicco.xhtml" rendered="#{permisosBean.permisoCatalogoEmpleados}"/> 
+                    </p:submenu>
+                    <p:submenu label="Masivos">
+                        <p:menuitem value="Modificaciones" url="#{appBean.basePath}empleados/masivasaltas/cenicco.xhtml"/>
+                        <p:menuitem value="Altas Puestos/Departamentos" url="#{appBean.basePath}empleados/catalogo/puestodepartamento/cenicco.xhtml" rendered="#{permisosBean.permisoCatalogoPuestoDept}"/> 
+                    </p:submenu>
+
+                    <p:menuitem value="Inicio" url="#{appBean.basePath}inicio/index.xhtml" icon="ui-icon-home"/> 
+                </p:menubar>
+            </h:form>
+        </div>
+
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>
