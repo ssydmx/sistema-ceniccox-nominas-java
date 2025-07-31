@@ -1,0 +1,314 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMax}"/>
+                    <p:fieldset legend="Catálogo Empleados - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <div align="center">
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones" style="width: 300px"
+                                             actionListener="#{catalogoempleadoBean.limpiar(event)}"
+                                             onclick="searchDialog.show();
+                                                     statusDialog.show();"
+                                             update=":formSearch:display"/> 
+
+                        </div>
+                        <div style="width: 100%">
+                            <p:panelGrid id="display" style="margin-top: 5px;">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="center">
+                                                <p:outputLabel value="#{catalogoempleadoBean.informacion}"/>    
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+
+                                <f:facet name="footer">
+                                    <p:row>
+                                        <p:column>
+                                            <div align="right">
+                                                <p:commandButton id="btnDescargaContratos"
+                                                                 title="DescargarContratos" 
+                                                                 value="Descargar Contratos" icon="icon-down"
+                                                                 rendered="true" onclick="ContratosForm.show();"
+                                                                 styleClass="style_botones"/>  
+                                                <p:commandButton id="btnDescargaCredenciales"
+                                                                 title="Descargar Credenciales"
+                                                                 value="Descargar Credenciales" icon="icon-down"
+                                                                 rendered="true" onclick="statusDialog.show();" oncomplete="handleLShow(args)"
+                                                                 actionListener="#{catalogoempleadoBean.descargarCredencialesDelMonte()}"
+                                                                 styleClass="style_botones"/>
+                                            </div>
+                                        </p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column>
+                                        <p:dataTable id="dataTable" var="vista"
+                                                     value="#{catalogoempleadoBean.vistas}"
+                                                     filteredValue="#{catalogoempleadoBean.filteredVistas}"
+                                                     resizableColumns="true" scrollable="true"
+                                                     scrollHeight="300" style="font-size: .8em;"
+                                                     emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                     widgetVar="registrosTable" scrollWidth="1150"
+                                                     selection="#{catalogoempleadoBean.selectedVistas}"
+                                                     rowKey="#{vista.idrelacionlaboral}">
+
+                                            <f:facet name="header">
+                                                <p:outputPanel>  
+                                                    <h:outputText value="Buscador:" />  
+                                                    <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                    <div class="datableImagenes" id="csv">
+                                                        <h:commandLink id="csv">  
+                                                            <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                            <p:dataExporter type="csv" target="dataTable" fileName="CatalogoEmpleados" />  
+                                                        </h:commandLink>
+                                                    </div>
+                                                </p:outputPanel>
+                                            </f:facet>
+
+                                            <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                                            <p:column filterMatchMode="contains" exportable="true" width="50"
+                                                      filterBy="#{vista.numeroempleado}" sortBy="#{vista.numeroempleado}"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="No. Empleado" title="Número Empleado" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.numeroempleado}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" width="180"
+                                                      filterBy="#{vista.nombreempleado}" sortBy="#{vista.nombreempleado}"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="N. Empleado" title="Nombre Empleado" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.nombreempleado}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true"
+                                                      filterBy="#{vista.rfc}" sortBy="#{vista.rfc}" width="100"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="R.F.C." title="R.F.C." style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.rfc}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" 
+                                                      filterBy="#{vista.nss}" sortBy="#{vista.nss}" width="100"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="N.S.S." title="Número de Seguridad Social" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.nss}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" 
+                                                      filterBy="#{vista.curp}" sortBy="#{vista.curp}" width="100"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="C.U.R.P." title="C.U.R.P." style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.curp}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" width="100"
+                                                      filterBy="#{vista.grupopago} - #{vista.nombregrupopago}" sortBy="#{vista.grupopago} - #{vista.nombregrupopago}"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="G. Pago" title="Grupo Pago" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.grupopago} - #{vista.nombregrupopago}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" width="100"
+                                                      filterBy="#{vista.departamento}" sortBy="#{vista.departamento}"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Departamento" title="Departamento" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.departamento}"/>
+                                            </p:column>
+
+                                            <p:column filterMatchMode="contains" exportable="true" width="100"
+                                                      filterBy="#{vista.nombrepuesto}" sortBy="#{vista.nombrepuesto}"
+                                                      style="#{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="Puesto" title="Puesto" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.nombrepuesto}"/>
+                                            </p:column>
+
+                                            <p:column exportable="true" sortBy="#{vista.sd}" width="50"
+                                                      style=" text-align: right; #{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="S.D." title="Salario Diario" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.sd}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </p:column>
+
+                                            <p:column exportable="true" sortBy="#{vista.sdi}" width="50"
+                                                      style=" text-align: right; #{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="S.D.I." title="Salario Diario Integrado" style="color:black"/>
+                                                </f:facet>
+                                                <p:outputLabel value="#{vista.sdi}">
+                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                </p:outputLabel>
+                                            </p:column>
+
+                                            <p:column exportable="true" width="100"
+                                                      style=" text-align: right; #{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}"
+                                                      filterBy="#{vista.fechaingresoStr}" filterMatchMode="contains" sortBy="#{vista.fechaingresoStr}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="F. Ingreso" title="Fecha Ingreso" style="color:black"/>
+                                                </f:facet>
+                                                <h:outputText value="#{vista.fechaingresoStr}"/>  
+                                            </p:column>
+
+                                            <p:column exportable="true" width="100"
+                                                      style=" text-align: right; #{vista.idestatus == 0?'background-color: rgb(247,58,58);color:white': vista.idestatus==99?'background-color: rgb(221,211,0);color:rgb(20,20,20)':''}"
+                                                      filterBy="#{vista.fechabajaStr}" filterMatchMode="contains" sortBy="#{vista.fechabajaStr}">
+                                                <f:facet name="header">
+                                                    <h:outputText value="F. Baja" title="Fecha Baja" style="color:black"/>
+                                                </f:facet>
+                                                <h:outputText value="#{vista.fechabajaStr}"/>  
+                                            </p:column>
+
+                                        </p:dataTable>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </div>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formSearch">
+                    <p:dialog header="Consultar Empleado(s)" widgetVar="searchDialog" resizable="false" id="searchDlg"
+                              hideEffect="explode" showEffect="fade" closeOnEscape="true"
+                              modal="true">  
+                        <h:panelGrid id="display" columns="2" cellpadding="4" style="margin:0 auto;">  
+                            <h:outputText value="No. Empleado:" />  
+                            <p:inputText value="#{catalogoempleadoBean.vista.numeroempleado}"/>  
+
+                            <h:outputText value="R.F.C:" />  
+                            <p:inputText value="#{catalogoempleadoBean.vista.rfc}"/>  
+
+                            <h:outputText value="Grupo Pago:" />  
+                            <p:selectOneMenu value="#{catalogoempleadoBean.vista.idgrupopago}" style="width: 175px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" 
+                                               var="gp" itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>  
+                            </p:selectOneMenu>  
+
+                            <h:outputText value="Registro Patronal:" />  
+                            <p:selectOneMenu value="#{catalogoempleadoBean.vista.idregistropatronal}" style="width: 175px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{registropatronalBean.registros}" 
+                                               var="registroPatronal" itemValue="#{registroPatronal.idregistropatronal}" itemLabel="#{registroPatronal.registropatronal} - #{registroPatronal.comentarios}"/>  
+                            </p:selectOneMenu>  
+
+                            <h:outputText value="Estatus:" />
+                            <p:selectOneMenu value="#{catalogoempleadoBean.vista.idestatus}" style="width: 175px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                <f:selectItems value="#{appBean.comboEstatusEmpleado}"/>  
+                            </p:selectOneMenu>  
+
+                            <h:outputText value="Fecha Ingreso:" />  
+                            <p:calendar value="#{catalogoempleadoBean.fechaInicioAlta}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+
+                            <h:outputText value="a:" />  
+                            <p:calendar value="#{catalogoempleadoBean.fechaFinAlta}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+
+                            <h:outputText value="Fecha Baja:" />  
+                            <p:calendar value="#{catalogoempleadoBean.fechaInicioBaja}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>  
+
+                            <h:outputText value="a:" />  
+                            <p:calendar value="#{catalogoempleadoBean.fechaFinBaja}" 
+                                        showOn="button" pattern="dd/MM/yyyy"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="btnSearchAceptar" 
+                                                 icon="icon-search" title="Consultar" value="Consultar"
+                                                 actionListener="#{catalogoempleadoBean.consultar(event)}"
+                                                 update=":form:display"
+                                                 onclick="statusDialog.show();
+                                                     searchDialog.hide();"
+                                                 styleClass="style_botones"/>
+                                <p:commandButton id="btnSearchCancelar" 
+                                                 onclick="searchDialog.hide();"
+                                                 icon="icon-cancel" 
+                                                 title="Cancelar" value="Cancelar" 
+                                                 styleClass="style_botones"/>  
+                            </f:facet>
+                        </h:panelGrid> 
+                    </p:dialog> 
+                </h:form>
+
+                <h:form id="formContratos"  enctype="multipart/form-data">
+                    <p:dialog id="posicionesDlg" header="Descarga Masiva Contratos" widgetVar="ContratosForm" resizable="false"  
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="2" style="margin:0 auto;">  
+                            <p:commandButton id="btnDescargaContratosCosechador"
+                                             title="Cosechador" style="font-size: 18px;width: 250px;height: 130px; color: black;"
+                                             value="Cosechador" oncomplete="handleLShow(args)"
+                                             onclick="statusDialog.show(); ContratosForm.hide();"
+                                             actionListener="#{catalogoempleadoBean.descargaContratos('CONCENTRADO_CONTRATOS_COSECHADOR')}"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton id="btnDescargaContratosMayordomo"
+                                             title="Mayordomo" style="font-size: 18px;width: 250px;height: 130px; color: black;"
+                                             value="Mayordomo" oncomplete="handleLShow(args)"
+                                             onclick="statusDialog.show(); ContratosForm.hide();"
+                                             actionListener="#{catalogoempleadoBean.descargaContratos('CONCENTRADO_CONTRATOS_MAYORDOMO')}"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton id="btnDescargaContratosSorteador"
+                                             title="Sorteador" style="font-size: 18px;width: 250px;height: 130px; color: black;"
+                                             value="Sorteador" oncomplete="handleLShow(args)"
+                                             onclick="statusDialog.show(); ContratosForm.hide();"
+                                             actionListener="#{catalogoempleadoBean.descargaContratos('CONCENTRADO_CONTRATOS_SORTEADOR')}"
+                                             styleClass="style_botones"/> 
+                            <p:commandButton id="btnDescargaContratosOperativo"
+                                             title="Operativo" style="font-size: 18px;width: 250px;height: 130px; color: black;"
+                                             value="Operativo" oncomplete="handleLShow(args)"
+                                             onclick="statusDialog.show(); ContratosForm.hide();"
+                                             actionListener="#{catalogoempleadoBean.descargaContratos('CONCENTRADO_CONTRATOS_OPERATIVO')}"
+                                             styleClass="style_botones"/> 
+                        </h:panelGrid>
+
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
