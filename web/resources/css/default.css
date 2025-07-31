@@ -1,0 +1,79 @@
+body {
+    width: 90%;
+    background-color: #202020;
+    margin: 5px auto;
+    font-family: sans-serif;
+    font-variant: small-caps;
+    font-stretch: ultra-expanded;
+    font-size: .8em;
+}
+
+h1 {
+    border-bottom: 1px solid #AFAFAF; 
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    color: #D20005;
+}
+
+a:link, a:visited {
+    font-weight : bold;
+    text-decoration: none;
+}
+
+a:link:hover, a:visited:hover  {
+    font-weight : bold;
+    text-decoration : underline;
+}
+
+.ui-state-default .icon-add{
+    background-image: url(../images/icons/add.png);
+}
+.ui-state-default .icon-search{
+    background-image: url(../images/icons/search.png);
+}
+.ui-state-default .icon-check{
+    background-image: url(../images/icons/check.png);
+}
+.ui-state-default .icon-cancel{
+    background-image: url(../images/icons/cancel.png);
+}
+.ui-state-default .icon-save{
+    background-image: url(../images/icons/disk.png);
+}
+.ui-state-default .icon-edit{
+    background-image: url(../images/icons/edit.png);
+}
+.ui-state-default .icon-exec{
+    background-image: url(../images/icons/ejecutar.png);
+}
+.ui-state-default .icon-login{
+    background-image: url(../images/icons/user.png);
+}
+.ui-state-default .icon-key{
+    background-image: url(../images/icons/key.png);
+}
+.ui-state-default .icon-down{
+    background-image: url(../images/icons/down.png);
+}
+.ui-state-default .icon-exit{
+    background-image: url(../images/icons/exit.png);
+}
+.ui-state-default .icon-pdf{
+    background-image: url(../images/icons/pdf.png);
+}
+.ui-state-default .icon-csv{
+    background-image: url(../images/icons/csv.png);
+}
+.ui-state-default .icon-xml{
+    background-image: url(../images/icons/xml.png);
+}
+.ui-state-default .icon-authorize {
+    background-image: url(../images/icons/authorize.png);
+}
+.ui-state-default .icon-aurized {
+    background-image: url(../images/icons/aurized.png);
+}
+.ui-state-default .icon-approve {
+    background-image: url(../images/icons/approve.png);
+}
