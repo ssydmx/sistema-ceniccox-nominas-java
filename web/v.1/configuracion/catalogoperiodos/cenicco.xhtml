@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <body>
+
+        <ui:composition template="./../../../templates/templateConfiguracion.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="6">
+                            <p:selectOneMenu id="idTipoProceso" style="width: 150px" value="#{periodoBean.selectedtipoproceso}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorTipoProceso}">  
+                                <f:selectItem itemValue="" itemLabel="Tipo Proceso"/>
+                                <f:selectItems value="#{tipoprocesoBean.procesos}" var="tp" itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idTipoProceso" display="tooltip"/>
+
+
+                            <p:inputText id="idAnio" placeholder    ="Año" required="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"
+                                         value="#{periodoBean.anio}" size="10" style="text-align: center"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{periodoBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+                            <p:commandButton value="Crear" icon="icon-add" title="Crear Calendario Proceso"
+                                             styleClass="style_botones"
+                                             update=":formCreate:display" onclick="createDialog.show();"/> 
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Calendario Procesos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{periodoBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="periodo"
+                                                 value="#{periodoBean.periodos}"
+                                                 filteredValue="#{periodoBean.filteredPeriodos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{periodoBean.selectedPeriodos}"
+                                                 rowKey="#{periodo.idperiodo}"
+                                                 editable="#{permisosBean.permisoCancelarRecibos}" editMode="cell">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div style="float: right" id="csv">
+                                                    <p:commandButton value="Descargar calendario" icon="/resources/images/icons/csv_table.png"
+                                                                     actionListener="#{periodoBean.descargarCalendario(event)}" oncomplete="handleLShow(args)"/>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                                        <p:column exportable="true" sortBy="#{periodo.idperiodo}"
+                                                  filterBy="#{periodo.idperiodo}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="ID Periodo" title="ID Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.idperiodo}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.periodo}"
+                                                  filterBy="#{periodo.periodo}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.periodo}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.periodo}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaInicioStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaInicioStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Inicio" title="Fecha Inicio"/>
+                                            </f:facet>
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.fechaInicioStr}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.fechaInicioStr}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaFinStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaFinStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Fin" title="Fecha Fin"/>
+                                            </f:facet>
+                                             <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.fechaFinStr}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.fechaFinStr}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaPagoStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaPagoStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Pago" title="Fecha Pago"/>
+                                            </f:facet>
+                                             <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.fechaPagoStr}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.fechaPagoStr}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.aniomes}"
+                                                  filterBy="#{periodo.aniomes}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.aniomes}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.aniomes}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.bimestre}" style="text-align: center"
+                                                  filterBy="#{periodo.bimestre}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Bimestre" title="Bimestre"/>
+                                            </f:facet>
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.bimestre}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.bimestre}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.anio}" style="text-align: center"
+                                                  filterBy="#{periodo.anio}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Año" title="Año"/>
+                                            </f:facet>
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{periodo.anio}"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText value="#{periodo.anio}"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column sortBy="#{periodo.estatus}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="¿Cerrado?" title="¿Periodo Cerrado?"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-check" actionListener="#{periodoBean.editarEstatusPeriodo(periodo)}"
+                                                             title="Abrir periodo" onstart="statusDialog.show()" rendered="#{periodo.estatus==1}" update="dataTable, :msgs"/>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-cancel" actionListener="#{periodoBean.editarEstatusPeriodo(periodo)}"
+                                                             title="Cerrar periodo" onstart="statusDialog.show()" rendered="#{periodo.estatus==0}" update="dataTable, :msgs"/>
+                                        </p:column>
+                                        <p:column sortBy="#{periodo.valesDespensa}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="¿A. Vales?" title="¿Aplica Vales Despensa?"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-check" actionListener="#{periodoBean.editarValesPeriodo(periodo)}"
+                                                             title="Desactivar vales despensa" onstart="statusDialog.show()" rendered="#{periodo.valesDespensa==1}" update="dataTable, :msgs"/>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-cancel" actionListener="#{periodoBean.editarValesPeriodo(periodo)}"
+                                                             title="Activar vales despensa" onstart="statusDialog.show()" rendered="#{periodo.valesDespensa==0}" update="dataTable, :msgs"/>
+                                        </p:column>
+                                        <p:column sortBy="#{periodo.segDaniosVivienda}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="¿A. Seg. Vivienda?" title="¿Aplica Seguro Vivienda?"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-check" actionListener="#{periodoBean.editarSeguroViviendaPeriodo(periodo)}"
+                                                             title="Desactivar seguro vivienda" onstart="statusDialog.show()" rendered="#{periodo.segDaniosVivienda==1}" update="dataTable, :msgs"/>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-cancel" actionListener="#{periodoBean.editarSeguroViviendaPeriodo(periodo)}"
+                                                             title="Activar seguro vivienda" onstart="statusDialog.show()" rendered="#{periodo.segDaniosVivienda==0}" update="dataTable, :msgs"/>
+                                        </p:column>
+                                        <p:column sortBy="#{periodo.subsidioempleado}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="¿A. Subsidio?" title="¿Aplica Subsidio?"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-check" actionListener="#{periodoBean.editarSubsidioPeriodo(periodo)}"
+                                                             title="Desactivar subsidio" onstart="statusDialog.show()" rendered="#{periodo.subsidioempleado==1}" update="dataTable, :msgs"/>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-cancel" actionListener="#{periodoBean.editarSubsidioPeriodo(periodo)}"
+                                                             title="Activar subsidio" onstart="statusDialog.show()" rendered="#{periodo.subsidioempleado==0}" update="dataTable, :msgs"/>
+                                        </p:column>
+                                        <p:column sortBy="#{periodo.asistenciaperfecta}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="¿A. Asistencia Perfecta?" title="¿Aplica Asistencia Perfecta?"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-check" actionListener="#{periodoBean.editarAsistenciaPeriodo(periodo)}"
+                                                             title="Desactivar asistencia perfecta" onstart="statusDialog.show()" rendered="#{periodo.asistenciaperfecta==1}" update="dataTable, :msgs"/>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-cancel" actionListener="#{periodoBean.editarAsistenciaPeriodo(periodo)}"
+                                                             title="Activar asistencia perfecta" onstart="statusDialog.show()" rendered="#{periodo.asistenciaperfecta==0||periodo.asistenciaperfecta==null}" update="dataTable, :msgs"/>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Guardar" title="Guardar cambios en el periodo"/>
+                                            </f:facet>
+                                            <p:commandButton styleClass="style_botones" icon="ui icon-save" actionListener="#{periodoBean.delete(periodo)}"
+                                                             title="Guardar cambios en el periodo" onstart="statusDialog.show()" update="dataTable, :msgs"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:commandButton value="Guardar Calendario" icon="icon-save" styleClass="style_botones"
+                                                             onclick="statusDialog.show();" actionListener="#{periodoBean.listenerSelected()}"
+                                                             update="dataTable, :form, :msgs"/> 
+                                        </div>
+
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <h:form id="formCreate">
+                    <p:dialog header="Calculo Calendario Procesos" widgetVar="createDialog" resizable="false" id="createDlg"  
+                              showEffect="fade" hideEffect="explode" modal="true" closeOnEscape="true" >  
+                        <h:panelGrid id="display" columns="7" style="margin:0 auto;"> 
+                            <p:selectOneMenu id="idTipoProceso" style="width: 150px" value="#{periodoBean.selectedtipoprocesoaux}"
+                                             filter="true" filterMatchMode="contains" required="true" requiredMessage="#{appBean.mensajeErrorTipoProceso}">  
+                                <f:selectItem itemValue="" itemLabel="Tipo Proceso"/>
+                                <f:selectItems value="#{tipoprocesoBean.procesos}" var="tp" itemValue="#{tp.idtipoproceso}" itemLabel="#{tp.tipoproceso} - #{tp.nombre}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idTipoProceso" display="tooltip"/>
+
+                            <p:inputText id="idDiaInicial" value="#{periodoBean.diainicial}" placeholder="Día Inicial" size="10" style="text-align: center"
+                                         required="true" requiredMessage="Favor de Ingresar Día Inicial"/>
+                            <p:message for="idDiaInicial" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{periodoBean.anioaux}" placeholder="Año" style="text-align: center" size="10"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton value="Calcular" icon="ui-icon-play"
+                                             styleClass="style_botones"
+                                             actionListener="#{periodoBean.create(event)}"
+                                             update="displayperiodos, :msgs" onclick="statusDialog.show();"/> 
+                        </h:panelGrid> 
+                        <p:panelGrid id="displayperiodos" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{periodoBean.informacionAux}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTablePeriodos" var="periodo"
+                                                 value="#{periodoBean.periodosaux}"
+                                                 filteredValue="#{periodoBean.filteredPeriodosaux}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em;width: 1000px"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{periodo.idperiodo}">
+                                        <p:column exportable="true" sortBy="#{periodo.periodo}"
+                                                  filterBy="#{periodo.periodo}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Periodo" title="Periodo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.periodo}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaInicioStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaInicioStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Inicio" title="Fecha Inicio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.fechaInicioStr}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaFinStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaFinStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Fin" title="Fecha Fin"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.fechaFinStr}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.fechaPagoStr}" style="text-align: center"
+                                                  filterBy="#{periodo.fechaPagoStr}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Pago" title="Fecha Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.fechaPagoStr}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.aniomes}"
+                                                  filterBy="#{periodo.aniomes}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Mes" title="Mes"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.aniomes}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.bimestre}" style="text-align: center"
+                                                  filterBy="#{periodo.bimestre}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Bimestre" title="Bimestre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.bimestre}"/>
+                                        </p:column>
+                                        <p:column exportable="true" sortBy="#{periodo.anio}" style="text-align: center"
+                                                  filterBy="#{periodo.anio}" filterMatchMode="contains">
+                                            <f:facet name="header">
+                                                <h:outputText value="Año" title="Año"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{periodo.anio}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                        <f:facet name="footer">
+                            <p:commandButton value="Aceptar" icon="icon-check" oncomplete="handleCreate(args)" update=":msgs"
+                                             actionListener="#{periodoBean.edit(event)}"  onclick="statusDialog.show();"/>
+                            <p:commandButton value="Cancelar" icon="icon-cancel" onclick="createDialog.hide();"/>        
+                        </f:facet>
+                    </p:dialog> 
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
