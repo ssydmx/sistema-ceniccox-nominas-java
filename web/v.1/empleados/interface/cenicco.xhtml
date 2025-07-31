@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="4" style="margin-top: 5px">
+                            <p:selectOneMenu style="width: 150px" value="#{interfacejdeBean.selectedCompania}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Compañía"/>
+                                <f:selectItems value="#{companiasBean.companias}"
+                                               var="cia" itemValue="#{cia.clave}" itemLabel="#{cia.clave} - #{cia.nombreCorto}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu style="width: 150px" value="#{interfacejdeBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.grupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu style="width: 150px" value="#{interfacejdeBean.selectedEstatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatusJDE}"/>  
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" actionListener="#{interfacejdeBean.consultar(event)}"
+                                             update=":msgs, :form" styleClass="style_botones" icon="icon-search" onclick="statusDialog.show();"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Interface - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{interfacejdeBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="vista"
+                                                 value="#{interfacejdeBean.vista}"
+                                                 filteredValue="#{interfacejdeBean.filteredVista}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{vista.idme}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Interface" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.hmco}"  sortBy="#{vista.hmco}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Compañía" title="Compañía"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.hmco}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.at1}"  sortBy="#{vista.at1}">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.at1}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.oemp}"  sortBy="#{vista.oemp}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.oemp}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="30%"
+                                                  filterBy="#{vista.alph}"  sortBy="#{vista.alph}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.alph}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="10%"
+                                                  filterBy="#{vista.ssn}"  sortBy="#{vista.ssn}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R.F.C." title="R.F.C."/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.ssn}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.dsi}"  sortBy="#{vista.dsi}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Antiguedad" title="Fecha Antiguedad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.dsi}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.psdt}"  sortBy="#{vista.psdt}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Ingreso" title="Fecha Ingreso"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.psdt}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.dt}"  sortBy="#{vista.dt}">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Baja" title="Fecha Baja"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.dt}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="5%"
+                                                  filterBy="#{vista.past}"  sortBy="#{vista.past}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Estatus" title="Estatus"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.past=='2'?'Inactivo':'Activo'}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="20%"
+                                                  filterBy="#{vista.pos} - #{vista.jbcx}"  sortBy="#{vista.pos} - #{vista.jbcx}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Puesto" title="Puesto"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{vista.pos} - #{vista.jbcx}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Archivo" title="Descargar Archivo" icon="icon-down"
+                                                             actionListener="#{interfacejdeBean.escribirFichero(event)}"
+                                                             oncomplete="handleLShow(args)" styleClass="style_botones" 
+                                                             onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
