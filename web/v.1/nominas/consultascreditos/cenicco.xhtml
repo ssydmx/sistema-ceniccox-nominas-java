@@ -1,0 +1,477 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="3" style="margin-top: 25px">
+
+                            <p:inputText value="#{consultacreditoCBean.numeroEmpleado}" placeholder="Número Empleado"
+                                         style="width: 190px"/>
+
+                            <p:selectOneMenu style="width: 200px" value="#{consultacreditoCBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu style="width: 200px" value="#{consultacreditoCBean.selectedConcepto}"
+                                             filter="true" filterMatchMode="contains" >  
+                                <f:selectItem itemValue="" itemLabel="Tipo Crédito"/>
+                                <f:selectItems value="#{consultacreditoCBean.conceptos}"
+                                               var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - (#{concepto.nombre})"/>  
+                            </p:selectOneMenu>
+
+                            <p:inputText value="#{consultacreditoCBean.periodo}" placeholder="Periodo" style="width: 190px"/>
+
+                            <p:inputText value="#{consultacreditoCBean.anio}" placeholder="Año" style="width: 190px"/>
+
+                            <p:selectOneMenu style="width: 200px" value="#{consultacreditoCBean.selectedEstatus}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Estatus"/>
+                                <f:selectItems value="#{appBean.comboEstatusCreditos}"/>  
+                            </p:selectOneMenu>
+
+                        </h:panelGrid>
+                    </div> 
+                    <p:fieldset legend="Consulta Créditos - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{consultacreditoCBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="credito"
+                                                 value="#{consultacreditoCBean.creditos}"
+                                                 filteredValue="#{consultacreditoCBean.filteredCreditos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 editable="true" editMode="cell"
+                                                 rowKey="#{credito.idcredito}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="pdf">
+                                                    <p:commandLink id="pdf" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/pdf_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Creditos" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.idcredito}"
+                                                  sortBy="#{credito.idcredito}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.idcredito}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.relacionLaboral.numeroempleado}"
+                                                  sortBy="#{credito.relacionLaboral.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.relacionLaboral.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{credito.relacionLaboral.idempleado.nombre} #{credito.relacionLaboral.idempleado.apellidopaterno} #{credito.relacionLaboral.idempleado.apellidomaterno}"
+                                                  sortBy="#{credito.relacionLaboral.idempleado.nombre} #{credito.relacionLaboral.idempleado.apellidopaterno} #{credito.relacionLaboral.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombbre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.relacionLaboral.idempleado.nombre} #{credito.relacionLaboral.idempleado.apellidopaterno} #{credito.relacionLaboral.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.numeroPeriodos}"
+                                                  style="text-align: right" filterBy="#{credito.numeroPeriodos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Periodos" title="Número de Periodos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.numeroPeriodos}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.concepto.concepto}"
+                                                  style="text-align: center" filterBy="#{credito.concepto.concepto} - #{credito.concepto.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Crédito" title="Tipo Crédtito"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.concepto.concepto} - #{credito.concepto.nombre}"/>
+                                        </p:column>
+
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.importe}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Préstamo" title="Préstamo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.aportacion}"
+                                                  style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Aportación" title="Aportación"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.aportacion}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.periodoInicio.fechaInicioStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Inicio" title="Fecha Inicio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.periodoInicio.fechaInicioStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.periodoFin.fechaFinStr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Fin" title="Fecha Fin"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.periodoFin.fechaFinStr}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.fechaactualizastr}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. Actualización" title="Fecha Actualización"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.fechaactualizastr}"/>
+                                        </p:column>
+
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.referencia}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.referencia}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.usuario.nombre}"
+                                                  style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Usuario" title="Usuario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{credito.usuario.nombre}"/>
+                                        </p:column>
+
+
+                                        <p:column filterMatchMode="contains" exportable="true" sortBy="#{credito.estatus}" style="text-align: center" headerText="Estatus">
+                                            <p:outputLabel value="Autorizado" rendered="#{credito.estatus==1}" style="color: #76E192"/>
+                                            <p:outputLabel value="Registrado" rendered="#{credito.estatus==2}" style="color: #B2BFB5"/>
+                                            <p:outputLabel value="Cancelado" rendered="#{credito.estatus==5}" style="color: #FF6969"/>
+                                            <p:outputLabel value="Liquidado" rendered="#{credito.estatus==6}"/>
+                                            <p:outputLabel value="Re-Estructurado" rendered="#{credito.estatus==7}" style="color: #FAB357"/>
+                                        </p:column>
+
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton title="Cancelar" value="C" style="color: red;" actionListener="#{consultacreditoCBean.cancelarCredito(credito)}"
+                                                             update=":form:display, :msgs"
+                                                             styleClass="style_botones" disabled="#{credito.estatus==1||credito.estatus==5||credito.estatus==6||credito.estatus==7}"
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton title="Autorizar" value="A" style="color: green;" actionListener="#{consultacreditoCBean.activarCredito(credito)}"
+                                                             update=":form:display, :msgs"
+                                                             styleClass="style_botones" disabled="#{credito.estatus==1||credito.estatus==5||credito.estatus==6||credito.estatus==7}"
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton title="Re-Estructurar" value="R" style="color: rgb(255,191,0)"
+                                                             actionListener="#{consultacreditoCBean.reestructura(credito)}"
+                                                             oncomplete="handleCreateInicidencia(args)" update=":formSearch"
+                                                             styleClass="style_botones" disabled="#{credito.estatus!=1}"
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+                                        <p:column width="30" exportable="false">
+                                            <p:commandButton title="Liquidar" value="L" disabled="#{credito.estatus!=1}"  actionListener="#{consultacreditoCBean.liquidarCredito(credito)}"
+                                                             update=":form:display, :msgs"
+                                                             styleClass="style_botones"
+                                                             onclick="statusDialog.show();"/> 
+                                        </p:column>
+
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 900px">
+                                                <p:panel header="Amortización">
+                                                    <p:dataTable id="dtamortiza"  value="#{credito.amortizacion}" var="amortizacion"
+                                                                 style="font-size: 1em;">
+                                                        <f:facet name="header">
+                                                            <div class="datableImagenes" id="csv">
+                                                                <h:commandLink id="csv">  
+                                                                    <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                    <p:dataExporter type="csv" target="dtamortiza" fileName="amortizacion" />  
+                                                                </h:commandLink>
+                                                            </div>
+                                                        </f:facet>
+                                                        <p:column>
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Periodo"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.periodo.periodo}" title="#{amortizacion.periodo.periodo}"/>
+                                                        </p:column>
+                                                        <p:column style="text-align: center">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Fecha Inicio"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.periodo.fechaInicioStr}" title="#{amortizacion.periodo.fechaInicioStr}"/>
+                                                        </p:column>
+                                                        <p:column style="text-align: center">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Fecha Fin"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.periodo.fechaFinStr}" title="#{amortizacion.periodo.fechaFinStr}"/>
+                                                        </p:column>
+                                                        <p:column style="text-align: center">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Saldo Insoluto"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.deuda+amortizacion.aportacion}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column style="text-align: center">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Aportación"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.aportacion}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column style="text-align: center">
+                                                            <f:facet name="header">
+                                                                <p:outputLabel value="Saldo Final"/>
+                                                            </f:facet>
+                                                            <p:outputLabel value="#{amortizacion.deuda}">
+                                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                            </p:outputLabel>
+                                                        </p:column>
+                                                        <p:column headerText="Estatus" style="text-align: center" exportable="false">
+                                                            <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{amortizacion.estatus==1}"/>
+                                                            <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{amortizacion.estatus==0||amortizacion.estatus==5||amortizacion.estatus==7}"/>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                                             actionListener="#{consultacreditoCBean.consultar(event)}" onstart="statusDialog.show()"
+                                                             update=":msgs, :form"/>
+                                            <p:commandButton value="Limpiar" icon="ui-icon-trash"
+                                                             styleClass="style_botones"
+                                                             immediate="true"
+                                                             actionListener="#{consultacreditoCBean.limpiar(event)}"
+                                                             update="dataTable" onclick="statusDialog.show();"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+
+                </h:form>
+
+                <h:form id="formSearch">
+                    <p:dialog header="Re-Estructuración" widgetVar="createDialog" resizable="false" id="searchDlg"
+                              hideEffect="explode" showEffect="fade" closeOnEscape="true"
+                              modal="true">  
+                        <p:panel header="Captura (#{consultacreditoCBean.selectedCredito.relacionLaboral.numeroempleado} - #{consultacreditoCBean.selectedCredito.relacionLaboral.idempleado.nombre} #{consultacreditoCBean.selectedCredito.relacionLaboral.idempleado.apellidopaterno} #{consultacreditoCBean.selectedCredito.relacionLaboral.idempleado.apellidomaterno})" toggleable="true">
+
+                            <h:panelGrid id="display" columns="6" cellpadding="4" style="margin:0 auto;">  
+                                <p:outputLabel value="Préstamo:"/>
+                                <p:inputText id="idPestamo" value="#{consultacreditoCBean.selectedCredito.importe}" readonly="true"
+                                             style="width: 192px;font-weight: bold;text-align: right;">
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+                                <p:message for="idPestamo" display="tooltip"/>
+
+                                <p:outputLabel value="Saldo Duedor:"/>
+                                <p:inputText id="importeOriginal" value="#{consultacreditoCBean.importeoriginal}" readonly="true"
+                                             style="width: 192px;font-weight: bold;text-align: right;">
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+                                <p:message for="importeOriginal" display="tooltip"/>
+
+                                <p:outputLabel value="Saldo Nuevo:"/>
+                                <p:inputText id="importe" value="#{consultacreditoCBean.importe}" readonly="true"
+                                             style="width: 192px;font-weight: bold;text-align: right">
+                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                </p:inputText>
+                                <p:message for="importe" display="tooltip"/>
+
+                                <p:outputLabel value="Aportación: *"/>
+                                <p:inputText id="aportacion" value="#{consultacreditoCBean.aportacion}" style="width: 192px;text-align: right" required="true" requiredMessage="Favor de ingresar Aportación"/>
+                                <p:message for="aportacion" display="tooltip"/>
+
+                                <p:outputLabel value="No. Periodos: *"/>
+                                <p:inputText id="noperiodos" value="#{consultacreditoCBean.noperiodos}"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorPeriodos}" style="text-align: right;width: 192px"/>
+                                <p:message for="noperiodos" display="tooltip"/>
+
+                                <p:outputLabel value="Periodo: *"/>
+                                <p:selectOneMenu id="periodo" style="width: 200px"  value="#{consultacreditoCBean.selectedPeriodo}"
+                                                 filter="true" filterMatchMode="contains" 
+                                                 required="true" requiredMessage="#{appBean.mensajeErrorPeriodo}">  
+                                    <f:selectItem itemValue="" itemLabel="#{appBean.mensajeSeleccione}"/>
+                                    <f:selectItems value="#{consultacreditoCBean.periodos}"
+                                                   var="periodo" itemValue="#{periodo.idperiodo}" itemLabel="#{periodo.periodo} - (#{periodo.fechaInicioStr} - #{periodo.fechaFinStr})"/>  
+                                </p:selectOneMenu>
+                                <p:message for="periodo" display="tooltip"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="btnSearchAceptar" 
+                                                     icon="ui-icon-play" title="Aplicar" value="Calcular"
+                                                     actionListener="#{consultacreditoCBean.calcular(event)}"
+                                                     update=":formSearch:display, :form:display, displayamortizacion, :msgs"
+                                                     oncomplete="handleCreate(args)"
+                                                     onclick="statusDialog.show();"
+                                                     styleClass="style_botones"/>
+                                    <p:commandButton id="btnSearchCancelar" 
+                                                     onclick="createDialog.hide();"
+                                                     icon="icon-cancel" 
+                                                     title="Cancelar" value="Cancelar" 
+                                                     immediate="true"
+                                                     styleClass="style_botones"/>  
+                                </f:facet>
+                            </h:panelGrid> 
+                        </p:panel>
+                        <p:panel header="Amortización" toggleable="true">
+                            <p:panelGrid id="displayamortizacion" columns="1" style="width: 900px">
+                                <f:facet name="header">
+                                    <div align="center">
+                                        <p:outputLabel value="#{consultacreditoCBean.informacionAmortizacion}" style="color: white;"/>    
+                                    </div>
+                                </f:facet>
+                                <f:facet name="footer">
+                                    <div align="right">
+                                        <p:commandButton id="btnSearchAplicar"  onclick="statusDialog.show();"
+                                                         icon="icon-check"  actionListener="#{consultacreditoCBean.aplicarreestructura(event)}"
+                                                         update=":formSearch:display, :form:display, :msgs" oncomplete="handleCreate(args)"
+                                                         title="Aplicar" value="Aplicar" styleClass="style_botones"/>
+                                    </div>
+                                </f:facet>
+                                <p:dataTable id="dtamortiza" value="#{consultacreditoCBean.creditoAmortizado.amortizacion}" var="amortizacion"
+                                             scrollable="true" scrollHeight="200"
+                                             rendered="#{!empty consultacreditoCBean.creditoAmortizado.amortizacion}" style="font-size: 1em;">
+                                    <f:facet name="header">
+                                        <div class="datableImagenes" id="csv">
+                                            <h:commandLink id="csv">  
+                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                <p:dataExporter type="csv" target="dtamortiza" fileName="amortizacion" />  
+                                            </h:commandLink>
+                                        </div>
+                                    </f:facet>
+                                    <p:column>
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Periodo"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.periodo.periodo}" title="#{amortizacion.periodo.periodo}"/>
+                                    </p:column>
+                                    <p:column style="text-align: center">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Fecha Inicio"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.periodo.fechaInicioStr}" title="#{amortizacion.periodo.fechaInicioStr}"/>
+                                    </p:column>
+                                    <p:column style="text-align: center">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Fecha Fin"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.periodo.fechaFinStr}" title="#{amortizacion.periodo.fechaFinStr}"/>
+                                    </p:column>
+                                    <p:column style="text-align: center">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Saldo Insoluto"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.deuda+amortizacion.aportacion}">
+                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                        </p:outputLabel>
+                                    </p:column>
+                                    <p:column style="text-align: center">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Aportación"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.aportacion}">
+                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                        </p:outputLabel>
+                                    </p:column>
+                                    <p:column style="text-align: center">
+                                        <f:facet name="header">
+                                            <p:outputLabel value="Saldo Final"/>
+                                        </f:facet>
+                                        <p:outputLabel value="#{amortizacion.deuda}">
+                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                        </p:outputLabel>
+                                    </p:column>
+                                    <p:column headerText="Estatus" style="text-align: center" exportable="false">
+                                        <h:graphicImage value="#{appBean.urlEstadoActivo}" rendered="#{amortizacion.estatus==1}"/>
+                                        <h:graphicImage value="#{appBean.urlEstadoInactivo}" rendered="#{amortizacion.estatus==0}"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </p:panelGrid>
+                        </p:panel>
+                    </p:dialog> 
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
