@@ -1,0 +1,349 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../../templates/templateKardex.xhtml">
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <p:fieldset legend="Departamentos- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                        <div align="right">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Alta" styleClass="style_botones" icon="icon-add" title="Alta"
+                                                 onstart="statusDialog.show()" actionListener="#{departamentoBean.limpiar(event)}"
+                                                 update=":formCreateDepartamento:display" onclick="createDialogDepartamento.show();"/>
+                                <p:commandButton value="Actualizar" styleClass="style_botones" icon="ui-icon-arrowrefresh-1-e" update=":form:displaydepartamento, :msgs"
+                                                 title="Actualizar" onstart="statusDialog.show()" actionListener="#{departamentoBean.consultar(event)}"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="displaydepartamento" columns="1" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <p:outputLabel value="#{departamentoBean.informacion}" style="color: white;"/>    
+                                </div>
+                            </f:facet>
+                            <p:dataTable id="dataTableDepartamentos" var="depto"
+                                         value="#{departamentoBean.departamentos}"
+                                         filteredValue="#{departamentoBean.filteredDepartamentos}"
+                                         resizableColumns="true" scrollable="true"
+                                         scrollHeight="300" style="font-size: .8em"
+                                         emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                         widgetVar="registrosTableDepartamentos"
+                                         rowKey="#{depto.iddepartamento}"
+                                         selection="#{departamentoBean.selectedDepartamento}" selectionMode="single">
+
+                                <f:facet name="header">
+                                    <p:outputPanel>  
+                                        <h:outputText value="Buscador:" />  
+                                        <p:inputText id="globalFilter" onkeyup="registrosTableDepartamentos.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                        <div class="datableImagenes" id="csv">
+                                            <p:commandLink id="csv" actionListener="#{departamentoBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                            </p:commandLink>
+                                        </div>
+                                    </p:outputPanel>
+                                </f:facet>
+
+                                <p:ajax event="rowSelect" onstart="updateDialogDepartamento.show();" update=":formUpdateDepartamento:display"/>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Departamento" 
+                                          filterBy="#{depto.departamento}" sortBy="#{depto.departamento}">
+                                    <p:outputLabel value="#{depto.departamento}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Nombre"
+                                          filterBy="#{depto.nombre}" sortBy="#{depto.nombre}">
+                                    <p:outputLabel value="#{depto.nombre}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Cuenta Contable"
+                                          filterBy="#{depto.cuentacontable}" sortBy="#{depto.cuentacontable}" style="text-align: center">
+                                    <p:outputLabel value="#{depto.cuentacontable}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Descripción"
+                                          filterBy="#{depto.descripcion}" sortBy="#{depto.descripcion}">
+                                    <p:outputLabel value="#{depto.descripcion}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Responsable"
+                                          filterBy="#{depto.empleado.nombre} #{depto.empleado.apellidopaterno} #{depto.empleado.apellidomaterno}" 
+                                          sortBy="#{depto.empleado.nombre} #{depto.empleado.apellidopaterno} #{depto.empleado.apellidomaterno}">
+                                    <p:outputLabel value="#{depto.empleado.nombre} #{depto.empleado.apellidopaterno} #{depto.empleado.apellidomaterno}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panelGrid>
+                    </p:fieldset>
+
+                    <p:fieldset legend="Puestos- #{appBean.compania.nombre}" styleClass="bg_color" toggleable="true">
+                        <div align="right">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Alta" styleClass="style_botones" icon="icon-add" title="Alta"
+                                                 onstart="statusDialog.show()" onclick="createDialogPuesto.show();" update=":formCreatePuesto:display" actionListener="#{puestoBean.limpiar(event)}"/>
+                                <p:commandButton value="Actualizar" styleClass="style_botones" icon="ui-icon-arrowrefresh-1-e" update=":form:displaypuesto"
+                                                 title="Actualizar" onstart="statusDialog.show()" actionListener="#{puestoBean.consultar(event)}"/>
+                            </h:panelGrid>
+                        </div>
+                        <p:panelGrid id="displaypuesto" columns="1" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <div align="center">
+                                    <p:outputLabel value="#{puestoBean.informacion}" style="color: white;"/>    
+                                </div>
+                            </f:facet>
+                            <p:dataTable id="dataTablePuestos" var="puesto"
+                                         value="#{puestoBean.puestos}"
+                                         filteredValue="#{puestoBean.filteredPuestos}"
+                                         resizableColumns="true" scrollable="true"
+                                         scrollHeight="300" style="font-size: .8em"
+                                         emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                         widgetVar="registrosTablePuestos"
+                                         rowKey="#{puesto.idpuesto}"
+                                         selection="#{puestoBean.selectedPuesto}" selectionMode="single">
+
+                                <f:facet name="header">
+                                    <p:outputPanel>  
+                                        <h:outputText value="Buscador:" />  
+                                        <p:inputText id="globalFilter" onkeyup="registrosTablePuestos.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                        <div class="datableImagenes" id="csv">
+                                            <p:commandLink id="csv"  actionListener="#{puestoBean.listenerSelected()}" oncomplete="handleLShow(args)">  
+                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                            </p:commandLink>
+                                        </div>
+                                    </p:outputPanel>
+                                </f:facet>
+
+                                <p:ajax event="rowSelect" onstart="updateDialogPuesto.show();" update=":formUpdatePuesto:display"/>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Nombre"
+                                          filterBy="#{puesto.nombre}" sortBy="#{puesto.nombre}">
+                                    <p:outputLabel value="#{puesto.nombre}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Clave"  style="text-align: right"
+                                          filterBy="#{puesto.puesto}" sortBy="#{puesto.puesto}">
+                                    <p:outputLabel value="#{puesto.puesto}"/>
+                                </p:column>
+
+                                <p:column filterMatchMode="contains" exportable="true" headerText="Responsable"
+                                          filterBy="#{puesto.empleado.nombre} #{puesto.empleado.apellidopaterno} #{puesto.empleado.apellidomaterno}" 
+                                          sortBy="#{puesto.empleado.nombre} #{puesto.empleado.apellidopaterno} #{puesto.empleado.apellidomaterno}">
+                                    <p:outputLabel value="#{puesto.empleado.nombre} #{puesto.empleado.apellidopaterno} #{puesto.empleado.apellidomaterno}"/>
+                                </p:column>
+
+                            </p:dataTable>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formCreateDepartamento">
+                    <p:dialog header="Alta Departamento" 
+                              widgetVar="createDialogDepartamento" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+
+                            <p:outputLabel value="Departamento: *" title="Departamento"/>
+                            <p:inputText id="idDepartamento" value="#{departamentoBean.departamento.departamento}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorDepartamento}"/>
+                            <p:message for="idDepartamento" display="tooltip"/>
+
+                            <p:outputLabel value="Nombre: *" title="Nombre"/>
+                            <p:inputText id="idNombre" value="#{departamentoBean.departamento.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreDepartamento}"/>
+                            <p:message for="idNombre" display="tooltip"/>
+
+                            <p:outputLabel value="Cta. Contable:" title="Cuenta Contable"/>
+                            <p:inputText id="idCtaContable" value="#{departamentoBean.departamento.cuentacontable}"/>
+                            <p:message for="idCtaContable" display="tooltip"/>
+
+                            <p:outputLabel value="Descripción:" title="Descripción"/>
+                            <p:inputText id="idDescripcion" value="#{departamentoBean.departamento.descripcion}"/>
+                            <p:message for="idDescripcion" display="tooltip"/>
+
+                            <p:outputLabel value="Responsable:"/>
+                            <p:selectOneMenu id="idResponsable" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{departamentoBean.departamento.empleado.idempleado}">  
+                                <f:selectItem itemValue="" itemLabel="- Seleccione -"/>
+                                <f:selectItems value="#{departamentoBean.empleados}"
+                                               var="rellab" itemValue="#{rellab.idempleado}" 
+                                               itemLabel="#{rellab.nombre} #{rellab.apellidopaterno} #{rellab.apellidomaterno}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idResponsable" display="tooltip"/>
+
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{departamentoBean.create(event)}"
+                                             update=":formCreateDepartamento:display, :form:displaydepartamento, :msgs"
+                                             oncomplete="handleCreateDepartamento(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createDialogDepartamento.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formCreatePuesto">
+                    <p:dialog header="Alta Puesto" 
+                              widgetVar="createDialogPuesto" resizable="false" id="createDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+
+                            <p:outputLabel value="Nombre: *" title="Nombre"/>
+                            <p:inputText id="idNombre" value="#{puestoBean.puesto.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombrePuesto}"/>
+                            <p:message for="idNombre" display="tooltip"/>
+
+                            <p:outputLabel value="Clave: *" title="Clave"/>
+                            <p:inputText id="idPuesto" value="#{puestoBean.puesto.puesto}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorPuesto}"/>
+                            <p:message for="idPuesto" display="tooltip"/>
+
+                            <p:outputLabel value="Responsable: *"/>
+                            <p:selectOneMenu id="idResponsable" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{puestoBean.puesto.empleado.idempleado}" required="false"
+                                             requiredMessage="#{appBean.mensajeErrorPuesto}">  
+                                <f:selectItem itemValue="" itemLabel="- Seleccione -"/>
+                                <f:selectItems value="#{departamentoBean.empleados}"
+                                               var="rellab" itemValue="#{rellab.idempleado}" 
+                                               itemLabel="#{rellab.nombre} #{rellab.apellidopaterno} #{rellab.apellidomaterno}"/>  
+                            </p:selectOneMenu>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-check" 
+                                             title="Aceptar" value="Aceptar"
+                                             actionListener="#{puestoBean.create(event)}"
+                                             update=":formCreatePuesto:display, :form:displaypuesto, :msgs"
+                                             oncomplete="handleCreatePuesto(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="createDialogPuesto.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formUpdateDepartamento">
+                    <p:dialog header="Actualizar Departamento" 
+                              widgetVar="updateDialogDepartamento" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+
+                            <p:outputLabel value="Departamento: *" title="Departamento"/>
+                            <p:inputText id="idDepartamento" value="#{departamentoBean.selectedDepartamento.departamento}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorDepartamento}"/>
+                            <p:message for="idDepartamento" display="tooltip"/>
+
+                            <p:outputLabel value="Nombre: *" title="Nombre"/>
+                            <p:inputText id="idNombre" value="#{departamentoBean.selectedDepartamento.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombreDepartamento}"/>
+                            <p:message for="idDepartamento" display="tooltip"/>
+
+                            <p:outputLabel value="Cta. Contable:" title="Cuenta Contable"/>
+                            <p:inputText id="idCtaContable" value="#{departamentoBean.selectedDepartamento.cuentacontable}"/>
+                            <p:message for="idCtaContable" display="tooltip"/>
+
+                            <p:outputLabel value="Descripción:" title="Descripción"/>
+                            <p:inputText id="idDescripcion" value="#{departamentoBean.selectedDepartamento.descripcion}"/>
+                            <p:message for="idDescripcion" display="tooltip"/>
+
+                            <p:outputLabel value="Responsable:"/>
+                            <p:selectOneMenu id="idResponsable" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{departamentoBean.selectedDepartamento.empleado.idempleado}">  
+                                <f:selectItem itemValue="" itemLabel="- Seleccione -"/>
+                                <f:selectItems value="#{departamentoBean.empleados}"
+                                               var="rellab" itemValue="#{rellab.idempleado}" 
+                                               itemLabel="#{rellab.nombre} #{rellab.apellidopaterno} #{rellab.apellidomaterno}"/>  
+                            </p:selectOneMenu>
+                            <p:message for="idResponsable" display="tooltip"/>
+
+                        </h:panelGrid> 
+
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-save" 
+                                             title="Guardar" value="Guardar"
+                                             actionListener="#{departamentoBean.edit(event)}"
+                                             update=":formUpdateDepartamento:display,:form:displaydepartamento, :msgs"
+                                             oncomplete="handleUpdateDepartamento(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="updateDialogDepartamento.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+                <h:form id="formUpdatePuesto">
+                    <p:dialog header="Actualizar Puesto" 
+                              widgetVar="updateDialogPuesto" resizable="false" id="updateDlg"
+                              styleClass="style_outputText" position="center,center" closeOnEscape="true"
+                              showEffect="fade" hideEffect="explode" modal="true">  
+                        <h:panelGrid id="display" columns="3" cellpadding="3">
+
+                            <p:outputLabel value="Nombre: *" title="Nombre"/>
+                            <p:inputText id="idNombre" value="#{puestoBean.selectedPuesto.nombre}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorNombrePuesto}"/>
+                            <p:message for="idNombre" display="tooltip"/>
+
+                            <p:outputLabel value="Clave: *" title="Clave"/>
+                            <p:inputText id="idPuesto" value="#{puestoBean.selectedPuesto.puesto}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorPuesto}"/>
+                            <p:message for="idPuesto" display="tooltip"/>
+
+                            <p:outputLabel value="Responsable:"/>
+                            <p:selectOneMenu id="idResponsable" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{puestoBean.selectedPuesto.empleado.idempleado}">  
+                                <f:selectItem itemValue="" itemLabel="- Seleccione -"/>
+                                <f:selectItems value="#{departamentoBean.empleados}"
+                                               var="rellab" itemValue="#{rellab.idempleado}" 
+                                               itemLabel="#{rellab.nombre} #{rellab.apellidopaterno} #{rellab.apellidomaterno}"/>  
+                            </p:selectOneMenu>
+                        </h:panelGrid> 
+                        <f:facet name="footer">
+                            <p:commandButton id="btnAceptar" icon="icon-save" 
+                                             title="Guardar" value="Guardar"
+                                             actionListener="#{puestoBean.edit(event)}"
+                                             update=":formUpdatePuesto:display, :form:displaypuesto, :msgs"
+                                             oncomplete=" handleUpdatePuesto(args)"
+                                             onclick="statusDialog.show();"
+                                             styleClass="style_botones"/>
+                            <p:commandButton id="btnCancelar" icon="icon-cancel" 
+                                             title="Cancelar" value="Cancelar"
+                                             styleClass="style_botones" immediate="true"
+                                             onclick="updateDialogPuesto.hide();"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
