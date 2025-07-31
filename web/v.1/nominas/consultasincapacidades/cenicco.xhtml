@@ -1,0 +1,248 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <p:outputLabel value="#{appBean.sesionMin}"/>
+                    <div align="center">
+                        <h:panelGrid columns="4" style="margin-top: 5px;" cellpadding="5">
+                            <p:inputText value="#{consultaincapacidadBean.numeroempleado}" placeholder="No. Empleado"/>
+
+                            <p:inputText value="#{consultaincapacidadBean.folio}" placeholder="Folio"/>    
+
+                            <p:inputText value="#{consultaincapacidadBean.periodo}" placeholder="Periodo"/>    
+
+                            <p:inputText value="#{consultaincapacidadBean.anio}" placeholder="Anio" size="8"/>    
+
+                            <p:selectOneMenu id="grupoPago" style="width: 180px" 
+                                             filter="true" filterMatchMode="contains" value="#{consultaincapacidadBean.selectedGrupopago}">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="tipoCredito" style="width: 180px" valueChangeListener="#{consultaincapacidadBean.changeIncapacidad}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Incapacidad"/>
+                                <f:selectItems value="#{consultaincapacidadBean.conceptos}"
+                                               var="concepto" itemValue="#{concepto.idconcepto}" itemLabel="#{concepto.concepto} - (#{concepto.nombre})"/>  
+                                <p:ajax onstart="statusDialog.show()" partialSubmit="true" update="idReferencia"/>
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idReferencia" style="width: 180px" value="#{consultaincapacidadBean.referencia}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Referencia"/>
+                                <f:selectItems value="#{consultaincapacidadBean.referencias}"/>  
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" icon="icon-search"
+                                             styleClass="style_botones"
+                                             actionListener="#{consultaincapacidadBean.consultar(event)}"
+                                             update=":form, :msgs" onclick="statusDialog.show();"/> 
+
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Consulta Incapacidades - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{consultaincapacidadBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="incapacidad"
+                                                 value="#{consultaincapacidadBean.incidencias}"
+                                                 filteredValue="#{consultaincapacidadBean.filteredIncidencias}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{incapacidad.idrellab}">
+
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="Incapacidades" />  
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incapacidad.numeroempleado} - #{incapacidad.nombreempleado}" 
+                                                  sortBy="#{incapacidad.numeroempleado} - #{incapacidad.nombreempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.numeroempleado} - #{incapacidad.nombreempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{incapacidad.noperiodos}" sortBy="#{incapacidad.noperiodos}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Periodos" title="Número de Periodos"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.noperiodos}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{incapacidad.concepto} - #{incapacidad.nombreconcepto}"
+                                                  sortBy="#{incapacidad.concepto} - #{incapacidad.nombreconcepto}">
+                                            <f:facet name="header">
+                                                <h:outputText value="T. Incapacidad" title="Tipo Incapacidad"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.concepto} - #{incapacidad.nombreconcepto}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                  filterBy="#{incapacidad.dias}"
+                                                  sortBy="#{incapacidad.dias}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Días" title="Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.dias}"/>
+                                        </p:column>
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechainicioincidencia}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. I. Incidencia" title="Fecha Inicio Incidencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechainicioincidencia}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechafinincidencia}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. F. Incidencia" title="Fecha Fin Incidencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechafinincidencia}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechaaux1}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. I. IMSS" title="Fecha Inicio IMSS"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaaux1}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true"
+                                                   filterBy="#{incapacidad.fechaaux2}" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="F. F. IMSS" title="Fecha Fin IMSS"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.fechaaux2}"/>
+                                        </p:column>
+
+
+                                        <p:column  filterMatchMode="contains" exportable="true" style="text-align: center"
+                                                   filterBy="#{incapacidad.referencia1}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Folio" title="Folio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.referencia1}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true" headerText="Referencia"
+                                                   style="text-align: center"
+                                                   filterBy="#{incapacidad.referencia2}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Referencia" title="Referencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.referencia2}"/>
+                                        </p:column>
+
+                                        <p:column  filterMatchMode="contains" exportable="true" headerText="Referencia"
+                                                   style="text-align: center"
+                                                   filterBy="#{incapacidad.texto1}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Observaciones" title="Observaciones"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{incapacidad.texto1}"/>
+                                        </p:column>
+
+                                        <p:column width="5%" style="text-align: center" exportable="false">
+                                            <p:commandButton icon="icon-cancel" styleClass="style_botones" title="Eliminar" update=":form:display ,:msgs"
+                                                             actionListener="#{consultaincapacidadBean.delete(incapacidad)}"
+                                                             onclick="statusDialog.show();"/>
+                                    </p:column>
+
+                                    <p:rowExpansion>
+                                        <p:panelGrid columns="1" style="width: 600px">
+                                            <p:panel header="Periodos">
+                                                <p:dataTable  value="#{incapacidad.incidencias}" var="incidencia"
+                                                              style="font-size: 1em;">
+                                                    <p:column headerText="Periodo">
+                                                        <p:outputLabel value="#{incidencia.periodo}" title="#{incidencia.periodo}"/>
+                                                    </p:column>
+                                                    <p:column headerText="Fecha Inicio" style="text-align: center">
+                                                        <p:outputLabel value="#{incidencia.fechainicio}" title="#{incidencia.fechainicio}"/>
+                                                    </p:column>
+                                                    <p:column headerText="Fecha Fin" style="text-align: center">
+                                                        <p:outputLabel value="#{incidencia.fechafin}" title="#{incidencia.fechafin}"/>
+                                                    </p:column>
+                                                    <p:column headerText="Días" style="text-align: center">
+                                                        <p:outputLabel value="#{incidencia.unidades}">
+                                                            <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                        </p:outputLabel>
+                                                    </p:column>
+                                                </p:dataTable>
+                                            </p:panel>
+                                        </p:panelGrid>
+                                    </p:rowExpansion>
+                                </p:dataTable>
+                            </p:column>
+                        </p:row>
+                        <f:facet name="footer">
+                            <p:row>
+                                <p:column>
+                                    <div align="right">
+                                        <p:commandButton value="Limpiar" icon="ui-icon-trash" styleClass="style_botones"
+                                                         actionListener="#{consultaincapacidadBean.limpiar(event)}"
+                                                         onclick="statusDialog.show();"
+                                                         update=":form, :msgs"/> 
+                                    </div>
+
+                                </p:column>
+                            </p:row>
+                        </f:facet>
+                    </p:panelGrid>
+                </p:fieldset>
+            </h:form>
+
+            <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+            <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                      draggable="false" closable="false" resizable="false" > 
+                <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+            </p:dialog>
+
+        </ui:define>
+
+    </ui:composition>
+
+</body>
+</html>
