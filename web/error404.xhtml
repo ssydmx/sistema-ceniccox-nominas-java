@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <body>
+
+        <ui:composition template="./templates/templateDefoult.xhtml">
+            <ui:define name="content">
+                <header>
+                    <p style="color: white; font-size: 50px" align="center">EL SISTEMA NO PUDO RESPONDER A SU SOLICITUD</p>
+                    <p style="color: white; font-size: 60px" align="center">POR FAVOR VUELVE A INICIAR SESIÓN</p>
+                    <div align="center">
+                        <p:button outcome="./login.xhtml" value="Regresar al inicio" 
+                                  style="font-size: 25px;width: 400px;height: 50px; color: #000000;">
+                        </p:button>
+                    </div>
+                    
+                </header>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
