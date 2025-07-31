@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./templates/templateDefoult.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="growl" showDetail="false" life="3000"/>
+                <header>
+                    <div class="logo">
+                        <img class="inconLogo" src="resources/images/logos/NewCeniccoLogo.png"/>
+                    </div>
+                    <div class="contenedor1" id="azul">
+                        <img class="icon" src="resources/images/fondos/tiempo.png"/>
+                        <p class="texto">Tiempo y Asistencias</p>
+                    </div>
+                    <div class="contenedor1" id="morado">
+                        <a href="" target="_blank">
+                            <img class="icon" src="resources/images/fondos/empleado.png"/>
+                        </a>
+                        <p class="texto">Empleados</p>
+                    </div>
+                    <div class="contenedor1" id="amarillo">
+                        <img class="icon" src="resources/images/fondos/recursos.png"/>
+                        <p class="texto">Recursos Humanos</p>
+                    </div>
+                    <div class="perfil">
+                        <h:form>
+                            <h:panelGrid columns="2">
+                                <p:row>
+                                    <p:column>
+                                        <h:panelGrid columns="1">
+                                            <p:outputLabel value=""/>
+                                        </h:panelGrid>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>
+                                    </p:column>
+                                </p:row>
+                            </h:panelGrid>
+                        </h:form>
+                    </div>
+                    <div class="contenedor2" id="rosa">
+                        <img class="icon" src="resources/images/fondos/nomina.png"/>
+                        <p class="texto">Nóminas</p>
+                    </div>
+                    <div class="contenedor2" id="verde">
+                        <img class="icon" src="resources/images/fondos/ahorro.png"/>
+                        <p class="texto">Fiscal</p>
+                    </div>
+                    <div class="ajustes" id="ajustes">
+                        <a href="" target="_blank">
+                            <img class="ajustes" src="resources/images/fondos/ajustes.png"/>
+                        </a>
+                    </div>
+                </header>
+                <h:form id="formLogin">
+                    <p:dialog header="Acceso" widgetVar="searchDialog" resizable="false" closable="false" draggable="false"
+                              hideEffect="explode" showEffect="fade" visible="true" position="center,center"
+                              modal="true">  
+                        <p:growl id="growl" showDetail="true" life="3000" />
+                        <h:panelGrid columns="2" cellpadding="5">   
+                            <h:outputLabel  value="Usuario: *" />  
+                            <p:inputText label="Usuario" value="#{loginBean.usuario.username}"
+                                         required="true" requiredMessage="#{appBean.mensajeErrorUsuario}"/>  
+
+                            <h:outputLabel value="Contraseña: *" />  
+                            <p:password label="Contraseña" value="#{loginBean.usuario.password}"
+                                        required="true" requiredMessage="#{appBean.mensajeErrorPassword}"/>  
+
+                            <f:facet name="footer">  
+                                <p:commandButton value="Entrar" icon="icon-login" update=":growl, :formLogin"
+                                                 actionListener="#{loginBean.login(actionEvent)}"
+                                                 oncomplete="handleLoginRequest(args)"
+                                                 styleClass="style_botones"/>
+
+                                <p:commandButton value="Cancelar" icon="icon-cancel" 
+                                                 update=":formLogin"
+                                                 styleClass="style_botones" immediate="true">
+                                    <p:resetInput target="formLogin"/>
+                                </p:commandButton>
+                            </f:facet>
+                        </h:panelGrid>
+                    </p:dialog> 
+                </h:form>
+                <script type="text/javascript" src="js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
