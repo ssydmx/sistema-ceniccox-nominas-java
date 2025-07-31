@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateKardex.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="8" style="margin-top: 25px">
+                            <p:selectOneMenu id="idGrupoPago" value="#{rotacionpersonalBean.selectedGrupoPago}"
+                                             style="width: 200px" filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}" var="gp" itemValue="#{gp.idgrupopago}" itemLabel="#{gp.grupopago} - #{gp.nombre}"/>
+                            </p:selectOneMenu>
+
+                            <p:inputText id="idMesInicio" value="#{rotacionpersonalBean.mesinicio}" placeholder="Mes Inicio"
+                                         style="width: 100px;text-align: center" required="true" requiredMessage="Favor de Ingresar Mes Inicio"/>
+                            <p:message for="idMesInicio" display="tooltip"/>
+
+                            <p:inputText id="idMesFin" value="#{rotacionpersonalBean.mesfin}" placeholder="Mes Fin"
+                                         style="width: 100px;text-align: center" required="true" requiredMessage="Favor de Ingresar Mes Fin"/>
+                            <p:message for="idMesFin" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{rotacionpersonalBean.anio}" placeholder="Año"
+                                         style="width: 100px;text-align: center" required="true" requiredMessage="Favor de Ingresar Año"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                             actionListener="#{rotacionpersonalBean.consultar(event)}" onstart="statusDialog.show()"
+                                             update=":msgs, :form"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset id="display" legend="Rotación Personal" styleClass="bg_color" toggleable="false">
+                        <p:tabView>
+                            <p:tab title="Datos">
+                                <p:panelGrid>
+                                    <f:facet name="header">
+                                        <p:row>
+                                            <p:column>
+                                                <div align="center">
+                                                    <p:outputLabel value="#{rotacionpersonalBean.informacion}"/>    
+                                                </div>
+                                            </p:column>
+                                        </p:row>
+                                    </f:facet>
+                                    <p:row>
+                                        <p:column>
+                                            <p:dataTable id="dataTable" var="rotacion"
+                                                         value="#{rotacionpersonalBean.vista}"
+                                                         filteredValue="#{rotacionpersonalBean.filteredVista}"
+                                                         resizableColumns="true" scrollable="true"
+                                                         scrollHeight="300" style="font-size: 1em"
+                                                         emptyMessage="No se encontraron registros" 
+                                                         widgetVar="registrosTable">
+                                                <f:facet name="header">
+                                                    <p:outputPanel>  
+                                                        <h:outputText value="Buscador:" />  
+                                                        <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                        <div class="datableImagenes" id="csv">
+                                                            <h:commandLink id="csv">  
+                                                                <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                                <p:dataExporter type="csv" target="dataTable" fileName="RotacionPersonal" />  
+                                                            </h:commandLink>
+                                                        </div>
+                                                    </p:outputPanel>
+                                                </f:facet>
+
+                                                <p:column filterMatchMode="contains" exportable="true"
+                                                          filterBy="#{rotacion.mesStr}" sortBy="#{rotacion.mesfechaingreso}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Mes" title="Mes"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{rotacion.mesStr}"/>
+                                                    <f:facet name="footer">
+                                                        <p:outputLabel value="Totales:"/>
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                          filterBy="#{rotacion.contadorIngresos}" sortBy="#{rotacion.contadorIngresos}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Ingresos" title="Ingresos"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{rotacion.contadorIngresos}"/>
+                                                    <f:facet name="footer">
+                                                        <p:outputLabel value="#{rotacionpersonalBean.totalIngresos}"/>
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column filterMatchMode="contains" exportable="true" style="text-align: right"
+                                                          filterBy="#{rotacion.contadorBajas}" sortBy="#{rotacion.contadorBajas}">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Bajas" title="Bajas"/>
+                                                    </f:facet>
+                                                    <p:outputLabel value="#{rotacion.contadorBajas}"/>
+                                                    <f:facet name="footer">
+                                                        <p:outputLabel value="#{rotacionpersonalBean.totalBajas}"/>
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:dataTable>
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </p:tab>
+                            <p:tab title="Gráfica">
+                                <div align="center">
+                                    <p:panelGrid columns="1">
+                                        <p:lineChart id="horizontal" value="#{rotacionpersonalBean.barModel}" seriesColors="04B486, DF0101"
+                                                    legendPosition="ne" style="height:600px;width: 1000px;" xaxisAngle="45" zoom="true" shadow="true"
+                                                    animate="true" title="Rotación Personal" yaxisLabel="Empleados"/>
+                                    </p:panelGrid>
+                                </div>
+                            </p:tab>
+                        </p:tabView>
+                    </p:fieldset>
+                </h:form>
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
