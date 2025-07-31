@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <script type="text/javascript">
+        /* <![CDATA[ */
+        function calendarShowCallback(date) {
+            // populate Calendar#DAY_OF_WEEK values from bean
+            var supportedDays = '#{saldoVacacionesExtraLegalesBean.getSupportedDays()}'.split(',');
+            // primefaces js widget day is from [0 - 6] - [Sunday - Monday]
+            var day = date.getDay() + 1;
+
+            for (var i = 0; i < supportedDays.length; i++) {
+                console.log('Dia asigando: ' + supportedDays[i] + ' :::: Dia calendar ' + day + ' Boolean: ' + (day == supportedDays[i]));
+                if (day == supportedDays[i]) {
+                    console.log('OK Entre');
+                    return [true, ''];
+                }
+            }
+            return [false, ''];
+        }
+
+        function calendarDisabledCallback(date) {
+            // populate Calendar#DAY_OF_WEEK values from bean
+            var supportedDays = '#{saldoVacacionesExtraLegalesBean.getSupportedDays()}'.split(',');
+            // primefaces js widget day is from [0 - 6] - [Sunday - Monday]
+            var day = date.getDay() + 1;
+
+            for (var i = 0; i < supportedDays.length; i++) {
+                console.log('Dia asigando: ' + supportedDays[i] + ' :::: Dia calendar ' + day + ' Boolean: ' + (day == supportedDays[i]));
+                if (day == supportedDays[i]) {
+                    console.log('OK Entre');
+                    return [false, ''];
+                }
+            }
+            return [true, ''];
+        }
+        /* ]]> */
+    </script>
+    <body>
+
+        <ui:composition template="./../../../templates/templateNominas.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="true"/>
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="5" style="margin-top: 25px">
+                            <p:inputText value="#{saldoVacacionesExtraLegalesBean.numeroempleado}" placeholder="Número Empleado"
+                                         style="width: 190px"/>
+
+                            <p:selectOneMenu style="width: 200px" value="#{saldoVacacionesExtraLegalesBean.selectedgrupopago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="idEstatus" value="#{saldoVacacionesExtraLegalesBean.status}" 
+                                             style="width: 200px" filter="true" filterMatchMode="contains" >  
+                                <f:selectItem itemValue="" itemLabel="Disponibles/Inactivo/Futuras/registradas"/>
+                                <f:selectItem itemValue="0" itemLabel="Inactivo"/>
+                                <f:selectItem itemValue="1" itemLabel="Disponibles"/>                               
+                                <f:selectItem itemValue="2" itemLabel="Inactivas Futuras"/>
+                                <f:selectItem itemValue="3" itemLabel="Disponibles Futuras"/>
+                                <f:selectItem itemValue="4" itemLabel="Registradas"/>
+                                <f:selectItem itemValue="0,1" itemLabel="Disponible/Inactivo"/>
+                                <f:selectItem itemValue="2,3" itemLabel="Futuras Disponibles/Inactivas"/>
+                            </p:selectOneMenu>
+
+                            <p:commandButton value="Consultar" styleClass="style_botones" icon="icon-search"
+                                             actionListener="#{saldoVacacionesExtraLegalesBean.consultar(event)}" onstart="statusDialog.show()"
+                                             update=":form"/>
+
+                            <p:commandButton value="Generar Saldos" styleClass="style_botones" icon="icon-exec"
+                                             actionListener="#{saldoVacacionesExtraLegalesBean.generarSaldos(event)}" onstart="statusDialog.show()"
+                                             update=":form,:msgs"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Saldos Vacaciones Extra Legales - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{saldoVacacionesExtraLegalesBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="saldo"
+                                                 value="#{saldoVacacionesExtraLegalesBean.saldos}"
+                                                 filteredValue="#{saldoVacacionesExtraLegalesBean.filteredsaldos}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 paginator="true" rows="50" rowsPerPageTemplate="50,100,200,300" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 selection="#{saldoVacacionesExtraLegalesBean.selectedsaldo}" selectionMode="single"
+                                                 rowKey="#{saldo.idsaldo}"
+                                                 disabledSelection="#{saldo.estatus == 0 || saldo.estatus == 4}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <h:commandLink id="csv">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                        <p:dataExporter type="csv" target="dataTable" fileName="SaldosVacaciones" encoding="ISO-8859-1"/>
+                                                    </h:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:ajax event="rowSelect" update=":formUpdate" listener="#{saldoVacacionesExtraLegalesBean.limpiar()}" oncomplete="updateDialog.show();" onstart="statusDialog.show();"/>
+
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.rellab.numeroempleado } - #{saldo.rellab.idempleado.nombre} #{saldo.rellab.idempleado.apellidopaterno} #{saldo.rellab.idempleado.apellidomaterno}" 
+                                                  sortBy="#{saldo.rellab.numeroempleado}" width="30%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Empleado" title="Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.rellab.numeroempleado } - #{saldo.rellab.idempleado.nombre} #{saldo.rellab.idempleado.apellidopaterno} #{saldo.rellab.idempleado.apellidomaterno}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.rellab.idgrupopago.grupopago} - #{saldo.rellab.idgrupopago.nombre}" 
+                                                  sortBy="#{saldo.rellab.idgrupopago.grupopago}" width="20%">
+                                            <f:facet name="header">
+                                                <h:outputText value="Grupo Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.rellab.idgrupopago.grupopago} - #{saldo.rellab.idgrupopago.nombre}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.ciclo}" 
+                                                  sortBy="#{saldo.ciclo}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Ciclo" title="Ciclo"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.ciclo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.devengadas}" 
+                                                  sortBy="#{saldo.devengadas}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Devengadas" title="Devengadas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.devengadas}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.disfrutadas}" 
+                                                  sortBy="#{saldo.disfrutadas}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Disfrutadas" title="Disfrutadas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.disfrutadas}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.saldo}" 
+                                                  sortBy="#{saldo.saldo}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Saldo" title="Saldo" />
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.saldo}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.solicitadas}" 
+                                                  sortBy="#{saldo.solicitadas}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Solicitadas" title="Solicitadas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.solicitadas}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.solicitadas}" 
+                                                  sortBy="#{saldo.vencidas}" width="10%" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Vencidas" title="Solicitadas"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.vencidas}"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.fechaInicioAniversario}" sortBy="#{saldo.fechaInicioAniversario}" width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Aniversario" title="Fecha Aniversario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.fechaInicioAniversario.toGregorianCalendar().time}">
+                                                <f:convertDateTime type="" pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.fechaInicio}" sortBy="#{saldo.fechaInicio}" width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Inicio" title="Fecha Inicio"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.fechaInicio.toGregorianCalendar().time}">
+                                                <f:convertDateTime type="" pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.fechaFin}" sortBy="#{saldo.fechaFin}" width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Fin" title="Fecha Fin"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.fechaFin.toGregorianCalendar().time}">
+                                                <f:convertDateTime type="" pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.fechaVigencia}" sortBy="#{saldo.fechaVigencia}" width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Fecha Vigencia" title="Fecha Vigencia"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{saldo.fechaVigencia.toGregorianCalendar().time}">
+                                                <f:convertDateTime type="" pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" filterBy="#{saldo.estatus}" sortBy="#{saldo.estatus}" width="15%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Estatus" title="Estatus"/>
+                                            </f:facet>
+                                            <p:outputLabel value="Activo" rendered="#{saldo.estatus==1}" style="color: green; font-weight: bold"/>
+                                            <p:outputLabel value="Inactivo" rendered="#{saldo.estatus==0}" style="color: red; font-weight: bold"/>
+                                            <p:outputLabel value="Inactivo Futuro" rendered="#{saldo.estatus==2}" style="color: red; font-weight: bold"/>
+                                            <p:outputLabel value="Activo Futuro" rendered="#{saldo.estatus==3}" style="color: blue; font-weight: bold"/>
+                                            <p:outputLabel value="Registrado" rendered="#{saldo.estatus==4}" style="color: grey; font-weight: bold"/>
+                                        </p:column>
+                                        <p:column filterMatchMode="contains" exportable="true" width="10%" style="text-align: center">
+                                            <f:facet name="header">
+                                                <h:outputText value="Autorizar" title="Autorizar"/>
+                                            </f:facet>
+                                            <p:commandButton icon="icon-add" rendered="#{saldo.estatus==4}" 
+                                                             actionListener="#{saldoVacacionesExtraLegalesBean.openSaldoAdelantado(saldo)}"
+                                                             onstart="statusDialog.show()" update=":form,:msgs"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Reporte Saldo Vacaciones" title="Reporte Saldo Vacaciones" icon="icon-down"
+                                                             actionListener="#{saldoVacacionesExtraLegalesBean.generarReporteSaldoVacaciones()}"
+                                                             onclick="statusDialog.show();"
+                                                             oncomplete="handleLShow(args)"
+                                                             styleClass="style_botones"/> 
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <h:form id="formUpdate">
+                    <p:dialog header="Solicitud Vacaciones" 
+                              widgetVar="updateDialog" resizable="false" id="updateDlg" width="600px" height="45%" closeOnEscape="true"
+                              styleClass="style_outputText" showEffect="fade" hideEffect="explode" modal="true">
+                        <div align="center">
+                            <h:panelGrid id="display" columns="4">
+                                <f:facet name="header">
+                                    <p:outputLabel value="#{saldoVacacionesExtraLegalesBean.selectedsaldo.rellab.numeroempleado} - #{saldoVacacionesExtraLegalesBean.selectedsaldo.rellab.idempleado.nombre} #{saldoVacacionesExtraLegalesBean.selectedsaldo.rellab.idempleado.apellidopaterno} #{saldoVacacionesExtraLegalesBean.selectedsaldo.rellab.idempleado.apellidomaterno}" />
+                                </f:facet>
+                                <p:outputLabel value="Saldo:"/>
+                                <p:inputText value="#{saldoVacacionesExtraLegalesBean.selectedsaldo.saldo}" readonly="true" style="text-align: right"/>
+
+                                <p:outputLabel value="A Solicitar:"/>
+                                <p:inputText value="#{saldoVacacionesExtraLegalesBean.solicitar}" style="text-align: right" required="Favor de Ingresar Dias a Solicitar">
+                                    <p:ajax partialSubmit="true"/>
+                                </p:inputText>
+
+                                <p:outputLabel value="Fecha Inicio:"/>
+                                <p:calendar id="idfinicio" value="#{saldoVacacionesExtraLegalesBean.fechainicio}" required="true" requiredMessage="Favor de Seleccionar Fecha Inicio"
+                                            disabledWeekends="true" pattern="dd/MM/yyyy">
+                                    <p:ajax event="dateSelect" listener="#{saldoVacacionesExtraLegalesBean.addCalendar}" update="idffin"/>
+                                </p:calendar>
+
+                                <p:outputLabel value="Fecha Fin:"/>
+                                <p:inputText id="idffin" value="#{saldoVacacionesExtraLegalesBean.fechafin}" readonly="true"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton value="Solicitar" style="width: 100%"
+                                                     update=":form,:formUpdate:display,:msgs"
+                                                     onstart="statusDialog.show();"
+                                                     oncomplete="handleUpdate(args)"
+                                                     actionListener="#{saldoVacacionesExtraLegalesBean.solicitar()}" 
+                                                     icon="ui-icon-document"/>
+                                </f:facet>
+
+                            </h:panelGrid>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
