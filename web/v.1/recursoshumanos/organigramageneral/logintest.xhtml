@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./templates/templateDefoult.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="growl" showDetail="false" life="3000"/>
+                
+                <h:form id="formLogin">
+                    <p:dialog header="Acceso" widgetVar="searchDialog" resizable="false" closable="false" draggable="false"
+                              hideEffect="explode" showEffect="fade" visible="true" position="center,center"
+                              modal="true">  
+                        <p:growl id="growl" showDetail="true" life="3000" />
+                        <h:panelGrid columns="2" cellpadding="5">   
+                            <h:outputLabel  value="Usuario: *" />  
+                            <p:inputText label="Usuario" />
+
+                            <h:outputLabel value="Contraseña: *" />  
+                            <p:password label="Contraseña" />  
+
+                            <f:facet name="footer">  
+                                <p:commandButton value="Entrar" icon="icon-login" update=":growl, :formLogin"
+                                                 oncomplete="handleLoginRequest(args)"
+                                                 styleClass="style_botones"/>
+
+                                <p:commandButton value="Cancelar" icon="icon-cancel" 
+                                                 update=":formLogin"
+                                                 styleClass="style_botones" immediate="true">
+                                    <p:resetInput target="formLogin"/>
+                                </p:commandButton>
+                            </f:facet>
+                        </h:panelGrid>
+                    </p:dialog> 
+                </h:form>
+                <script type="text/javascript" src="js/JSCenicco.js"/>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
