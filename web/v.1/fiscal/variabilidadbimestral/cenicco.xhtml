@@ -1,0 +1,239 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./../../../templates/templateFiscal.xhtml">
+
+            <ui:define name="content">
+                <p:growl id="msgs" showDetail="false"/>
+                <h:form id="form">
+                    <div align="center">
+                        <h:panelGrid columns="9" style="margin-top: 25px">
+                            <p:selectOneMenu id="grupoPago" style="width: 200px" value="#{variabilidadBean.selectedGrupoPago}"
+                                             filter="true" filterMatchMode="contains">  
+                                <f:selectItem itemValue="" itemLabel="Grupo Pago"/>
+                                <f:selectItems value="#{grupopagoBean.gruposPago}"
+                                               var="grupoPago" itemValue="#{grupoPago.idgrupopago}" itemLabel="#{grupoPago.grupopago} - #{grupoPago.nombre}"/>  
+                            </p:selectOneMenu>
+
+                            <p:selectOneMenu id="registroPatronalRelacionLaboral" value="#{variabilidadBean.selectedRegistroPatronal}"
+                                             style="width: 200px" filter="true">  
+                                <f:selectItem itemValue="" itemLabel="Registro Patronal"/>
+
+                                <f:selectItems value="#{registropatronalBean.registros}" 
+                                               var="registroPatronalRelacionLaboral" itemValue="#{registroPatronalRelacionLaboral.idregistropatronal}" 
+                                               itemLabel="#{registroPatronalRelacionLaboral.comentarios} - #{registroPatronalRelacionLaboral.registropatronal}"/>  
+                            </p:selectOneMenu>  
+
+                            <p:selectOneMenu id="idBimestre" style="width: 200px" value="#{variabilidadBean.selectedBimestre}"
+                                             filter="true" filterMatchMode="contains"
+                                             required="true" requiredMessage="#{appBean.mensajeErrorGrupoPago}">  
+                                <f:selectItem itemValue="" itemLabel="Bimestre"/>
+                                <f:selectItems value="#{appBean.comboBimestres}"/>
+                            </p:selectOneMenu>
+                            <p:message for="idBimestre" display="tooltip"/>
+
+                            <p:inputText id="idAnio" value="#{variabilidadBean.anio}" required="true" requiredMessage="#{appBean.mensajeErrorAnioNomina}"
+                                         placeholder="Año" style="text-align: center"/>
+                            <p:message for="idAnio" display="tooltip"/>
+
+                            <p:inputMask id="idFechaBase" value="#{variabilidadBean.fechabase}" mask="99/99/9999"  style="text-align: center"
+                                         title="Fecha Base" placeholder="Fecha Base" required="true" requiredMessage="#{appBean.mensajeErrorFechaPagoNomina}"/>
+                            <p:message for="idFechaBase" display="tooltip"/>
+
+                            <p:commandButton value="Calcular" styleClass="style_botones" icon="ui-icon-play"
+                                             actionListener="#{variabilidadBean.consultar(event)}"
+                                             onstart="statusDialog.show();"
+                                             update=":msgs, :form:display"/>
+                        </h:panelGrid>
+                    </div>
+                    <p:fieldset legend="Variabilidad Bimestral - #{appBean.compania.nombre}" styleClass="bg_color" toggleable="false">  
+                        <p:panelGrid id="display" style="margin-top: 5px">
+                            <f:facet name="header">
+                                <p:row>
+                                    <p:column>
+                                        <div align="center">
+                                            <p:outputLabel value="#{variabilidadBean.informacion}" style="color: white;"/>    
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                            <p:row>
+                                <p:column>
+                                    <p:dataTable id="dataTable" var="relacion"
+                                                 value="#{variabilidadBean.relaciones}"
+                                                 filteredValue="#{variabilidadBean.filteredRelaciones}"
+                                                 resizableColumns="true" scrollable="true"
+                                                 scrollHeight="300" style="font-size: .8em"
+                                                 emptyMessage="#{appBean.mensajeTablaVacia}" 
+                                                 widgetVar="registrosTable"
+                                                 rowKey="#{relacion.idrellab}">
+                                        <f:facet name="header">
+                                            <p:outputPanel>  
+                                                <h:outputText value="Buscador:" />  
+                                                <p:inputText id="globalFilter" onkeyup="registrosTable.filter();" style="width:150px"  placeholder="Ingresa Búsqueda"/>  
+                                                <div class="datableImagenes" id="csv">
+                                                    <p:commandLink id="csv" actionListener="#{variabilidadBean.descargarReporte()}" oncomplete="handleLShow(args)">  
+                                                        <p:graphicImage value="/resources/images/icons/csv_table.png" />  
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:outputPanel>
+                                        </f:facet>
+
+                                        <p:column width="4%" exportable="false">
+                                            <p:rowToggler/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.numeroempleado}"
+                                                  sortBy="#{relacion.numeroempleado}">
+                                            <f:facet name="header">
+                                                <h:outputText value="No. Empleado" title="Número Empleado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.numeroempleado}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.idempleado.nombre} #{relacion.idempleado.apellidopaterno} #{relacion.idempleado.apellidomaterno}"
+                                                  sortBy="#{relacion.idempleado.nombre} #{relacion.idempleado.apellidopaterno} #{relacion.idempleado.apellidomaterno}">
+                                            <f:facet name="header">
+                                                <h:outputText value="Nombre" title="Nombre"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.idempleado.nombre} #{relacion.idempleado.apellidopaterno} #{relacion.idempleado.apellidomaterno}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.idgrupopago.grupopago} - #{relacion.idgrupopago.nombre}"
+                                                  sortBy="#{relacion.idgrupopago.grupopago} - #{relacion.idgrupopago.nombre}">
+                                            <f:facet name="header">
+                                                <h:outputText value="G. Pago" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.idgrupopago.grupopago} - #{relacion.idgrupopago.nombre}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.idregistropatronal.comentarios} - #{relacion.idregistropatronal.registropatronal}"
+                                                  sortBy="#{relacion.idregistropatronal.registropatronal}">
+                                            <f:facet name="header">
+                                                <h:outputText value="R. Patronal" title="Grupo Pago"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.idregistropatronal.comentarios} - #{relacion.idregistropatronal.registropatronal}"/>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.importe}"
+                                                  sortBy="#{relacion.importe}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="V. Día" title="Variabilidad Por Día"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.importe}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.dias}"
+                                                  sortBy="#{relacion.dias}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="Días" title="Días"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.dias}"/>    
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.salarioDiario}"
+                                                  sortBy="#{relacion.salarioDiario}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="S.D." title="Sueldo Diario"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.salarioDiario}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:column filterMatchMode="contains" exportable="true"
+                                                  filterBy="#{relacion.salarioDiarioIntegrado}"
+                                                  sortBy="#{relacion.salarioDiarioIntegrado}" style="text-align: right">
+                                            <f:facet name="header">
+                                                <h:outputText value="S.D.I." title="Sueldo Diario Integrado"/>
+                                            </f:facet>
+                                            <p:outputLabel value="#{relacion.salarioDiarioIntegrado}" style="color: #{!relacion.banderasdi?'red':'green'}">
+                                                <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                            </p:outputLabel>
+                                        </p:column>
+
+                                        <p:rowExpansion>
+                                            <p:panelGrid columns="1" style="width: 800px">
+                                                <p:panel header="Detalle">
+                                                    <p:dataTable  value="#{relacion.acumulados}" var="acumulado"
+                                                                  resizableColumns="true">
+                                                        <p:column headerText="Concepto" sortBy="#{acumulado.numeroconcepto} - #{acumulado.nombreconcepto}">
+                                                            <p:outputLabel value="#{acumulado.numeroconcepto} - #{acumulado.nombreconcepto}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Tiempo" sortBy="#{acumulado.tiempo}">
+                                                            <div align="right">
+                                                                <p:outputLabel value="#{acumulado.tiempo}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </div>
+
+                                                        </p:column>
+                                                        <p:column headerText="Importe" sortBy="#{acumulado.importe}">
+                                                            <div align="right">
+                                                                <p:outputLabel value="#{acumulado.importe}">
+                                                                    <f:convertNumber groupingUsed="true" maxFractionDigits="2"/>
+                                                                </p:outputLabel>
+                                                            </div>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                            </p:panelGrid>
+                                        </p:rowExpansion>
+                                    </p:dataTable>
+                                </p:column>
+                            </p:row>
+                            <f:facet name="footer">
+                                <p:row>
+                                    <p:column>
+                                        <div align="right">
+                                            <p:commandButton value="Descargar Reporte Variables" title="Descargar Reporte Variables" icon="icon-down"
+                                                             actionListener="#{variabilidadBean.descargarVariables()}"
+                                                             oncomplete="handleLShow(args)"
+                                                             styleClass="style_botones" onclick="statusDialog.show();"/>&nbsp; 
+                                            <p:commandButton value="Limpiar" icon="ui-icon-trash"
+                                                             styleClass="style_botones"
+                                                             actionListener="#{variabilidadBean.limpiar(event)}"
+                                                             update="dataTable"
+                                                             onclick="statusDialog.show();"/>     
+                                            <p:commandButton value="Guardar" icon="icon-save" update=":msgs"
+                                                             actionListener="#{variabilidadBean.edit(event)}"
+                                                             styleClass="style_botones"
+                                                             onclick="statusDialog.show();"/>     
+                                        </div>
+                                    </p:column>
+                                </p:row>
+                            </f:facet>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </h:form>
+
+                <p:ajaxStatus widgetVar="status"  onsuccess="statusDialog.hide()"/>
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento..."   
+                          draggable="false" closable="false" resizable="false" > 
+                    <p:graphicImage value="/resources/images/icons/bar_status.gif"/>  
+                </p:dialog>
+
+                <script type="text/javascript" src="../../../js/JSCenicco.js"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
